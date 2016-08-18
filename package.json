@@ -1,0 +1,21 @@
+{
+    "name": "whowas-ui",
+    "version": "1.0.0",
+    "description": "WHOWAS user interface",
+    "main": "index.js",
+    "scripts": {
+        "serve": "webpack-dev-server --inline",
+        "build": "webpack -p --output-path=dist",
+        "lint": "eslint app"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@gitlab:NIC/slideui.git"
+    },
+    "author": "Byron Ellacott <bje@apnic.net> (http://blog.apnic.net/author/byron-ellacott/)",
+    "license": "BSD-2-Clause",
+    "dependencies": {
+    },
+    "devDependencies": {
+    }
+}
