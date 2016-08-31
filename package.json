@@ -16,6 +16,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {},
   "devDependencies": {
-    "elm": "^0.17.1"
+    "elm": "^0.17.1",
+    "node-sass": "^3.8.0"
   }
 }

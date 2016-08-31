@@ -4,6 +4,11 @@
             "watch": "src/**/*.elm",
             "base": "src",
             "command": "./node_modules/.bin/elm make src/Main.elm --output elm.js"
+        },
+        {
+            "watch": "src/**/*.sass",
+            "base": "src",
+            "command": "node_modules/.bin/node-sass --output css ${path}"
         }
     ]
 }
