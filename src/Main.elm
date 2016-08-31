@@ -7,33 +7,37 @@ import Http
 import Task
 import String
 import Either exposing (Either (..))
+import Result exposing (map)
 import RPSL exposing (..)
 import Diff exposing (diffLines, Change(..))
+import Date exposing (fromString, toTime)
 import DOM exposing (target, childNode)
 import Json.Decode exposing (Decoder, succeed, (:=), string, object1)
 
 import Model exposing (..)
 import Decode exposing (history)
 
+type alias Response =
+    { stamp   : Date.Date
+    , history : List History }
+
 type alias Model =
     { resource : String
-    , searchString : String
-    , result   : Either String (List (History))
+    , response : Either String Response
     , selected : Int
     , redraw   : Bool }
 
 type Msg
   = Nada
   | Error Http.Error
-  | Success (List History)
-  | UpdateRange String
+  | Success Response
   | StartSearch String
   | Select Int
 
 type Selected = Selected | NotSelected
 
 init : String -> (Model, Cmd Msg)
-init resource = (Model resource "" (Left "Loading") 0 False, search resource)
+init resource = (Model resource (Left "Loading…") 0 False, search resource)
 
 errMsg : Http.Error -> String
 errMsg err =
@@ -47,11 +51,10 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         Nada          -> (     model, Cmd.none)
-        Error err     -> (upd {model | result = Left (errMsg err), selected = 0}, Cmd.none)
-        Success h     -> (upd {model | result = Right h, selected = 0}, Cmd.none)
-        UpdateRange s -> (    {model | searchString = s}, Cmd.none)
+        Error err     -> (upd {model | response = Left (errMsg err), selected = 0}, Cmd.none)
+        Success h     -> (upd {model | response = Right h, selected = 0}, Cmd.none)
         Select i      -> (upd {model | selected = i}, Cmd.none)
-        StartSearch s -> (upd {model | result = Left "Searching…", resource = s }, search s)
+        StartSearch s -> (upd {model | response = Left "Searching…", resource = s }, search s)
 
 upd : Model -> Model
 upd model = { model | redraw = not model.redraw }
@@ -62,27 +65,50 @@ view model = lazy (\z -> view' model) model.redraw
 view' : Model -> Html Msg
 view' model =
     let
-        body = case model.result of
+        body = case model.response of
             Left error      -> [ div [ class "error" ] [text error] ]
-            Right history   -> viewAsList history model.selected
-        cease = { stopPropagation = True, preventDefault = True }
+            Right response  -> viewAsList response model.selected
     in
         div [ class "main" ] <|
-            [ h1 [] [text "APNIC registry history search"]
-            , form [ class "range", onWithOptions "submit" cease searchForm ]
-                [ input [ value model.resource ] [] ]
-            ] `List.append` body
+            headerBar model `List.append` body
 
-viewAsList : List History -> Int -> List (Html Msg)
-viewAsList hs idx = [ div [ class "historyPane" ]
-    [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) hs
-    , div [ class "detail", id "content" ] [ firstVersion <| List.head (List.drop idx hs) ]
+headerBar : Model -> List (Html Msg)
+headerBar model =
+    [nav [] [ul []
+        [ li [] [h1 [] [text "WHOWAS (prototype)" ]]
+        , li [] [ searchBox model ] ] ] ]
+
+searchBox : Model -> Html Msg
+searchBox model = let cease = { stopPropagation = True, preventDefault = True } in
+    form [ class "range", onWithOptions "submit" cease searchForm ]
+        [ input [ value model.resource ] [] ]
+
+viewAsList : Response -> Int -> List (Html Msg)
+viewAsList response idx = [ div [ class "historyPane" ]
+    [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
+    , div [ class "detail", id "content" ]
+        (firstVersion response.stamp <| List.head (List.drop idx response.history))
     ] ]
 
-firstVersion : Maybe History -> Html Msg
-firstVersion mh = case mh of
-    Nothing -> text ""
-    Just h  -> viewVersions h
+firstVersion : Date.Date -> Maybe History -> List (Html Msg)
+firstVersion now mh = case mh of
+    Nothing -> [ text "" ]
+    Just h  -> [viewTimeline now h, viewVersions h]
+
+viewTimeline : Date.Date -> History -> Html Msg
+viewTimeline now h =
+    let
+        asTime   s = Date.toTime <| Result.withDefault now <| Date.fromString s
+        timespan v = { whence = asTime v.applicability.whence
+                     , until  = asTime v.applicability.until }
+        times = List.map timespan h.versions
+        minmax = List.concatMap (\p -> [p.whence, p.until]) times
+        earliest = List.minimum minmax
+        latest   = List.maximum minmax
+    in
+        div [ class "timeline" ] [
+            text (toString (Maybe.map Date.fromTime earliest, Maybe.map Date.fromTime latest, now))
+        ]
 
 viewSummary : Int -> Int -> History -> Html Msg
 viewSummary sel idx h = li
@@ -102,7 +128,7 @@ viewObject h =
         ]
 
 viewVersions : History -> Html Msg
-viewVersions h =div [ class "versions" ] (
+viewVersions h = div [ class "versions" ] (
             viewFirst h.versions :: List.map2 viewVersion h.versions (List.drop 1 h.versions))
 
 
@@ -152,7 +178,8 @@ search resource =
     let
         url = "http://localhost:8080/v4?range=" ++ resource
     in
-        Task.perform Error Success (Http.get history url)
+        Task.perform Error Success <|
+            Task.map2 Response Date.now (Http.get history url)
 
 main : Program Never
 main = App.program

@@ -37,20 +37,29 @@ $fixed-font: 'Droid Sans Mono', monospace
         input
             font-size: large
 
+nav
+    background-color: #eee
+    margin: 0
+
+    ul
+        margin: 0
+        padding: 0
+
+        li
+            display: inline-block
+            list-style-type: none
+
 .object
     margin: 5em
 
 .historyPane
     +flex
     width: 100vw
-    border-top: 1px solid #eee
-    margin-top: 1em
+    border-top: 2px solid black
 
     .objectList
-        // width: 20em
         margin: 0
-        padding: 0
-        // padding: 1em 1.5em 1em 1em
+        padding: 1em 0 0 0
         border-right: 2px solid black
         font-family: $fixed-font
         font-size: small

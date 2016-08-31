@@ -22,6 +22,16 @@
     .main .range input {
       font-size: large; }
 
+nav {
+  background-color: #eee;
+  margin: 0; }
+  nav ul {
+    margin: 0;
+    padding: 0; }
+    nav ul li {
+      display: inline-block;
+      list-style-type: none; }
+
 .object {
   margin: 5em; }
 
@@ -35,11 +45,10 @@
   -moz-flex-direction: row;
   -ms-flex-direction: row;
   width: 100vw;
-  border-top: 1px solid #eee;
-  margin-top: 1em; }
+  border-top: 2px solid black; }
   .historyPane .objectList {
     margin: 0;
-    padding: 0;
+    padding: 1em 0 0 0;
     border-right: 2px solid black;
     font-family: "Droid Sans Mono", monospace;
     font-size: small;
