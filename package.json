@@ -4,9 +4,8 @@
   "description": "WHOWAS user interface",
   "main": "index.js",
   "scripts": {
-    "serve": "webpack-dev-server --inline",
-    "build": "webpack -p --output-path=dist",
-    "lint": "eslint app"
+    "start": "elm reactor",
+    "install": "elm package install -y && elm make src/Main.elm --output elm.js && node-sass --output css src/*.sass"
   },
   "repository": {
     "type": "git",
