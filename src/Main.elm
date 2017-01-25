@@ -95,7 +95,7 @@ searchForm = target (childNode 0 (Json.Decode.map StartSearch (Json.Decode.field
 
 search : String -> Cmd Msg
 search resource =
-    let url   = "http://rdap.apnic.net/history/ip/" ++ resource
+    let url   = "//rdap.apnic.net/history/ip/" ++ resource
         fetch = Http.toTask <| Http.get url history
     in fetch |> Task.andThen (\r -> Task.map (\d -> Response d r) Date.now)
              |> Task.attempt Fetched
