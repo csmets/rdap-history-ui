@@ -1,6 +1,8 @@
-@import 'https://fonts.googleapis.com/css?family=Droid+Sans+Mono'
+@import url('https://fonts.googleapis.com/css?family=Inconsolata|Nunito|Rubik')
 
-$fixed-font: 'Droid Sans Mono', monospace
+$fixed-font: 'Inconsolata', monospace
+$title-font: 'Rubik', 'Arial', sans-serif
+$detail-font: 'Nunito', 'Arial', sans-serif
 $existed: rgb(151, 223, 129)
 
 =prefixed($name, $value)
@@ -22,6 +24,10 @@ $existed: rgb(151, 223, 129)
 
 =flex-shrink($factor: 0)
     +prefixed(flex-shrink, $factor)
+
+
+pre
+    font-family: $fixed-font
 
 *
     margin: 0
@@ -59,6 +65,7 @@ nav
     border-top: 2px solid black
     min-width: 0
     min-height: 0
+    height: 100%
 
     .objectList
         margin: 0
@@ -84,6 +91,19 @@ nav
         width: 100%
         overflow: hidden
 
+.rdap
+    // padding: 0 0.5em
+    padding-top: 0.5em
+    font-family: $detail-font
+    td
+        padding: 0 0.05em
+    td:first-child
+        vertical-align: top
+        font-family: $title-font
+        color: rgb(140, 140, 140)
+        text-align: right
+        padding-right: 1em
+
 .versions
     white-space: nowrap
     overflow: scroll
@@ -91,6 +111,7 @@ nav
 
     .version
         display: inline-block
+        padding: 0 0.7em
 
         .period
             margin-left: 2em

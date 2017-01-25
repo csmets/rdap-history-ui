@@ -2,11 +2,12 @@ module Timeline exposing (timeline)
 
 import Date exposing (Date, toTime, fromString)
 import Html exposing (Html)
+import Maybe
 import Result exposing (withDefault)
 import Svg exposing (svg, rect)
 import Svg.Attributes as A exposing (width, height, x, y, class)
 import VirtualDom
-import Model exposing (Period)
+import Model exposing (..)
 
 
 -- asTime   s = Date.toTime <| Result.withDefault now <| Date.fromString s
@@ -32,28 +33,15 @@ minimax vs =
         , Maybe.withDefault 1 (List.maximum flat)
         )
 
-
-timeline : Date -> List Period -> Html msg
+timeline : Date -> List Version -> Html msg
 timeline now ps =
-    let
-        asTime s =
-            toTime <| withDefault now <| fromString s
-
-        timespan p =
-            ( asTime p.whence, asTime p.until )
-
-        times =
-            List.map timespan ps
-
-        ( min, max ) =
-            minimax times
-
-        span =
-            max - min
-
-        scale v =
-            toString <| (v - min) * 100 / span
-
+    let asResult s   = Result.andThen fromString <| Result.fromMaybe "" s
+        asTime s     = toTime <| withDefault now <| asResult s
+        timespan p   = ( asTime (Maybe.Just p.from), asTime p.until )
+        times        = List.map timespan ps
+        ( min, max ) = minimax times
+        span         = max - min
+        scale v      = toString <| (v - min) * 100 / span
         existed ( f, t ) =
             rect
                 [ x (scale f)
