@@ -10171,7 +10171,7 @@ var _user$project$Render$Response = F2(
 	});
 
 var _user$project$Main$search = function (resource) {
-	var url = A2(_elm_lang$core$Basics_ops['++'], 'http://rdap.apnic.net/history/ip/', resource);
+	var url = A2(_elm_lang$core$Basics_ops['++'], '//rdap.apnic.net/history/ip/', resource);
 	var fetch = _elm_lang$http$Http$toTask(
 		A2(_elm_lang$http$Http$get, url, _user$project$Decode$history));
 	return A2(
