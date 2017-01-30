@@ -9601,83 +9601,284 @@ var _user$project$Model$Entity = {ctor: 'Entity'};
 var _user$project$Model$AutNum = {ctor: 'AutNum'};
 var _user$project$Model$InetNum = {ctor: 'InetNum'};
 
-var _user$project$Rdap$labelled = F3(
-	function (k, d, v) {
+var _user$project$Rdap$newlined = function (s) {
+	return A2(
+		_elm_lang$core$List$intersperse,
+		A2(
+			_elm_lang$html$Html$br,
+			{ctor: '[]'},
+			{ctor: '[]'}),
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$html$Html$text,
+			A2(_elm_lang$core$String$split, '\n', s)));
+};
+var _user$project$Rdap$structured = F2(
+	function (sep, part) {
+		return A2(
+			_elm_lang$core$Json_Decode$map,
+			_elm_lang$core$String$join(sep),
+			_elm_lang$core$Json_Decode$list(part));
+	});
+var _user$project$Rdap$row = F2(
+	function (l, r) {
+		return A2(
+			_elm_lang$html$Html$tr,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$td,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: l,
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$td,
+						{ctor: '[]'},
+						r),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$Rdap$adr = function (v) {
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		{ctor: '[]'},
+		A2(
+			_elm_lang$core$Result$map,
+			function (a) {
+				return {
+					ctor: '::',
+					_0: A2(
+						_user$project$Rdap$row,
+						_elm_lang$html$Html$text('address'),
+						_user$project$Rdap$newlined(a)),
+					_1: {ctor: '[]'}
+				};
+			},
+			A2(
+				_elm_lang$core$Result$withDefault,
+				A2(
+					_elm_lang$core$Json_Decode$decodeValue,
+					A2(
+						_user$project$Rdap$structured,
+						';',
+						_elm_lang$core$Json_Decode$oneOf(
+							{
+								ctor: '::',
+								_0: _elm_lang$core$Json_Decode$string,
+								_1: {
+									ctor: '::',
+									_0: A2(_user$project$Rdap$structured, ',', _elm_lang$core$Json_Decode$string),
+									_1: {ctor: '[]'}
+								}
+							})),
+					v.content),
+				A2(
+					_elm_lang$core$Result$map,
+					_elm_lang$core$Result$Ok,
+					A2(
+						_elm_lang$core$Result$andThen,
+						_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
+						A2(
+							_elm_lang$core$Result$fromMaybe,
+							'unused error description',
+							A2(_elm_lang$core$Dict$get, 'label', v.parameters)))))));
+};
+var _user$project$Rdap$run = F3(
+	function (f, d, v) {
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			{ctor: '[]'},
 			A2(
 				_elm_lang$core$Result$map,
-				function (h) {
+				f,
+				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
+	});
+var _user$project$Rdap$simple = F2(
+	function (l, v) {
+		return A3(
+			_user$project$Rdap$run,
+			function (n) {
+				return {
+					ctor: '::',
+					_0: A2(
+						_user$project$Rdap$row,
+						_elm_lang$html$Html$text(l),
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(n),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				};
+			},
+			_elm_lang$core$Json_Decode$string,
+			v.content);
+	});
+var _user$project$Rdap$tel = function (v) {
+	return function (t) {
+		return function (t) {
+			return A3(
+				_user$project$Rdap$run,
+				function (n) {
 					return {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
+							_user$project$Rdap$row,
+							_elm_lang$html$Html$text(t),
 							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$td,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(k),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: h,
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
+								_0: _elm_lang$html$Html$text(n),
+								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
 					};
 				},
+				_elm_lang$core$Json_Decode$string,
+				v.content);
+		}(
+			(!_elm_lang$core$Native_Utils.eq(t, 'fax')) ? 'voice' : 'fax');
+	}(
+		A2(
+			_elm_lang$core$Result$withDefault,
+			'no type parameter',
+			A2(
+				_elm_lang$core$Result$andThen,
+				_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
+				A2(
+					_elm_lang$core$Result$fromMaybe,
+					'unused error description',
+					A2(_elm_lang$core$Dict$get, 'type', v.parameters)))));
+};
+var _user$project$Rdap$vcardEntry = function (v) {
+	var _p0 = v.name;
+	switch (_p0) {
+		case 'fn':
+			return A2(_user$project$Rdap$simple, 'name', v);
+		case 'kind':
+			return A2(_user$project$Rdap$simple, 'kind', v);
+		case 'adr':
+			return _user$project$Rdap$adr(v);
+		case 'tel':
+			return _user$project$Rdap$tel(v);
+		case 'email':
+			return A2(_user$project$Rdap$simple, 'email', v);
+		default:
+			return A3(
+				_user$project$Rdap$run,
+				function (raw) {
+					return {
+						ctor: '::',
+						_0: A2(
+							_user$project$Rdap$row,
+							_elm_lang$html$Html$text(v.name),
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(
+									A2(_elm_lang$core$Json_Encode$encode, 0, raw)),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					};
+				},
+				_elm_lang$core$Json_Decode$value,
+				v.content);
+	}
+};
+var _user$project$Rdap$vcard = F2(
+	function (d, v) {
+		return A2(
+			_elm_lang$core$Result$withDefault,
+			A2(
+				_elm_lang$core$Debug$log,
+				'failed vcard decode',
+				{ctor: '[]'}),
+			A2(
+				_elm_lang$core$Result$map,
+				function (_p1) {
+					return A2(
+						_elm_lang$core$List$concatMap,
+						_user$project$Rdap$vcardEntry,
+						A2(_elm_lang$core$List$drop, 1, _p1));
+				},
 				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
 	});
-var _user$project$Rdap$tabulated = F2(
-	function (d, v) {
+var _user$project$Rdap$tabulated = _user$project$Rdap$run(
+	_elm_lang$core$List$map(
+		function (_p2) {
+			var _p3 = _p2;
+			return A2(
+				_user$project$Rdap$row,
+				_elm_lang$html$Html$text(_p3._0),
+				{
+					ctor: '::',
+					_0: _p3._1,
+					_1: {ctor: '[]'}
+				});
+		}));
+var _user$project$Rdap$labelled = function (k) {
+	return _user$project$Rdap$run(
+		function (h) {
+			return {
+				ctor: '::',
+				_0: A2(
+					_user$project$Rdap$row,
+					_elm_lang$html$Html$text(k),
+					{
+						ctor: '::',
+						_0: h,
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			};
+		});
+};
+var _user$project$Rdap$spacer = A2(
+	_elm_lang$html$Html$tr,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('spacer'),
+		_1: {ctor: '[]'}
+	},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$td,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$colspan(2),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$hr,
+					{ctor: '[]'},
+					{ctor: '[]'}),
+				_1: {ctor: '[]'}
+			}),
+		_1: {ctor: '[]'}
+	});
+var _user$project$Rdap$recursively = F3(
+	function (f, d, v) {
 		return A2(
 			_elm_lang$core$Result$withDefault,
 			{ctor: '[]'},
 			A2(
 				_elm_lang$core$Result$map,
-				_elm_lang$core$List$map(
-					function (_p0) {
-						var _p1 = _p0;
-						return A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$td,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(_p1._0),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$td,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _p1._1,
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
-							});
+				_elm_lang$core$List$concatMap(
+					function (x) {
+						return {
+							ctor: '::',
+							_0: _user$project$Rdap$spacer,
+							_1: f(x)
+						};
 					}),
 				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
 	});
@@ -9697,8 +9898,8 @@ var _user$project$Rdap$remark = function (r) {
 	};
 };
 var _user$project$Rdap$ot = function (s) {
-	var _p2 = s;
-	switch (_p2) {
+	var _p4 = s;
+	switch (_p4) {
 		case 'ip network':
 			return _elm_lang$core$Maybe$Just(_user$project$Model$InetNum);
 		case 'autnum':
@@ -9751,89 +9952,194 @@ var _user$project$Rdap$remarks = _elm_lang$core$Json_Decode$list(
 			_elm_lang$core$Json_Decode$field,
 			'description',
 			_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string))));
+var _user$project$Rdap$VCardEntry = F4(
+	function (a, b, c, d) {
+		return {name: a, parameters: b, kind: c, content: d};
+	});
+var _user$project$Rdap$decodeVcard = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Rdap$VCardEntry,
+	A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string),
+	A2(
+		_elm_lang$core$Json_Decode$index,
+		1,
+		_elm_lang$core$Json_Decode$dict(_elm_lang$core$Json_Decode$value)),
+	A2(_elm_lang$core$Json_Decode$index, 2, _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$index, 3, _elm_lang$core$Json_Decode$value));
+var _user$project$Rdap$entity = function (v) {
+	return A2(
+		_elm_lang$core$List$concatMap,
+		function (i) {
+			return i(v);
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_user$project$Rdap$labelled,
+				'handle',
+				A2(
+					_elm_lang$core$Json_Decode$field,
+					'handle',
+					A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_user$project$Rdap$labelled,
+					'country',
+					A2(
+						_elm_lang$core$Json_Decode$field,
+						'country',
+						A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Rdap$vcard(
+						A2(
+							_elm_lang$core$Json_Decode$field,
+							'vcardArray',
+							A2(
+								_elm_lang$core$Json_Decode$index,
+								1,
+								_elm_lang$core$Json_Decode$list(_user$project$Rdap$decodeVcard)))),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_user$project$Rdap$labelled,
+							'roles',
+							A2(
+								_elm_lang$core$Json_Decode$field,
+								'roles',
+								A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Rdap$tabulated(
+								A2(
+									_elm_lang$core$Json_Decode$field,
+									'remarks',
+									A2(
+										_elm_lang$core$Json_Decode$map,
+										_elm_lang$core$List$map(_user$project$Rdap$remark),
+										_user$project$Rdap$remarks))),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Rdap$tabulated(
+									A2(
+										_elm_lang$core$Json_Decode$field,
+										'notices',
+										A2(
+											_elm_lang$core$Json_Decode$map,
+											_elm_lang$core$List$map(_user$project$Rdap$remark),
+											_user$project$Rdap$remarks))),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_user$project$Rdap$recursively,
+										_user$project$Rdap$entity,
+										A2(
+											_elm_lang$core$Json_Decode$field,
+											'entities',
+											_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value))),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+};
 var _user$project$Rdap$inetnum = function (v) {
-	return {
-		ctor: '::',
-		_0: A2(
-			_elm_lang$html$Html$table,
-			{ctor: '[]'},
-			A2(
-				_elm_lang$core$List$concatMap,
-				function (i) {
-					return i(v);
-				},
-				{
+	return A2(
+		_elm_lang$core$List$concatMap,
+		function (i) {
+			return i(v);
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_user$project$Rdap$labelled,
+				'network name',
+				A2(
+					_elm_lang$core$Json_Decode$field,
+					'name',
+					A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_user$project$Rdap$labelled,
+					'network',
+					A2(
+						_elm_lang$core$Json_Decode$field,
+						'handle',
+						A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+				_1: {
 					ctor: '::',
 					_0: A2(
 						_user$project$Rdap$labelled,
-						'network name',
+						'country',
 						A2(
 							_elm_lang$core$Json_Decode$field,
-							'name',
+							'country',
 							A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
 					_1: {
 						ctor: '::',
 						_0: A2(
 							_user$project$Rdap$labelled,
-							'network',
+							'type',
 							A2(
 								_elm_lang$core$Json_Decode$field,
-								'handle',
+								'type',
 								A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
 						_1: {
 							ctor: '::',
-							_0: A2(
-								_user$project$Rdap$labelled,
-								'country',
+							_0: _user$project$Rdap$tabulated(
 								A2(
 									_elm_lang$core$Json_Decode$field,
-									'country',
-									A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+									'remarks',
+									A2(
+										_elm_lang$core$Json_Decode$map,
+										_elm_lang$core$List$map(_user$project$Rdap$remark),
+										_user$project$Rdap$remarks))),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_user$project$Rdap$labelled,
-									'type',
+								_0: _user$project$Rdap$tabulated(
 									A2(
 										_elm_lang$core$Json_Decode$field,
-										'type',
-										A2(_elm_lang$core$Json_Decode$map, _elm_lang$html$Html$text, _elm_lang$core$Json_Decode$string))),
+										'notices',
+										A2(
+											_elm_lang$core$Json_Decode$map,
+											_elm_lang$core$List$map(_user$project$Rdap$remark),
+											_user$project$Rdap$remarks))),
 								_1: {
 									ctor: '::',
-									_0: _user$project$Rdap$tabulated(
+									_0: A2(
+										_user$project$Rdap$recursively,
+										_user$project$Rdap$entity,
 										A2(
 											_elm_lang$core$Json_Decode$field,
-											'remarks',
-											A2(
-												_elm_lang$core$Json_Decode$map,
-												_elm_lang$core$List$map(_user$project$Rdap$remark),
-												_user$project$Rdap$remarks))),
-									_1: {
-										ctor: '::',
-										_0: _user$project$Rdap$tabulated(
-											A2(
-												_elm_lang$core$Json_Decode$field,
-												'notices',
-												A2(
-													_elm_lang$core$Json_Decode$map,
-													_elm_lang$core$List$map(_user$project$Rdap$remark),
-													_user$project$Rdap$remarks))),
-										_1: {ctor: '[]'}
-									}
+											'entities',
+											_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value))),
+									_1: {ctor: '[]'}
 								}
 							}
 						}
 					}
-				})),
-		_1: {ctor: '[]'}
-	};
+				}
+			}
+		});
 };
 var _user$project$Rdap$render = function (v) {
-	var _p3 = _user$project$Rdap$objectClass(v.object);
-	if (_p3.ctor === 'Just') {
-		switch (_p3._0.ctor) {
+	var _p5 = _user$project$Rdap$objectClass(v.object);
+	if (_p5.ctor === 'Just') {
+		switch (_p5._0.ctor) {
 			case 'InetNum':
-				return _user$project$Rdap$inetnum(v.object);
+				return {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$table,
+						{ctor: '[]'},
+						_user$project$Rdap$inetnum(v.object)),
+					_1: {ctor: '[]'}
+				};
 			case 'AutNum':
 				return {
 					ctor: '::',
@@ -9843,7 +10149,10 @@ var _user$project$Rdap$render = function (v) {
 			case 'Entity':
 				return {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Entity NYI'),
+					_0: A2(
+						_elm_lang$html$Html$table,
+						{ctor: '[]'},
+						_user$project$Rdap$entity(v.object)),
 					_1: {ctor: '[]'}
 				};
 			default:
@@ -9885,18 +10194,14 @@ var _user$project$Decode$addGroupingKey = function (v) {
 		_elm_lang$core$Maybe$map2,
 		F2(
 			function (oc, h) {
-				return A2(
-					_elm_lang$core$Debug$log,
-					h,
-					{
-						ctor: '_Tuple2',
-						_0: {ctor: '_Tuple2', _0: oc, _1: h},
-						_1: v
-					});
+				return {
+					ctor: '_Tuple2',
+					_0: {ctor: '_Tuple2', _0: oc, _1: h},
+					_1: v
+				};
 			}),
 		_user$project$Rdap$objectClass(v.object),
-		_user$project$Rdap$handle(
-			A2(_elm_lang$core$Debug$log, 'object', v.object)));
+		_user$project$Rdap$handle(v.object));
 };
 var _user$project$Decode$toComparable = function (_p1) {
 	var _p2 = _p1;
@@ -10002,28 +10307,133 @@ var _user$project$Decode$history = A2(
 				'records',
 				_elm_lang$core$Json_Decode$list(_user$project$Decode$record)))));
 
-var _user$project$Render$viewPeriod = F2(
-	function (f, mu) {
+var _user$project$Relativity$plural = F2(
+	function (n, s) {
+		var v = _elm_lang$core$Basics$round(n);
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(v),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				s,
+				_elm_lang$core$Native_Utils.eq(v, 1) ? '' : 's'));
+	});
+var _user$project$Relativity$seconds = 1000;
+var _user$project$Relativity$minutes = _user$project$Relativity$seconds * 60;
+var _user$project$Relativity$hours = _user$project$Relativity$minutes * 60;
+var _user$project$Relativity$days = _user$project$Relativity$hours * 24;
+var _user$project$Relativity$months = _user$project$Relativity$days * 30;
+var _user$project$Relativity$years = _user$project$Relativity$days * 366;
+var _user$project$Relativity$when = F2(
+	function (c, e) {
+		return c ? _elm_lang$core$Maybe$Just(e) : _elm_lang$core$Maybe$Nothing;
+	});
+var _user$project$Relativity$ranges = {
+	ctor: '::',
+	_0: function (t) {
+		return A2(
+			_user$project$Relativity$when,
+			_elm_lang$core$Native_Utils.cmp(t, _user$project$Relativity$minutes) < 0,
+			A2(_user$project$Relativity$plural, t / _user$project$Relativity$seconds, ' second'));
+	},
+	_1: {
+		ctor: '::',
+		_0: function (t) {
+			return A2(
+				_user$project$Relativity$when,
+				_elm_lang$core$Native_Utils.cmp(t, _user$project$Relativity$hours) < 0,
+				A2(_user$project$Relativity$plural, t / _user$project$Relativity$minutes, ' minute'));
+		},
+		_1: {
+			ctor: '::',
+			_0: function (t) {
+				return A2(
+					_user$project$Relativity$when,
+					_elm_lang$core$Native_Utils.cmp(t, _user$project$Relativity$days) < 0,
+					A2(_user$project$Relativity$plural, t / _user$project$Relativity$hours, ' hour'));
+			},
+			_1: {
+				ctor: '::',
+				_0: function (t) {
+					return A2(
+						_user$project$Relativity$when,
+						_elm_lang$core$Native_Utils.cmp(t, _user$project$Relativity$months) < 0,
+						A2(_user$project$Relativity$plural, t / _user$project$Relativity$days, ' day'));
+				},
+				_1: {
+					ctor: '::',
+					_0: function (t) {
+						return A2(
+							_user$project$Relativity$when,
+							_elm_lang$core$Native_Utils.cmp(t, _user$project$Relativity$years) < 0,
+							A2(_user$project$Relativity$plural, t / _user$project$Relativity$months, ' month'));
+					},
+					_1: {
+						ctor: '::',
+						_0: function (t) {
+							return _elm_lang$core$Maybe$Just(
+								A2(_user$project$Relativity$plural, t / _user$project$Relativity$years, ' year'));
+						},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		}
+	}
+};
+var _user$project$Relativity$relativeSpan = F2(
+	function (a, b) {
+		var def = 'a long time';
+		var bx = _elm_lang$core$Date$toTime(b);
+		var ax = _elm_lang$core$Date$toTime(a);
+		var d = _elm_lang$core$Basics$abs(ax - bx);
+		var z = A2(
+			_elm_lang$core$List$filterMap,
+			function (f) {
+				return f(d);
+			},
+			_user$project$Relativity$ranges);
+		var suf = (_elm_lang$core$Native_Utils.cmp(ax, bx) > 0) ? ' ago' : ' from now';
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			'about ',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					def,
+					_elm_lang$core$List$head(z)),
+				suf));
+	});
+
+var _user$project$Render$viewPeriod = F3(
+	function (now, f, mu) {
 		var _p0 = mu;
 		if (_p0.ctor === 'Nothing') {
 			return _elm_lang$html$Html$text(
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(f),
-					' - present'));
+					'From ',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(_user$project$Relativity$relativeSpan, now, f),
+						' to the present')));
 		} else {
 			return _elm_lang$html$Html$text(
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					_elm_lang$core$Basics$toString(f),
+					'From ',
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						' - ',
-						_elm_lang$core$Basics$toString(_p0._0))));
+						A2(_user$project$Relativity$relativeSpan, now, f),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' to ',
+							A2(_user$project$Relativity$relativeSpan, now, _p0._0)))));
 		}
 	});
-var _user$project$Render$viewVersion = F2(
-	function (was, is) {
+var _user$project$Render$viewVersion = F3(
+	function (now, was, is) {
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -10033,7 +10443,7 @@ var _user$project$Render$viewVersion = F2(
 			},
 			{
 				ctor: '::',
-				_0: A2(_user$project$Render$viewPeriod, is.from, is.until),
+				_0: A3(_user$project$Render$viewPeriod, now, is.from, is.until),
 				_1: {
 					ctor: '::',
 					_0: A2(
@@ -10048,26 +10458,27 @@ var _user$project$Render$viewVersion = F2(
 				}
 			});
 	});
-var _user$project$Render$viewVersions = function (h) {
-	var sv = _elm_lang$core$List$reverse(
-		A2(
-			_elm_lang$core$List$sortBy,
-			function (v) {
-				return _elm_lang$core$Date$toTime(v.from);
+var _user$project$Render$viewVersions = F2(
+	function (now, h) {
+		var sv = _elm_lang$core$List$reverse(
+			A2(
+				_elm_lang$core$List$sortBy,
+				function (v) {
+					return _elm_lang$core$Date$toTime(v.from);
+				},
+				h.versions));
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('versions'),
+				_1: {ctor: '[]'}
 			},
-			h.versions));
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('versions'),
-			_1: {ctor: '[]'}
-		},
-		A2(
-			_elm_lang$core$List$map,
-			_user$project$Render$viewVersion(_elm_lang$core$Maybe$Nothing),
-			sv));
-};
+			A2(
+				_elm_lang$core$List$map,
+				A2(_user$project$Render$viewVersion, now, _elm_lang$core$Maybe$Nothing),
+				sv));
+	});
 var _user$project$Render$viewSummary = F3(
 	function (sel, idx, h) {
 		return A2(
@@ -10112,7 +10523,7 @@ var _user$project$Render$firstVersion = F2(
 		} else {
 			return {
 				ctor: '::',
-				_0: _user$project$Render$viewVersions(_p1._0),
+				_0: A2(_user$project$Render$viewVersions, now, _p1._0),
 				_1: {ctor: '[]'}
 			};
 		}
