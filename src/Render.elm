@@ -8,6 +8,7 @@ import Html.Events exposing (onWithOptions, onInput, onClick)
 
 import Model exposing (..)
 import Rdap
+import Relativity exposing (..)
 
 -- TODO figure out if needed, and move to common module if so
 type alias Response =
@@ -27,7 +28,7 @@ viewAsList response idx =
 firstVersion : Date.Date -> Maybe History -> List (Html Msg)
 firstVersion now mh = case mh of
     Nothing -> [ text "" ]
-    Just h  -> [ {- viewTimeline now h, -} viewVersions h ]
+    Just h  -> [ {- viewTimeline now h, -} viewVersions now h ]
 
 viewSummary : Int -> Int -> History -> Html Msg
 viewSummary sel idx h = li
@@ -35,16 +36,16 @@ viewSummary sel idx h = li
         , onClick (Select idx) ]
         [ span [ class "handle" ] [ text h.handle ] ]
 
-viewPeriod : Date -> Maybe Date -> Html a
-viewPeriod f mu = case mu of
-    Nothing -> text (toString f ++ " - present")
-    Just u  -> text (toString f ++ " - " ++ toString u)
+viewPeriod : Date -> Date -> Maybe Date -> Html a
+viewPeriod now f mu = case mu of
+    Nothing -> text ("From " ++ relativeSpan now f ++ " to the present")
+    Just u  -> text ("From " ++ relativeSpan now f ++ " to " ++ relativeSpan now u)
 
-viewVersions : History -> Html a
-viewVersions h = let sv = List.reverse <| List.sortBy (\v -> Date.toTime v.from) h.versions
-                  in div [ class "versions" ] (List.map (viewVersion Nothing) sv)
+viewVersions : Date -> History -> Html a
+viewVersions now h = let sv = List.reverse <| List.sortBy (\v -> Date.toTime v.from) h.versions
+                  in div [ class "versions" ] (List.map (viewVersion now Nothing) sv)
 
-viewVersion : Maybe Version -> Version -> Html a
-viewVersion was is = div [ class "version" ]
-                    [ viewPeriod (is.from) (is.until)
+viewVersion : Date -> Maybe Version -> Version -> Html a
+viewVersion now was is = div [ class "version" ]
+                    [ viewPeriod now is.from is.until
                     , div [ class "rdap" ] (Rdap.render is) ]
