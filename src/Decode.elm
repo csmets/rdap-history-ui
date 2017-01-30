@@ -1,7 +1,5 @@
 module Decode exposing (history)
 
-import Debug
-
 import Date exposing (Date)
 import Json.Decode exposing (..)
 import List
@@ -35,7 +33,7 @@ toComparable (c, h) = (toString c, h)
 
 addGroupingKey : Version -> Maybe ((ObjectClass, String), Version)
 addGroupingKey v =
-    Maybe.map2 (\oc h -> Debug.log h ((oc, h), v)) (objectClass v.object) (handle (Debug.log "object" v.object))
+    Maybe.map2 (\oc h -> ((oc, h), v)) (objectClass v.object) (handle v.object)
 
 -- decode one version
 record : Decoder Version
