@@ -1,9 +1,10 @@
-module Rdap exposing (objectClass, handle, render)
+module Rdap exposing (objectClass, handle, render, output, diff)
 
 -- The renderers in this module are quite specific to APNIC's use profile of RDAP.
 -- Pull requests making the rendering less rigidly fixed to one profile are very welcome.
 
 import Dict             exposing (Dict)
+import Diff             exposing (Change(..))
 import Html             exposing (..)
 import Html.Attributes  exposing (class, colspan)
 import Json.Decode      exposing (..)
@@ -13,15 +14,31 @@ import Result
 
 import Model exposing (..)
 
+type alias Remark = { title : String , description : List String }
+type alias VCardEntry =
+    { name : String
+    , parameters : Dict String Value
+    , kind : String
+    , content : Value
+    }
+
+-- A structure to represent an RDAP object interpreted for display
+type DisplayMode = Text | Preformatted
+type alias DisplayLine a = { a | label : String, value : String, display : DisplayMode }
+type alias DisplayObject a = List (DisplayLine a)
+type alias DisplayRecord a = { identifier : Identifier, object : DisplayObject a }
+type alias RdapDisplay a = List (DisplayRecord a)
+
+-- Annotating a display line with a diff state
+type DiffMode = Unchanged | Modified | New
+type alias Diff = { diffMode : DiffMode }
+
 extract : Value -> (a -> Maybe b) -> Decoder a -> Maybe b
 extract v f d = Result.withDefault Nothing
         <| decodeValue (Json.Decode.map (Maybe.andThen f) (maybe d)) v
 
 objectClass : Value -> Maybe ObjectClass
 objectClass v = extract v ot (field "objectClassName" string)
-
-handle : Value -> Maybe String
-handle v = extract v Just (field "handle" string)
 
 ot : String -> Maybe ObjectClass
 ot s = case s of
@@ -31,17 +48,13 @@ ot s = case s of
     "domain"     -> Just Domain
     _            -> Nothing
 
-type alias Remark =
-    { title : String
-    , description : List String
-    }
+handle : Value -> Maybe String
+handle v = extract v Just (field "handle" string)
 
-type alias VCardEntry =
-    { name : String
-    , parameters : Dict String Value
-    , kind : String
-    , content : Value
-    }
+identifier : Value -> Maybe Identifier
+identifier value = Maybe.map2 Identifier (objectClass value) (handle value)
+
+{- Decoders -}
 
 decodeVcard : Decoder VCardEntry
 decodeVcard = Json.Decode.map4 VCardEntry (index 0 string) (index 1 (dict value)) (index 2 string) (index 3 value)
@@ -49,90 +62,128 @@ decodeVcard = Json.Decode.map4 VCardEntry (index 0 string) (index 1 (dict value)
 remarks : Decoder (List Remark)
 remarks = list (map2 Remark (field "title" string) (field "description" (list string)))
 
-remark : Remark -> (String, Html a)
-remark r = (r.title, pre [] [text <| String.join "\n" r.description])
+render : Identifier -> Value -> RdapDisplay {}
+render i value = case i.objectClass of
+    InetNum -> { identifier = i, object = inetnum value } :: entities value
+    AutNum  -> entities value
+    Entity  -> { identifier = i, object = entity value } :: entities value
+    Domain  -> entities value
 
-render : Version -> List (Html a)
-render v = case objectClass v.object of
-    Just InetNum -> [ table [] <| inetnum v.object ]
-    Just AutNum  -> [ text "ASN NYI" ]
-    Just Entity  -> [ table [] <| entity  v.object ]
-    Just Domain  -> [ text "Domain NYI" ]
-    Nothing      -> [ text "Unrecognised object class" ]
+-- Extract all the entities linked in an RDAP object
+entities : Value -> RdapDisplay {}
+entities v = field "entities" (list value)
+        |> Json.Decode.map (List.concatMap mapObject)
+        |> \d -> Result.withDefault [] (decodeValue d v)
 
--- This renderer assumes that the object handle contains the network address block
-inetnum : Value -> List (Html a)
-inetnum v = List.concatMap (\i -> i v)
-    [ labelled "network name"   (field "name"     (Json.Decode.map text string))
-    , labelled "network"        (field "handle"   (Json.Decode.map text string))
-    , labelled "country"        (field "country"  (Json.Decode.map text string))
-    , labelled "type"           (field "type"     (Json.Decode.map text string))
-    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
-    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
-    , recursively entity        (field "entities" (list value))
-    ]
+mapObject : Value -> RdapDisplay {}
+mapObject v = identifier v
+        |> Maybe.map (\i -> [{ identifier = i, object = entity v }])
+        |> Maybe.withDefault []
+
+    -- like `text`, but will produce interspersed text and <br>
+newlined : String -> List (Html a)
+newlined s = String.split "\n" s
+        |> List.map text
+        |> List.intersperse (br [] [])
+    
+output : RdapDisplay Diff -> Html a
+output rdap = table []
+        <| List.concat
+        <| List.intersperse [spacer]
+        <| List.map (.object >> object) rdap
+
+object : DisplayObject Diff -> List (Html a)
+object lines = List.map line lines
+
+line : DisplayLine Diff -> Html a
+line { label, value, display, diffMode } = case display of
+    Text         -> row diffMode (text label) (newlined value)
+    Preformatted -> row diffMode (text label) [ pre [] [ text value ] ]
+
+row : DiffMode -> Html a -> List (Html a) -> Html a
+row d l r = tr [ diffattr d ] [ td [] [ l ], td [] r ]
+
+diffattr : DiffMode -> Attribute a
+diffattr d = case d of
+    Unchanged   -> class "diff-unchanged"
+    Modified    -> class "diff-modified"
+    New         -> class "diff-new"
 
 spacer : Html a
 spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
 
-recursively : (Value -> List (Html a)) -> Decoder (List Value) -> Value -> List (Html a)
-recursively f d v = Result.withDefault []
-    <| Result.map (List.concatMap (\x -> spacer :: f x)) (decodeValue d v)
+{- Functions to assist rendering into an RdapDisplay -}
 
-entity : Value -> List (Html a)
-entity v = List.concatMap (\i -> i v)
-    [ labelled "handle"         (field "handle"   (Json.Decode.map text string))
-    , labelled "country"        (field "country"  (Json.Decode.map text string))
-    , vcard                     (field "vcardArray" <| index 1 <| list decodeVcard)
-    , labelled "roles"          (field "roles"     (Json.Decode.map text string))
-    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
-    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
-    , recursively entity        (field "entities" (list value))
-    ]
+display : String -> String -> DisplayLine {}
+display l v = { label = l, value = v, display = Text }
 
-run : (a -> List (Html b)) -> Decoder a -> Value -> List (Html b)
+run : (a -> List b) -> Decoder a -> Value -> List b
 run f d v = Result.withDefault [] <| Result.map f (decodeValue d v)
 
-row : Html a -> List (Html a) -> Html a
-row l r = tr [] [ td [] [ l ], td [] r ]
+labelled : String -> Decoder String -> Value -> DisplayObject {}
+labelled k d v = (run <| \h -> [ display k h ]) d v
 
-vcard : Decoder (List VCardEntry) -> Value -> List (Html a)
-vcard d v = Result.withDefault (Debug.log "failed vcard decode" []) <| Result.map (List.concatMap vcardEntry << List.drop 1) (decodeValue d v)
+tabulated : Decoder (List (DisplayLine a)) -> Value -> DisplayObject a
+tabulated = run identity
+
+remark : Remark -> DisplayLine {}
+remark r = { label = r.title, value = String.join "\n" r.description, display = Preformatted }
+
+{- Renderers for the RDAP objects -}
+
+-- This renderer assumes that the object handle contains the network address block
+inetnum : Value -> DisplayObject {}
+inetnum v = List.concatMap (\i -> i v)
+    [ labelled "network name"   (field "name"     string)
+    , labelled "network"        (field "handle"   string)
+    , labelled "country"        (field "country"  string)
+    , labelled "type"           (field "type"     string)
+    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
+    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
+    ]
+
+entity : Value -> DisplayObject {}
+entity v = List.concatMap (\i -> i v)
+    [ labelled "handle"         (field "handle"   string)
+    , labelled "country"        (field "country"  string)
+    , vcard                     (field "vcardArray" <| index 1 <| list decodeVcard)
+    , labelled "roles"          (field "roles"     string)
+    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
+    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
+    ]
+
+vcard : Decoder (List VCardEntry) -> Value -> DisplayObject {}
+vcard d v = Result.withDefault []
+        <| Result.map (List.concatMap vcardEntry << List.drop 1) (decodeValue d v)
 
 -- decode a structured jCard value to a string, given a separator and a component decoder
 structured : String -> Decoder String -> Decoder String
 structured sep part = Json.Decode.map (String.join sep) (list part)
 
--- like `text`, but will produce interspersed text and <br>
-newlined : String -> List (Html a)
-newlined s = String.split "\n" s
-        |> List.map text
-        |> List.intersperse (br [] [])
-
-adr : VCardEntry -> List (Html a)
+adr : VCardEntry -> DisplayObject {}
 adr v = Dict.get "label" v.parameters
         |> Result.fromMaybe "unused error description"
         |> Result.andThen (decodeValue string)
         |> Result.map Ok
         |> Result.withDefault (decodeValue (structured ";" (oneOf [string, structured "," string])) v.content)
-        |> Result.map (\a -> [ row (text "address") (newlined a) ])
+        |> Result.map (\a -> [ display "address" a ])
         |> Result.withDefault []
 
-simple : String -> VCardEntry -> List (Html a)
-simple l v = run (\n -> [ row (text l) [text n] ]) string v.content
+simple : String -> VCardEntry -> DisplayObject {}
+simple l v = run (\n -> [ display l n ]) string v.content
 
 -- The "tel" vCard spec is a complex piece of work, this function will only recognise TYPE=fax, and only if it's the
 -- only type parameter: ["work","fax"] will be considered a voice number, for instance.
-tel : VCardEntry -> List (Html a)
+tel : VCardEntry -> DisplayObject {}
 tel v = Dict.get "type" v.parameters
         |> Result.fromMaybe "unused error description"
         |> Result.andThen (decodeValue string)
         |> Result.withDefault "no type parameter"
         |> \t -> (if t /= "fax" then "voice" else "fax")
-        |> \t -> run (\n -> [ row (text t) [text n] ]) string v.content
+        |> \t -> run (\n -> [ display t n ]) string v.content
 
 -- This is only a partial decode of jCard attributes
-vcardEntry : VCardEntry -> List (Html a)
+vcardEntry : VCardEntry -> DisplayObject {}
 vcardEntry v = case v.name of
     "fn"    -> simple "name" v
     "kind"  -> simple "kind" v
@@ -140,10 +191,41 @@ vcardEntry v = case v.name of
     "tel"   -> tel v
     "email" -> simple "email" v
     -- the default is to show raw JSON data; could do better
-    _       -> run (\raw -> [ row (text v.name) [ text (Json.Encode.encode 0 raw) ] ]) value v.content
+    _       -> run (\raw -> [ display v.name (Json.Encode.encode 0 raw) ]) value v.content
 
-tabulated : Decoder (List (String, Html a)) -> Value -> List (Html a)
-tabulated = run <| List.map (\(t, v) -> row (text t) [ v ])
+{- Diffs between two RdapDisplays -}
+diff : Maybe (RdapDisplay {}) -> RdapDisplay {} -> RdapDisplay Diff
+diff mOrig new = case mOrig of
+    Nothing     -> List.map (using Unchanged) new
+    Just orig   -> List.map (diffRecord orig) new
 
-labelled : String -> Decoder (Html a) -> Value -> List (Html a)
-labelled k = run <| \h -> [ row (text k) [ h ] ]
+-- Return the first element of the list satisfying the predicate, if any
+lookup : (a -> Bool) -> List a -> Maybe a
+lookup f xs = case xs of
+    []      -> Nothing
+    v :: vs -> if f v then Just v else lookup f vs
+
+-- object-by-object check: brand-new objects are just "brandNew"
+diffRecord : RdapDisplay {} -> DisplayRecord {} -> DisplayRecord Diff
+diffRecord orig obj = case lookup (\r -> r.identifier == obj.identifier) orig of
+    Nothing     -> using New obj
+    Just old    -> let new = diffObject old.object obj.object in { obj | object = new }
+
+diffObject : DisplayObject {} -> DisplayObject {} -> DisplayObject Diff
+diffObject orig new = diffed <| Diff.diff orig new
+
+diffed : List (Change (DisplayLine {})) -> DisplayObject Diff
+diffed changes = case changes of
+    []      -> []
+    Added l :: cs -> setDiff New l :: diffed cs
+    Removed l :: Added m :: cs -> if l.label == m.label then setDiff Modified m :: diffed cs else diffed (Added m :: cs)
+    Removed l :: cs -> diffed cs
+    NoChange l :: cs -> setDiff Unchanged l :: diffed cs
+
+setDiff : DiffMode -> DisplayLine a -> DisplayLine Diff
+setDiff d a = { label = a.label, value = a.value, display = a.display, diffMode = d }
+
+using : DiffMode -> DisplayRecord {} -> DisplayRecord Diff
+using m d = DisplayRecord d.identifier
+        <| List.map (setDiff m )
+        <| d.object

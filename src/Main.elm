@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id)
+import Html.Attributes exposing (class, value, id, rel, href)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
@@ -66,7 +66,10 @@ view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
         Right response -> viewAsList response model.selected
-    in div [ class "main" ] <| List.append (headerBar model) body
+    in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
+
+styles : List (Html a)
+styles = [ node "link" [ rel "stylesheet", href "../css/ui.css" ] [] ]
 
 headerBar : Model -> List (Html Msg)
 headerBar model =

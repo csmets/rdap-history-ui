@@ -29,6 +29,10 @@ $existed: rgb(151, 223, 129)
 pre
     font-family: $fixed-font
 
+abbr
+    text-decoration: none
+    border-bottom: 0.05em dotted #999
+
 *
     margin: 0
     padding: 0
@@ -95,6 +99,8 @@ nav
     // padding: 0 0.5em
     padding-top: 0.5em
     font-family: $detail-font
+    table
+        border-collapse: collapse
     td
         padding: 0 0.05em
     td:first-child
@@ -163,3 +169,8 @@ nav
         fill: $existed
         &:hover
             fill: lighten($existed, 10%)
+
+.diff-modified
+    background-color: #ffffdd
+.diff-new
+    background-color: #ddffdd

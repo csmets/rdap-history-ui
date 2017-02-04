@@ -26,7 +26,7 @@ history = field "records" (list record)
         |> map (List.map toHistory)         -- covert to (List History)
 
 toHistory : ((ObjectClass, String), List Version) -> History
-toHistory ((oc, h), vs) = History oc h vs
+toHistory ((oc, h), vs) = History (Identifier oc h) vs
 
 toComparable : (ObjectClass, String) -> (String, String)
 toComparable (c, h) = (toString c, h)

@@ -2,7 +2,7 @@ module Render exposing (viewAsList)
 
 import Date exposing (Date)
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id)
+import Html.Attributes exposing (class, value, id, title)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 -- import Html.Lazy exposing (lazy)
 
@@ -16,6 +16,15 @@ type alias Response =
     , history : List History
     }
 
+-- Rendering happens inside a context
+type alias Context =
+    { today : Date
+    , identifier : Identifier
+    }
+
+mkCtx : Date -> History -> Context
+mkCtx today history = Context today history.identifier
+
 viewAsList : Response -> Int -> List (Html Msg)
 viewAsList response idx =
     [ div [ class "historyPane" ]
@@ -25,27 +34,35 @@ viewAsList response idx =
         ]
     ]
 
-firstVersion : Date.Date -> Maybe History -> List (Html Msg)
-firstVersion now mh = case mh of
-    Nothing -> [ text "" ]
-    Just h  -> [ {- viewTimeline now h, -} viewVersions now h ]
-
 viewSummary : Int -> Int -> History -> Html Msg
 viewSummary sel idx h = li
         [ class (if sel == idx then "selected" else "" )
         , onClick (Select idx) ]
-        [ span [ class "handle" ] [ text h.handle ] ]
+        [ span [ class "handle" ] [ text h.identifier.handle ] ]
+
+firstVersion : Date -> Maybe History -> List (Html Msg)
+firstVersion now mh = case mh of
+    Nothing -> [ text "" ]
+    Just h  -> [ {- viewTimeline now h, -} viewVersions (mkCtx now h) h.versions ]
+
+viewVersions : Context -> List Version -> Html a
+viewVersions ctx vs =
+    let versions = List.reverse <| List.sortBy (\v -> Date.toTime v.from) vs
+        paired   = List.map2 (,) (List.map Just (List.drop 1 versions) ++ [Nothing]) versions
+    in div [ class "versions" ] (List.map (uncurry (viewVersion ctx)) paired)
+
+viewVersion : Context -> Maybe Version -> Version -> Html a
+viewVersion ctx was is =
+    let rWas = Maybe.map (Rdap.render ctx.identifier << .object) was
+        rIs  = Rdap.render ctx.identifier is.object
+    in  div [ class "version" ]
+            [ viewPeriod ctx.today is.from is.until
+            , div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
+
+friendlyDate : Date -> Date -> Html a
+friendlyDate now dt = abbr [ title (toString dt) ] [ text <| relativeSpan now dt ]
 
 viewPeriod : Date -> Date -> Maybe Date -> Html a
 viewPeriod now f mu = case mu of
-    Nothing -> text ("From " ++ relativeSpan now f ++ " to the present")
-    Just u  -> text ("From " ++ relativeSpan now f ++ " to " ++ relativeSpan now u)
-
-viewVersions : Date -> History -> Html a
-viewVersions now h = let sv = List.reverse <| List.sortBy (\v -> Date.toTime v.from) h.versions
-                  in div [ class "versions" ] (List.map (viewVersion now Nothing) sv)
-
-viewVersion : Date -> Maybe Version -> Version -> Html a
-viewVersion now was is = div [ class "version" ]
-                    [ viewPeriod now is.from is.until
-                    , div [ class "rdap" ] (Rdap.render is) ]
+    Nothing -> span [] [ text "From ", friendlyDate now f, text " to the present" ]
+    Just u  -> span [] [ text "From ", friendlyDate now f, text " to ", friendlyDate now u ]

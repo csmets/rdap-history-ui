@@ -1,4 +1,4 @@
-module Model exposing (Version, History, ObjectClass (..), Response, Model, Msg (..), Selected)
+module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected)
 
 import Date exposing (Date)
 import Either exposing (Either)
@@ -34,10 +34,14 @@ type ObjectClass
     | Entity
     | Domain
 
--- The history of one object
-type alias History =
+type alias Identifier =
     { objectClass   : ObjectClass
     , handle        : String
+    }
+
+-- The history of one object
+type alias History =
+    { identifier    : Identifier
     , versions      : List Version
     }
 
