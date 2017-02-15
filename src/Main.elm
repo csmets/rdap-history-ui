@@ -75,7 +75,7 @@ headerBar : Model -> List (Html Msg)
 headerBar model =
     [ nav []
         [ ul []
-            [ li [] [ h1 [] [ text "WHOWAS (prototype)" ] ]
+            [ li [] [ h1 [] [ text "Historical RDAP" ] ]
             , li [] [ searchBox model ]
             ]
         ]
