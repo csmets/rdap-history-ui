@@ -4,6 +4,8 @@ import Date exposing (Date)
 import Html exposing (..)
 import Html.Attributes exposing (class, value, id, title)
 import Html.Events exposing (onWithOptions, onInput, onClick)
+import Date.Extra.Config.Config_en_au exposing (config)
+import Date.Extra.Format exposing (formatUtc, isoDateFormat)
 -- import Html.Lazy exposing (lazy)
 
 import Model exposing (..)
@@ -60,7 +62,8 @@ viewVersion ctx was is =
             , div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
 
 friendlyDate : Date -> Date -> Html a
-friendlyDate now dt = abbr [ title (toString dt) ] [ text <| relativeSpan now dt ]
+-- friendlyDate now dt = abbr [ title (toString dt) ] [ text <| relativeSpan now dt ]
+friendlyDate now dt = abbr [ title (toString dt) ] [ text <| formatUtc config "%a %d %b %Y" dt ]
 
 viewPeriod : Date -> Date -> Maybe Date -> Html a
 viewPeriod now f mu = case mu of
