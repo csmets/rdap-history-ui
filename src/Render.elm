@@ -6,11 +6,9 @@ import Html.Attributes exposing (class, value, id, title)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Date.Extra.Config.Config_en_au exposing (config)
 import Date.Extra.Format exposing (formatUtc, isoDateFormat)
--- import Html.Lazy exposing (lazy)
 
 import Model exposing (..)
 import Rdap
-import Relativity exposing (..)
 
 -- TODO figure out if needed, and move to common module if so
 type alias Response =
@@ -47,13 +45,13 @@ firstVersion now mh = case mh of
     Nothing -> [ text "" ]
     Just h  -> [ {- viewTimeline now h, -} viewVersions (mkCtx now h) h.versions ]
 
-viewVersions : Context -> List Version -> Html a
+viewVersions : Context -> List Version -> Html Msg
 viewVersions ctx vs =
     let versions = List.reverse <| List.sortBy (\v -> Date.toTime v.from) vs
         paired   = List.map2 (,) (List.map Just (List.drop 1 versions) ++ [Nothing]) versions
     in div [ class "versions" ] (List.map (uncurry (viewVersion ctx)) paired)
 
-viewVersion : Context -> Maybe Version -> Version -> Html a
+viewVersion : Context -> Maybe Version -> Version -> Html Msg
 viewVersion ctx was is =
     let rWas = Maybe.map (Rdap.render ctx.identifier << .object) was
         rIs  = Rdap.render ctx.identifier is.object

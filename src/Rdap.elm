@@ -6,7 +6,8 @@ module Rdap exposing (objectClass, handle, render, output, diff)
 import Dict             exposing (Dict)
 import Diff             exposing (Change(..))
 import Html             exposing (..)
-import Html.Attributes  exposing (class, colspan)
+import Html.Attributes  exposing (class, colspan, href)
+import Html.Events      exposing (onClick)
 import Json.Decode      exposing (..)
 import Json.Encode
 import Maybe            exposing (Maybe)
@@ -23,7 +24,7 @@ type alias VCardEntry =
     }
 
 -- A structure to represent an RDAP object interpreted for display
-type DisplayMode = Text | Preformatted
+type DisplayMode = Text | Lookup | Preformatted
 type alias DisplayLine a = { a | label : String, value : String, display : DisplayMode }
 type alias DisplayObject a = List (DisplayLine a)
 type alias DisplayRecord a = { identifier : Identifier, object : DisplayObject a }
@@ -86,18 +87,19 @@ newlined s = String.split "\n" s
         |> List.map text
         |> List.intersperse (br [] [])
     
-output : RdapDisplay Diff -> Html a
+output : RdapDisplay Diff -> Html Msg
 output rdap = table []
         <| List.concat
         <| List.intersperse [spacer]
         <| List.map (.object >> object) rdap
 
-object : DisplayObject Diff -> List (Html a)
+object : DisplayObject Diff -> List (Html Msg)
 object lines = List.map line lines
 
-line : DisplayLine Diff -> Html a
+line : DisplayLine Diff -> Html Msg
 line { label, value, display, diffMode } = case display of
     Text         -> row diffMode (text label) (newlined value)
+    Lookup       -> row diffMode (text label) [ a [ href "#", onClick (StartSearch value) ] [ text value ] ]
     Preformatted -> row diffMode (text label) [ pre [] [ text value ] ]
 
 row : DiffMode -> Html a -> List (Html a) -> Html a
@@ -117,11 +119,17 @@ spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
 display : String -> String -> DisplayLine {}
 display l v = { label = l, value = v, display = Text }
 
+link : String -> String -> DisplayLine {}
+link l v = { label = l, value = v, display = Lookup }
+
 run : (a -> List b) -> Decoder a -> Value -> List b
 run f d v = Result.withDefault [] <| Result.map f (decodeValue d v)
 
 labelled : String -> Decoder String -> Value -> DisplayObject {}
 labelled k d v = (run <| \h -> [ display k h ]) d v
+
+linked : String -> Decoder String -> Value -> DisplayObject {}
+linked k d v = (run <| \h -> [ link k h ]) d v
 
 tabulated : Decoder (List (DisplayLine a)) -> Value -> DisplayObject a
 tabulated = run identity
@@ -144,7 +152,7 @@ inetnum v = List.concatMap (\i -> i v)
 
 entity : Value -> DisplayObject {}
 entity v = List.concatMap (\i -> i v)
-    [ labelled "handle"         (field "handle"   string)
+    [ linked   "handle"         (field "handle"   string)
     , labelled "country"        (field "country"  string)
     , vcard                     (field "vcardArray" <| index 1 <| list decodeVcard)
     , labelled "roles"          (field "roles"     string)
