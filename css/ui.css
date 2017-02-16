@@ -89,7 +89,7 @@ nav {
   .rdap table {
     border-collapse: collapse; }
   .rdap td {
-    padding: 0 0.05em; }
+    padding: 0 0.15em; }
   .rdap td:first-child {
     vertical-align: top;
     font-family: "Nunito", "Arial", sans-serif;
@@ -152,6 +152,22 @@ nav {
 
 .diff-modified {
   background-color: #ffffdd; }
+  .diff-modified td:first-child:before {
+    width: 1em;
+    content: "!";
+    float: left;
+    text-align: left; }
 
 .diff-new {
   background-color: #ddffdd; }
+  .diff-new td:first-child:before {
+    width: 1em;
+    content: "+";
+    float: left;
+    text-align: left; }
+
+.diff-unchanged td:first-child:before {
+  width: 1em;
+  content: " ";
+  float: left;
+  text-align: left; }
