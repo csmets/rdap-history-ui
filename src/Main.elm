@@ -24,7 +24,7 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Loading…") 0 False, search resource )
+            in ( Model resource (Left "Searching…") 0 False, search resource )
 
 errMsg : Http.Error -> String
 errMsg err = case err of
@@ -55,7 +55,7 @@ update msg model = case msg of
     Select i ->
         ( upd { model | selected = i }, Cmd.none )
     StartSearch s ->
-        ( upd { model | response = Left "Searching…", resource = s }, search s )
+        ( model, Navigation.newUrl ("#" ++ s) )
 
 upd : Model -> Model
 upd model = { model | redraw = not model.redraw }
