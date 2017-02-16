@@ -9,10 +9,12 @@ import Task
 import Platform.Cmd
 import List exposing (map, map2)
 import String
+import Regex
 import Either exposing (Either(..))
 import Date exposing (fromString, toTime)
 import DOM exposing (target, childNode)
 import Json.Decode exposing (Decoder, succeed, string, map)
+import Guards exposing (..)
 
 import Model exposing (..)
 import Decode exposing (history)
@@ -98,10 +100,26 @@ searchForm = target (childNode 0 (Json.Decode.map StartSearch (Json.Decode.field
 
 search : String -> Cmd Msg
 search resource =
-    let url   = "//rdap.apnic.net/history/ip/" ++ resource
+    let typ   = url_of_typ <| infer_type resource
+        url   = "//rdap.apnic.net/history/" ++ typ ++ "/" ++ resource
         fetch = Http.toTask <| Http.get url history
     in fetch |> Task.andThen (\r -> Task.map (\d -> Response d r) Date.now)
              |> Task.attempt Fetched
+
+url_of_typ : ObjectClass -> String
+url_of_typ oc = case oc of
+    AutNum      -> "autnum"
+    Entity      -> "entity"
+    Domain      -> "domain"
+    InetNum     -> "ip"
+
+-- Infer the RDAP object class of a key
+infer_type : String -> ObjectClass
+infer_type res
+     = String.endsWith ".arpa" res => Domain
+    |= Regex.contains (Regex.regex "^AS\\d+$") res => AutNum
+    |= Regex.contains (Regex.regex "^([\\d\\.]+|[\\da-fA-F:]+)(/\\d+)?$") res => InetNum
+    |= Entity
 
 main : Program Never Model Msg
 main = program
