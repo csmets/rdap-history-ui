@@ -65,9 +65,9 @@ remarks = list (map2 Remark (field "title" string) (field "description" (list st
 render : Identifier -> Value -> RdapDisplay {}
 render i value = case i.objectClass of
     InetNum -> { identifier = i, object = inetnum value } :: entities value
-    AutNum  -> { identifier = i, object = autnum value } :: entities value
-    Entity  -> { identifier = i, object = entity value } :: entities value
-    Domain  -> entities value
+    AutNum  -> { identifier = i, object = autnum value  } :: entities value
+    Entity  -> { identifier = i, object = entity value  } :: entities value
+    Domain  -> { identifier = i, object = domain value  } :: entities value
 
 -- Extract all the entities linked in an RDAP object
 entities : Value -> RdapDisplay {}
@@ -159,6 +159,15 @@ autnum v = List.concatMap (\i -> i v)
     , labelled "AS name"        (field "name" string)
     , labelled "country"        (field "country"  string)
     , labelled "type"           (field "type"     string)
+    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
+    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
+    ]
+
+-- Omitted: variants, ldhName, unicodeName, secureDNS, status, publicIds, network, links, events, port43
+domain : Value -> DisplayObject {}
+domain v = List.concatMap (\i -> i v)
+    [ labelled "handle"         (field "handle" string)
+    , labelled "servers"        (field "nameservers" <| Json.Decode.map (String.join "\n") (list (field "ldhName" string)))
     , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
     , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
     ]
