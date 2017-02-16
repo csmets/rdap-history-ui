@@ -102,7 +102,7 @@ nav
     table
         border-collapse: collapse
     td
-        padding: 0 0.05em
+        padding: 0 0.15em
     td:first-child
         vertical-align: top
         font-family: $title-font
@@ -170,7 +170,18 @@ nav
         &:hover
             fill: lighten($existed, 10%)
 
+=floaty($char)
+    td:first-child:before
+        width: 1em
+        content: $char
+        float: left
+        text-align: left
+
 .diff-modified
     background-color: #ffffdd
+    +floaty("!")
 .diff-new
     background-color: #ddffdd
+    +floaty("+")
+.diff-unchanged
+    +floaty(" ")
