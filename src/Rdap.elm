@@ -65,7 +65,7 @@ remarks = list (map2 Remark (field "title" string) (field "description" (list st
 render : Identifier -> Value -> RdapDisplay {}
 render i value = case i.objectClass of
     InetNum -> { identifier = i, object = inetnum value } :: entities value
-    AutNum  -> entities value
+    AutNum  -> { identifier = i, object = autnum value } :: entities value
     Entity  -> { identifier = i, object = entity value } :: entities value
     Domain  -> entities value
 
@@ -148,6 +148,17 @@ entity v = List.concatMap (\i -> i v)
     , labelled "country"        (field "country"  string)
     , vcard                     (field "vcardArray" <| index 1 <| list decodeVcard)
     , labelled "roles"          (field "roles"     string)
+    , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
+    , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
+    ]
+
+-- Omitted: status, start, end, links, events, port43
+autnum : Value -> DisplayObject {}
+autnum v = List.concatMap (\i -> i v)
+    [ labelled "handle"         (field "handle" string)
+    , labelled "AS name"        (field "name" string)
+    , labelled "country"        (field "country"  string)
+    , labelled "type"           (field "type"     string)
     , tabulated                 (field "remarks"  (Json.Decode.map (List.map remark) remarks))
     , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
     ]
