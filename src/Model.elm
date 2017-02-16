@@ -4,6 +4,7 @@ import Date exposing (Date)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
+import Navigation exposing (Location)
 
 type alias Response =
     { stamp : Date.Date
@@ -19,6 +20,7 @@ type alias Model =
 
 type Msg
     = Nada
+    | UrlChange Location
     | Fetched (Result Http.Error Response)
     | StartSearch String
     | Select Int

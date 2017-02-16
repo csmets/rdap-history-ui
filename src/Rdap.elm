@@ -7,7 +7,6 @@ import Dict             exposing (Dict)
 import Diff             exposing (Change(..))
 import Html             exposing (..)
 import Html.Attributes  exposing (class, colspan, href)
-import Html.Events      exposing (onClick)
 import Json.Decode      exposing (..)
 import Json.Encode
 import Maybe            exposing (Maybe)
@@ -99,7 +98,7 @@ object lines = List.map line lines
 line : DisplayLine Diff -> Html Msg
 line { label, value, display, diffMode } = case display of
     Text         -> row diffMode (text label) (newlined value)
-    Lookup       -> row diffMode (text label) [ a [ href "#", onClick (StartSearch value) ] [ text value ] ]
+    Lookup       -> row diffMode (text label) [ a [ href ("#" ++ value) ] [ text value ] ]
     Preformatted -> row diffMode (text label) [ pre [] [ text value ] ]
 
 row : DiffMode -> Html a -> List (Html a) -> Html a

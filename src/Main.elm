@@ -1,28 +1,30 @@
 module Main exposing (..)
 
+import Date exposing (fromString, toTime)
+import DOM exposing (target, childNode)
+import Either exposing (Either(..))
+import Guards exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (class, value, id, rel, href)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
-import Task
-import Platform.Cmd
-import List exposing (map, map2)
-import String
-import Regex
-import Either exposing (Either(..))
-import Date exposing (fromString, toTime)
-import DOM exposing (target, childNode)
 import Json.Decode exposing (Decoder, succeed, string, map)
-import Guards exposing (..)
+import List exposing (map, map2)
+import Navigation
+import Platform.Cmd
+import Regex
+import String
+import Task
 
 import Model exposing (..)
 import Decode exposing (history)
 import Render exposing (viewAsList)
 
-init : String -> ( Model, Cmd Msg )
-init resource =
-    ( Model resource (Left "Loading…") 0 False, search resource )
+init : Navigation.Location -> ( Model, Cmd Msg )
+init loc = let hash = String.dropLeft 1 loc.hash
+               resource = if String.isEmpty hash then "203.133.248.0/24" else hash
+            in ( Model resource (Left "Loading…") 0 False, search resource )
 
 errMsg : Http.Error -> String
 errMsg err = case err of
@@ -48,10 +50,8 @@ update msg model = case msg of
         ( model, Cmd.none )
     Fetched f ->
         ( upd { model | response = fromFetch f, selected = 0 }, Cmd.none )
-    -- Error err ->
-    --     ( upd { model | response = Left (errMsg err), selected = 0 }, Cmd.none )
-    -- Success h ->
-    --     ( upd { model | response = Right h, selected = 0 }, Cmd.none )
+    UrlChange l ->
+        init l
     Select i ->
         ( upd { model | selected = i }, Cmd.none )
     StartSearch s ->
@@ -122,8 +122,8 @@ infer_type res
     |= Entity
 
 main : Program Never Model Msg
-main = program
-    { init = init "203.133.248.0/24"
+main = Navigation.program UrlChange
+    { init = init
     , view = view
     , update = update
     , subscriptions = subscriptions
