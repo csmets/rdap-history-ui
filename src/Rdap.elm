@@ -67,7 +67,7 @@ render : Identifier -> Value -> RdapDisplay {}
 render i value = case i.objectClass of
     InetNum -> { identifier = i, object = inetnum value } :: entities value
     AutNum  -> { identifier = i, object = autnum value  } :: entities value
-    Entity  -> { identifier = i, object = entity value  } :: entities value
+    Entity  -> { identifier = i, object = entity Text value  } :: entities value
     Domain  -> { identifier = i, object = domain value  } :: entities value
 
 -- Extract all the entities linked in an RDAP object
@@ -78,7 +78,7 @@ entities v = field "entities" (list value)
 
 mapObject : Value -> RdapDisplay {}
 mapObject v = identifier v
-        |> Maybe.map (\i -> [{ identifier = i, object = entity v }])
+        |> Maybe.map (\i -> [{ identifier = i, object = entity Lookup v }])
         |> Maybe.withDefault []
 
     -- like `text`, but will produce interspersed text and <br>
@@ -116,20 +116,17 @@ spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
 
 {- Functions to assist rendering into an RdapDisplay -}
 
-display : String -> String -> DisplayLine {}
-display l v = { label = l, value = v, display = Text }
-
-link : String -> String -> DisplayLine {}
-link l v = { label = l, value = v, display = Lookup }
+display : DisplayMode -> String -> String -> DisplayLine {}
+display d l v = { label = l, value = v, display = d }
 
 run : (a -> List b) -> Decoder a -> Value -> List b
 run f d v = Result.withDefault [] <| Result.map f (decodeValue d v)
 
 labelled : String -> Decoder String -> Value -> DisplayObject {}
-labelled k d v = (run <| \h -> [ display k h ]) d v
+labelled k d v = (run <| \h -> [ display Text k h ]) d v
 
-linked : String -> Decoder String -> Value -> DisplayObject {}
-linked k d v = (run <| \h -> [ link k h ]) d v
+mode : DisplayMode -> String -> Decoder String -> Value -> DisplayObject {}
+mode m k d v = (run <| \h -> [ display m k h ]) d v
 
 tabulated : Decoder (List (DisplayLine a)) -> Value -> DisplayObject a
 tabulated = run identity
@@ -150,9 +147,9 @@ inetnum v = List.concatMap (\i -> i v)
     , tabulated                 (field "notices"  (Json.Decode.map (List.map remark) remarks))
     ]
 
-entity : Value -> DisplayObject {}
-entity v = List.concatMap (\i -> i v)
-    [ linked   "handle"         (field "handle"   string)
+entity : DisplayMode -> Value -> DisplayObject {}
+entity d v = List.concatMap (\i -> i v)
+    [ mode d   "handle"         (field "handle"   string)
     , labelled "country"        (field "country"  string)
     , vcard                     (field "vcardArray" <| index 1 <| list decodeVcard)
     , labelled "roles"          (field "roles"     string)
@@ -194,11 +191,11 @@ adr v = Dict.get "label" v.parameters
         |> Result.andThen (decodeValue string)
         |> Result.map Ok
         |> Result.withDefault (decodeValue (structured ";" (oneOf [string, structured "," string])) v.content)
-        |> Result.map (\a -> [ display "address" a ])
+        |> Result.map (\a -> [ display Text "address" a ])
         |> Result.withDefault []
 
 simple : String -> VCardEntry -> DisplayObject {}
-simple l v = run (\n -> [ display l n ]) string v.content
+simple l v = run (\n -> [ display Text l n ]) string v.content
 
 -- The "tel" vCard spec is a complex piece of work, this function will only recognise TYPE=fax, and only if it's the
 -- only type parameter: ["work","fax"] will be considered a voice number, for instance.
@@ -208,7 +205,7 @@ tel v = Dict.get "type" v.parameters
         |> Result.andThen (decodeValue string)
         |> Result.withDefault "no type parameter"
         |> \t -> (if t /= "fax" then "voice" else "fax")
-        |> \t -> run (\n -> [ display t n ]) string v.content
+        |> \t -> run (\n -> [ display Text t n ]) string v.content
 
 -- This is only a partial decode of jCard attributes
 vcardEntry : VCardEntry -> DisplayObject {}
@@ -219,7 +216,7 @@ vcardEntry v = case v.name of
     "tel"   -> tel v
     "email" -> simple "email" v
     -- the default is to show raw JSON data; could do better
-    _       -> run (\raw -> [ display v.name (Json.Encode.encode 0 raw) ]) value v.content
+    _       -> run (\raw -> [ display Text v.name (Json.Encode.encode 0 raw) ]) value v.content
 
 {- Diffs between two RdapDisplays -}
 diff : Maybe (RdapDisplay {}) -> RdapDisplay {} -> RdapDisplay Diff
