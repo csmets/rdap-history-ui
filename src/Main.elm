@@ -5,7 +5,7 @@ import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id, rel, href)
+import Html.Attributes exposing (class, value, id, rel, href, src)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
@@ -77,7 +77,8 @@ headerBar : Model -> List (Html Msg)
 headerBar model =
     [ nav []
         [ ul []
-            [ li [] [ h1 [] [ text "Historical RDAP" ] ]
+            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_web.jpg" ] []]
+            , li [] [ h1 [] [ text "Whowas" ] ]
             , li [] [ searchBox model ]
             ]
         ]
