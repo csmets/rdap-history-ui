@@ -6,6 +6,8 @@ import Html.Attributes exposing (class, value, id, title)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Date.Extra.Config.Config_en_au exposing (config)
 import Date.Extra.Format exposing (formatUtc, isoDateFormat)
+import Svg exposing (svg, path)
+import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
 
 import Model exposing (..)
 import Rdap
@@ -29,8 +31,11 @@ viewAsList : Response -> Int -> List (Html Msg)
 viewAsList response idx =
     [ div [ class "historyPane" ]
         [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
-        , div [class "detail", id "content" ]
-            ( firstVersion response.stamp <| List.head (List.drop idx response.history) )
+        , div [ class "detail", id "content" ]
+            [ div [] [arrow "leftArrow"] ,
+              div [] ( firstVersion response.stamp <| List.head (List.drop idx response.history) ),
+              div [] [arrow "rightArrow"]
+            ]
         ]
     ]
 
@@ -67,3 +72,9 @@ viewPeriod : Date -> Date -> Maybe Date -> Html a
 viewPeriod now f mu = case mu of
     Nothing -> span [] [ text "From ", friendlyDate now f, text " to the present" ]
     Just u  -> span [] [ text "From ", friendlyDate now f, text " to ", friendlyDate now u ]
+
+arrow : String -> Html a
+arrow svgClass =
+    svg [width "50", height "100", viewBox "0 0 50 100", Svg.Attributes.class svgClass]
+        [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
+                   Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
