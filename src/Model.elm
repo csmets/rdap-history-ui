@@ -1,10 +1,12 @@
-module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected)
+module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected
+                      , history, versions)
 
 import Date exposing (Date)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
 import Navigation exposing (Location)
+import List.Extra exposing ((!!))
 
 type alias Response =
     { stamp : Date.Date
@@ -15,15 +17,18 @@ type alias Model =
     { resource : String
     , response : Either String Response
     , selected : Int
+    , viewModification : Maybe Date
     , redraw : Bool
     }
 
 type Msg
-    = Nada
+    = Nada -- TODO remove this?
     | UrlChange Location
     | Fetched (Result Http.Error Response)
     | StartSearch String
     | Select Int
+    | NavigateDiffForward
+    | NavigateDiffBack
 
 type Selected
     = Selected
@@ -53,3 +58,11 @@ type alias Version =
     , until : Maybe Date
     , object : Value
     }
+
+
+-- Utility methods
+history : Model -> Maybe History
+history model = Maybe.andThen ( flip (!!) model.selected) <| Maybe.map .history <| Either.toMaybe model.response
+
+versions : Model -> Maybe (List Version)
+versions = Maybe.map .versions << history

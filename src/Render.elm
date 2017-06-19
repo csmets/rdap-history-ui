@@ -11,6 +11,7 @@ import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLin
 
 import Model exposing (..)
 import Rdap
+import Util exposing ((!!))
 
 -- TODO figure out if needed, and move to common module if so
 type alias Response =
@@ -32,9 +33,9 @@ viewAsList response idx =
     [ div [ class "historyPane" ]
         [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
         , div [ class "detail", id "content" ]
-            [ div [] [arrow "leftArrow"] ,
-              div [] ( firstVersion response.stamp <| List.head (List.drop idx response.history) ),
-              div [] [arrow "rightArrow"]
+            [ button [class "arrowButton", onClick NavigateDiffBack] [arrow "leftArrow"] ,
+              div [class "diffPanel"] ( firstVersion response.stamp <| response.history !! idx ),
+              button [class "arrowButton", onClick NavigateDiffForward] [arrow "rightArrow"]
             ]
         ]
     ]

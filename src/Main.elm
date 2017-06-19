@@ -11,7 +11,9 @@ import Html.Lazy exposing (lazy)
 import Http
 import Json.Decode exposing (Decoder, succeed, string, map)
 import List exposing (map, map2)
+import List.Extra exposing (last)
 import Navigation
+import Maybe.Extra exposing (or)
 import Platform.Cmd
 import Regex
 import String
@@ -24,7 +26,7 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Searching…") 0 False, search resource )
+            in ( Model resource (Left "Searching…") 0 Nothing False, search resource )
 
 errMsg : Http.Error -> String
 errMsg err = case err of
@@ -44,6 +46,9 @@ fromFetch r = case r of
     Ok ok -> Right ok
     Err e -> Left (errMsg e)
 
+
+-- Update
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model = case msg of
     Nada ->
@@ -56,9 +61,37 @@ update msg model = case msg of
         ( upd { model | selected = i }, Cmd.none )
     StartSearch s ->
         ( model, Navigation.newUrl ("#" ++ s) )
+    NavigateDiffForward ->
+        ( navigateForward model, Cmd.none)
+    NavigateDiffBack ->
+        ( navigateBack model, Cmd.none)
 
 upd : Model -> Model
-upd model = { model | redraw = not model.redraw }
+upd model = let
+        viewModification = case model.response of
+                              Left _ -> Nothing
+                              Right response -> date response
+        date res = List.head res.history |> Maybe.map .versions |> Maybe.andThen List.head |> Maybe.map .from
+    in { model | redraw = not model.redraw, viewModification = viewModification }
+
+navigateForward : Model -> Model
+navigateForward model = let versions = Model.versions model
+                            next = case model.viewModification of
+                                       Nothing   -> Nothing
+                                       Just date -> or (Maybe.map .from <| Maybe.andThen last
+                                                            <| Maybe.map (List.filter (\v -> toTime v.from > toTime date)) versions)
+                                                       (Just date)
+                        in { model | viewModification = next }
+
+navigateBack : Model -> Model
+navigateBack model = let versions = Model.versions model
+                         previous = case model.viewModification of
+                                        Nothing   -> Nothing
+                                        Just date -> or (getPrevious date) (Just date)
+                         getPrevious date = Maybe.map .from <| Maybe.andThen List.head
+                                                <| Maybe.map ( List.filter (\v -> toTime v.from < toTime date) ) versions
+                        in { model | viewModification = previous }
+-- View
 
 view : Model -> Html Msg
 view model = lazy (\z -> view_ model) model.redraw
@@ -103,7 +136,7 @@ search : String -> Cmd Msg
 search resource =
     let typ   = url_of_typ <| infer_type resource
         url   = "//rdap.apnic.net/history/" ++ typ ++ "/" ++ resource
-        fetch = Http.toTask <| Http.get url history
+        fetch = Http.toTask <| Http.get url Decode.history
     in fetch |> Task.andThen (\r -> Task.map (\d -> Response d r) Date.now)
              |> Task.attempt Fetched
 

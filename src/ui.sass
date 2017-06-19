@@ -47,7 +47,7 @@ $existed: rgb(151, 223, 129)
         opacity: 1
     100%
         opacity: 0
-    
+
 pre
     font-family: $fixed-font
 
@@ -108,7 +108,7 @@ nav
         font-family: $fixed-font
         font-size: small
         list-style: none
-        overflow-y: scroll
+        overflow-y: auto
         +flex-shrink(0)
 
         li
@@ -120,10 +120,20 @@ nav
                 background-color: #eee
 
     .detail
+        +flex
         padding: 1em
         background: #fafafa
-        width: 100%
+        // width: 100%
         overflow: hidden
+
+    .diffPanel
+        flex: 1 1 auto
+
+    .arrowButton
+        flex: 0 1 auto
+        align-self: center
+        border: none
+        background: transparent
 
     .arrow
         stroke: black
@@ -154,8 +164,8 @@ nav
         padding: 0.2em
 
 .versions
-    white-space: nowrap
-    overflow: scroll
+    // white-space: nowrap
+    overflow: auto
     height: 100%
 
     .version
