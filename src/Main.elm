@@ -84,7 +84,7 @@ navigateForward model = let versions = Model.versions model
                         in { model | viewModification = next }
 
 navigateBack : Model -> Model
-navigateBack model = let versions = Model.versions model
+navigateBack model = let versions = Maybe.andThen List.Extra.init <| Model.versions model
                          previous = case model.viewModification of
                                         Nothing   -> Nothing
                                         Just date -> or (getPrevious date) (Just date)
@@ -100,7 +100,7 @@ view_ : Model -> Html Msg
 view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
-        Right response -> viewAsList response model.selected
+        Right response -> viewAsList response model.selected (Maybe.withDefault response.stamp model.viewModification)
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)

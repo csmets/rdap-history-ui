@@ -9,7 +9,7 @@ import Navigation exposing (Location)
 import List.Extra exposing ((!!))
 
 type alias Response =
-    { stamp : Date.Date
+    { stamp : Date.Date  -- TODO: this can probably be removed
     , history : List History
     }
 
@@ -66,3 +66,4 @@ history model = Maybe.andThen ( flip (!!) model.selected) <| Maybe.map .history 
 
 versions : Model -> Maybe (List Version)
 versions = Maybe.map .versions << history
+
