@@ -136,6 +136,14 @@ nav
         background: transparent
         outline: none
 
+        path
+            transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
+            &:hover
+                stroke-width: 13
+            &:active
+                stroke: rgba(0, 0, 0, 0.5)
+                stroke-width: 3
+
     .arrow
         stroke: black
 
@@ -165,9 +173,10 @@ nav
         padding: 0.2em
 
 .versions
-    // white-space: nowrap
+    +flex
     overflow: auto
     height: 100%
+    justify-content: space-around
 
     .version
         display: inline-block
