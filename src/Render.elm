@@ -5,9 +5,10 @@ import Date.Extra.Compare exposing (Compare2(..), is)
 import Date.Extra.Config.Config_en_au exposing (config)
 import Date.Extra.Format exposing (formatUtc, isoDateFormat)
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id, title)
+import Html.Attributes exposing (class, value, id, title, disabled)
 import Html.Events exposing (onWithOptions, onInput, onClick)
-import List.Extra exposing ((!!), dropWhile)
+import List exposing (length)
+import List.Extra exposing ((!!), dropWhile, last)
 import Maybe.Extra exposing (isJust, (?))
 import Svg exposing (svg, path)
 import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
@@ -27,15 +28,16 @@ mkCtx today history modDate = Context today history.identifier modDate
 
 viewAsList : Response -> Int -> Date -> List (Html Msg)
 viewAsList response idx modDate =
-    [ div [ class "historyPane" ]
-        [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
-        , div [ class "detail", id "content" ]
-            [ button [class "arrowButton", onClick NavigateDiffBack] [arrow "leftArrow"] ,
-              div [class "diffPanel"] ( firstVersion response.stamp (response.history !! idx) modDate ),
-              button [class "arrowButton", onClick NavigateDiffForward] [arrow "rightArrow"]
-            ]
-        ]
-    ]
+    let history = response.history !! idx
+    in [ div [ class "historyPane" ]
+           [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
+           , div [ class "detail", id "content" ]
+               [ button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack history modDate) [arrow "leftArrow"] ,
+                 div [class "diffPanel"] ( firstVersion response.stamp history modDate ),
+                 button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd history modDate) [arrow "rightArrow"]
+               ]
+           ]
+       ]
 
 viewSummary : Int -> Int -> History -> Html Msg
 viewSummary sel idx h = li
@@ -86,3 +88,16 @@ arrow svgClass =
     svg [width "50", height "100", viewBox "0 0 50 100", Svg.Attributes.class svgClass]
         [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
                    Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
+
+checkNavBack : Maybe History -> Date -> List (Html.Attribute Msg)
+checkNavBack history modDate = checkNav history modDate (\h -> h !! ((length h) - 2))
+
+checkNavFwd : Maybe History -> Date -> List (Html.Attribute Msg)
+checkNavFwd history modDate = checkNav history modDate List.head
+
+checkNav : Maybe History -> Date -> (List Version -> Maybe Version) -> List (Html.Attribute Msg)
+checkNav history modDate f =
+    if Maybe.withDefault False <| Maybe.map ((/=) (Date.toTime modDate)) <| Maybe.map (Date.toTime << .from)
+           <| Maybe.Extra.join <| Maybe.map f <| Maybe.map .versions history
+    then []
+    else [disabled True]

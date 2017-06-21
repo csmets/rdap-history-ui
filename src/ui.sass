@@ -136,13 +136,19 @@ nav
         background: transparent
         outline: none
 
-        path
-            transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
-            &:hover
-                stroke-width: 13
-            &:active
-                stroke: rgba(0, 0, 0, 0.5)
-                stroke-width: 3
+        &:enabled
+            transition-duration: 0.3s
+            path
+                transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
+                &:hover
+                    stroke-width: 13
+                &:active
+                    stroke: rgba(0, 0, 0, 0.5)
+                    stroke-width: 3
+        &:disabled
+            transition-duration: 0.3s
+            opacity: 0.4
+            cursor: not-allowed
 
     .arrow
         stroke: black

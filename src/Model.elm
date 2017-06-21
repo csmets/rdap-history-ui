@@ -5,6 +5,7 @@ import Date exposing (Date)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
+import Keyboard
 import Navigation exposing (Location)
 import List.Extra exposing ((!!))
 
@@ -29,6 +30,7 @@ type Msg
     | Select Int
     | NavigateDiffForward
     | NavigateDiffBack
+    | KeyMsg Keyboard.KeyCode
 
 type Selected
     = Selected
@@ -66,4 +68,3 @@ history model = Maybe.andThen ( flip (!!) model.selected) <| Maybe.map .history 
 
 versions : Model -> Maybe (List Version)
 versions = Maybe.map .versions << history
-
