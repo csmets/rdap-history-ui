@@ -116,7 +116,7 @@ headerBar : Model -> List (Html Msg)
 headerBar model =
     [ nav []
         [ ul []
-            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_web.jpg" ] []]
+            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
             , li [] [ h1 [] [ text "Whowas" ] ]
             , li [] [ searchBox model ]
             ]
@@ -133,7 +133,7 @@ fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)
 
 subscriptions : Model -> Sub Msg
-subscriptions _ = Sub.batch [Keyboard.downs KeyMsg]
+subscriptions _ = Sub.batch [] -- [Keyboard.downs KeyMsg]
 
 searchForm : Decoder Msg
 searchForm = target (childNode 0 (Json.Decode.map StartSearch (Json.Decode.field "value" string)))
