@@ -27,9 +27,9 @@ type alias Context = {
 
 mkCtx : History -> Date -> Context
 mkCtx h modDate =
-    let splited = dropWhile (\v -> is After v.from modDate) h.versions
-        isVersion = splited !! 0
-        wasVersion = splited !! 1
+    let split = dropWhile (\v -> is After v.from modDate) h.versions
+        isVersion = split !! 0
+        wasVersion = split !! 1
         versions = Maybe.Extra.values [wasVersion, isVersion]
     in Context h wasVersion isVersion versions modDate
 
