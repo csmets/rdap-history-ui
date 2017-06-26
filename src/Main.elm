@@ -5,12 +5,11 @@ import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id, rel, href, src)
+import Html.Attributes exposing (class, value, id, rel, href, src, autofocus)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
 import Json.Decode exposing (Decoder, succeed, string, map)
-import Keyboard
 import List exposing (map, map2)
 import List.Extra exposing (last)
 import Navigation
@@ -66,7 +65,6 @@ update msg model = case msg of
         ( navigateForward model, Cmd.none)
     NavigateDiffBack ->
         ( navigateBack model, Cmd.none)
-    KeyMsg keycode -> (processKey model keycode, Cmd.none)
 
 upd : Model -> Model
 upd model = let viewModification = Maybe.map .from <| Maybe.andThen List.head <| versions model
@@ -90,12 +88,6 @@ navigateBack model = let versions = Maybe.andThen List.Extra.init <| Model.versi
                                                 <| Maybe.map ( List.filter (\v -> toTime v.from < toTime date) ) versions
                         in { model | viewModification = previous }
 
-processKey : Model -> Keyboard.KeyCode -> Model
-processKey model key =
-    case key of
-        39 -> navigateForward model   -- right arrow key
-        37 -> navigateBack model      -- left arrow key
-        _  -> model
 
 -- View
 
@@ -116,7 +108,7 @@ headerBar : Model -> List (Html Msg)
 headerBar model =
     [ nav []
         [ ul []
-            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_web.jpg" ] []]
+            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
             , li [] [ h1 [] [ text "Whowas" ] ]
             , li [] [ searchBox model ]
             ]
@@ -127,13 +119,13 @@ searchBox : Model -> Html Msg
 searchBox model =
     let cease = { stopPropagation = True, preventDefault = True }
     in form [ class "range", onWithOptions "submit" cease searchForm ]
-            [ input [ value model.resource ] [] ]
+            [ input [ value model.resource, autofocus True ] [] ]
 
 fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)
 
 subscriptions : Model -> Sub Msg
-subscriptions _ = Sub.batch [Keyboard.downs KeyMsg]
+subscriptions _ = Sub.none
 
 searchForm : Decoder Msg
 searchForm = target (childNode 0 (Json.Decode.map StartSearch (Json.Decode.field "value" string)))

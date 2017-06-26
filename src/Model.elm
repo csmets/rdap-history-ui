@@ -5,7 +5,6 @@ import Date exposing (Date)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
-import Keyboard
 import Navigation exposing (Location)
 import List.Extra exposing ((!!))
 
@@ -23,14 +22,13 @@ type alias Model =
     }
 
 type Msg
-    = Nada -- TODO remove this?
+    = Nada
     | UrlChange Location
     | Fetched (Result Http.Error Response)
     | StartSearch String
     | Select Int
     | NavigateDiffForward
     | NavigateDiffBack
-    | KeyMsg Keyboard.KeyCode
 
 type Selected
     = Selected

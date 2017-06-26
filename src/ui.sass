@@ -75,8 +75,10 @@ abbr
             font-size: large
 
 nav
-    background-color: #eee
+    color: white
+    background-color: #003D5E
     margin: 0
+    padding: 0.75em
 
     ul
         margin: 0
@@ -96,35 +98,77 @@ nav
 .historyPane
     +flex
     width: 100vw
-    border-top: 2px solid black
     min-width: 0
     min-height: 0
     height: 100%
 
     .objectList
+        background-color: #f4f4f4
         margin: 0
         padding: 1em 0 0 0
-        border-right: 2px solid black
-        font-family: $fixed-font
+        border-right: 1px solid #e5e3e3
         font-size: small
         list-style: none
         overflow-y: auto
+        cursor: default
         +flex-shrink(0)
 
         li
             padding: 0.25em 1em
             margin: 0
-            &.selected
-                background-color: #eef
             &:hover
-                background-color: #eee
+                background-color: #cfcfcf
+            &.selected
+                background-color: #a9c1d6
 
-    .detail
-        +flex
-        padding: 1em
-        background: #fafafa
+    .detailPanel
+        +flex(column)
+        //padding: 1em
+        //background: #fafafa
         width: 100%
         overflow: auto
+
+        .arrowPlaceholderBox
+            width: 60px
+            visibility: hidden
+
+    .versionDatesPanel
+        +flex
+        overflow: hidden
+        flex-wrap: nowrap
+        //justify-content: space-between
+        color: white
+        background-color: #006FAB
+
+        .versionDateItem
+            +flex
+            flex: 1
+            justify-content: center
+
+        .versionDateLeft
+            @extend .versionDateItem
+            span
+                margin-right: auto
+
+        .versionDateCenter
+            @extend .versionDateItem
+
+        .versionDateRight
+            @extend .versionDateItem
+            span
+                margin-left: auto
+        .moreIconSvg
+            fill: white
+            width: 0.8em
+            height: 0.8em
+            margin-right: 0.3em
+            margin-left: 0.3em
+
+    .detailBody
+        +flex
+        width: 100%
+        height: 100%
+        flex-wrap: nowrap
 
     .diffPanel
         flex: 1 1 auto
@@ -166,6 +210,7 @@ nav
     font-family: $detail-font
     table
         border-collapse: collapse
+        margin: auto
     td
         padding: 0 0.15em
     td:first-child
@@ -180,17 +225,15 @@ nav
 
 .versions
     +flex
-    overflow: auto
+    overflow: hidden
+    flex-wrp: nowrap
     height: 100%
-    justify-content: space-around
+    justify-content: center
 
     .version
+        flex: 1
         display: inline-block
         padding: 0 0.7em
-
-        .period
-            margin-left: 2em
-            font-weight: bold
 
     .version:first-child .diff
         border-left: none
@@ -251,3 +294,6 @@ nav
     +floaty("+")
 .diff-unchanged
     +floaty(" ")
+
+.logo
+    transform: scale(0.7, 0.7)
