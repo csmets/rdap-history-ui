@@ -107,19 +107,19 @@ nav
         margin: 0
         padding: 1em 0 0 0
         border-right: 1px solid #e5e3e3
-        Font-family: $fixed-font
         font-size: small
         list-style: none
         overflow-y: auto
+        cursor: default
         +flex-shrink(0)
 
         li
             padding: 0.25em 1em
             margin: 0
-            &.selected
-                background-color: #eef
             &:hover
-                background-color: #eee
+                background-color: #cfcfcf
+            &.selected
+                background-color: #a9c1d6
 
     .detailPanel
         +flex(column)

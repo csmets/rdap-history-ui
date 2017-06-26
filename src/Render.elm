@@ -103,7 +103,7 @@ viewVersion ctx was is =
             [ div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
 
 prettifyDate : Date -> Html a
-prettifyDate = text << formatUtc config "%a %d %b %Y"
+prettifyDate = text << formatUtc config "%d/%m/%Y %H:%M"
 
 arrow : String -> Html a
 arrow svgClass =
