@@ -2,11 +2,10 @@ module Main exposing (..)
 
 import Date exposing (fromString, toTime)
 import DOM exposing (target, childNode)
-import Dom
 import Either exposing (Either(..))
 import Guards exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (class, value, id, rel, href, src)
+import Html.Attributes exposing (class, value, id, rel, href, src, autofocus)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
@@ -55,7 +54,7 @@ update msg model = case msg of
     Nada ->
         ( model, Cmd.none )
     Fetched f ->
-        ( upd { model | response = fromFetch f, selected = 0 }, Dom.focus "input" |> Task.attempt (always Nada) )
+        ( upd { model | response = fromFetch f, selected = 0 }, Cmd.none )
     UrlChange l ->
         init l
     Select i ->
@@ -120,7 +119,7 @@ searchBox : Model -> Html Msg
 searchBox model =
     let cease = { stopPropagation = True, preventDefault = True }
     in form [ class "range", onWithOptions "submit" cease searchForm ]
-            [ input [ value model.resource, id "input" ] [] ]
+            [ input [ value model.resource, autofocus True ] [] ]
 
 fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)
