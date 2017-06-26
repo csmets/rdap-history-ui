@@ -28,16 +28,13 @@ mkCtx today history modDate = Context today history.identifier modDate
 
 viewAsList : Response -> Int -> Date -> List (Html Msg)
 viewAsList response idx modDate =
-    let history = response.history !! idx
-    in [ div [ class "historyPane" ]
-           [ ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) response.history
-           , div [ class "detail", id "content" ]
-               [ button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack history modDate) [arrow "leftArrow"] ,
-                 div [class "diffPanel"] ( firstVersion response.stamp history modDate ),
-                 button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd history modDate) [arrow "rightArrow"]
-               ]
-           ]
-       ]
+    [ div [ class "historyPane" ] ((objectListPanel response.history idx) ++ (detailPanel response idx modDate))]
+
+objectListPanel : List History -> Int -> List (Html Msg)
+objectListPanel history idx =
+    if length history <= 1
+    then []
+    else [ol [ class "objectList" ] <| List.indexedMap (viewSummary idx) history]
 
 viewSummary : Int -> Int -> History -> Html Msg
 viewSummary sel idx h = li
@@ -45,17 +42,20 @@ viewSummary sel idx h = li
         , onClick (Select idx) ]
         [ span [ class "handle" ] [ text h.identifier.handle ] ]
 
-firstVersion : Date -> Maybe History -> Date -> List (Html Msg)
-firstVersion now mh modDate = case mh of
+detailPanel : Response -> Int -> Date -> List (Html Msg)
+detailPanel response idx modDate =
+    let history = response.history !! idx
+    in [ div [ class "detail", id "content" ]
+          [ button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack history modDate) [arrow "leftArrow"] ,
+            div [class "diffPanel"] ( diffPanel response.stamp history modDate ),
+            button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd history modDate) [arrow "rightArrow"]
+          ]
+       ]
+
+diffPanel : Date -> Maybe History -> Date -> List (Html Msg)
+diffPanel now mh modDate = case mh of
     Nothing -> [ text "" ]
     Just h  -> [ {- viewTimeline now h, -} viewModification (mkCtx now h modDate) h.versions ]
-
--- TODO: remove?
-viewVersions : Context -> List Version -> Html Msg
-viewVersions ctx vs =
-    let versions = List.reverse <| List.sortBy (\v -> Date.toTime v.from) vs
-        paired   = List.map2 (,) (List.map Just (List.drop 1 versions) ++ [Nothing]) versions
-    in div [ class "versions" ] (List.reverse <| List.map (uncurry (viewVersion ctx)) paired)
 
 viewModification : Context -> List Version -> Html Msg
 viewModification ctx vs =
