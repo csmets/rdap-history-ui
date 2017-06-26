@@ -26,7 +26,7 @@ history = field "records" (list record)
         |> map (List.map toHistory)         -- covert to (List History)
 
 toHistory : ((ObjectClass, String), List Version) -> History
-toHistory ((oc, h), vs) = History (Identifier oc h) vs
+toHistory ((oc, h), vs) = History (Identifier oc h) (sortVersions vs)
 
 toComparable : (ObjectClass, String) -> (String, String)
 toComparable (c, h) = (toString c, h)
@@ -46,3 +46,6 @@ date : Decoder Date
 date = string |> andThen (\s -> case Date.fromString s of
     Ok d  -> succeed d
     Err e -> fail e)
+
+sortVersions : List Version -> List Version
+sortVersions = List.reverse << List.sortBy (\v -> Date.toTime v.from)
