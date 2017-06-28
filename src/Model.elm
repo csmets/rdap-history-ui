@@ -1,7 +1,9 @@
 module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected
-                      , history, versions)
+                      , history, versions, LockerState (..), NavigationDirection (..), getNextVersion
+                      , getPreviousVersion, getDistance)
 
-import Date exposing (Date)
+import Date exposing (Date, toTime)
+import Date.Extra.Compare exposing (Compare2(..), is)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
@@ -17,7 +19,8 @@ type alias Model =
     { resource : String
     , response : Either String Response
     , selected : Int
-    , viewModification : Maybe Date
+    , displayedVersions : (Maybe Version, Maybe Version)
+    , navigationLocks : (LockerState, LockerState)
     , redraw : Bool
     }
 
@@ -27,8 +30,8 @@ type Msg
     | Fetched (Result Http.Error Response)
     | StartSearch String
     | Select Int
-    | NavigateDiffForward
-    | NavigateDiffBack
+    | NavigateDiff NavigationDirection
+    | FlipNavLock NavigationDirection
 
 type Selected
     = Selected
@@ -59,6 +62,9 @@ type alias Version =
     , object : Value
     }
 
+type NavigationDirection = Fwd | Bkwd
+
+type LockerState = Locked | Unlocked
 
 -- Utility methods
 history : Model -> Maybe History
@@ -66,3 +72,12 @@ history model = Maybe.andThen ( flip (!!) model.selected) <| Maybe.map .history 
 
 versions : Model -> Maybe (List Version)
 versions = Maybe.map .versions << history
+
+getNextVersion : Version -> List Version -> Maybe Version
+getNextVersion current = List.Extra.last << List.Extra.takeWhile (\v -> is After v.from current.from)
+
+getPreviousVersion : Version -> List Version -> Maybe Version
+getPreviousVersion current = List.head << List.Extra.dropWhile (\v -> is SameOrAfter v.from current.from)
+
+getDistance : Version -> Version -> List Version -> Maybe Int
+getDistance v1 v2 vs = Maybe.map2 (-) (List.Extra.elemIndex v1 vs) (List.Extra.elemIndex v2 vs)

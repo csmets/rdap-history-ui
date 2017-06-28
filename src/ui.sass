@@ -4,6 +4,7 @@ $fixed-font: 'Inconsolata', monospace
 $title-font: 'Nunito', 'Arial', sans-serif
 $detail-font: 'Nunito', 'Arial', sans-serif
 $existed: rgb(151, 223, 129)
+$lockedButtonColour: #732a2a
 
 =prefixed($name, $value)
     -webkit-#{$name}: $value
@@ -219,7 +220,23 @@ nav
         width: 30px
         background-color: transparent
         border: none
+        outline: none
+        transition-duration: 1s
+
+
+    .lockedButton
+        @extend .lockButton
+        fill: $lockedButtonColour
+
+        &:hover
+            fill: black
+
+    .unlockedButton
+        @extend .lockButton
         fill: black
+
+        &:hover
+            fill: $lockedButtonColour
 
 .rdap
     // padding: 0 0.5em

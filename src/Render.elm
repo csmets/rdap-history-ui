@@ -12,6 +12,7 @@ import List.Extra exposing ((!!), dropWhile, last)
 import Maybe.Extra exposing (isJust, (?))
 import Svg exposing (svg, path)
 import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
+import Tuple exposing (..)
 
 import Model exposing (..)
 import Rdap
@@ -19,26 +20,23 @@ import Rdap
 -- Rendering happens inside a context
 type alias Context = {
     history : History,
-    wasVersion : Maybe Version,
-    isVersion : Maybe Version,
+    fromVersion : Maybe Version,
+    toVersion : Maybe Version,
     versions : List Version,
-    modificationDate : Date
+    navigationLocks : (LockerState, LockerState)
 }
 
-mkCtx : History -> Date -> Context
-mkCtx h modDate =
-    let split = dropWhile (\v -> is After v.from modDate) h.versions
-        isVersion = split !! 0
-        wasVersion = split !! 1
-        versions = Maybe.Extra.values [wasVersion, isVersion]
-    in Context h wasVersion isVersion versions modDate
+mkCtx : History -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> Context
+mkCtx h (fromVersion, toVersion) navigationLockers =
+    let versions = Maybe.Extra.values [fromVersion, toVersion]
+    in Context h fromVersion toVersion versions navigationLockers
 
-viewAsList : Response -> Int -> Date -> List (Html Msg)
-viewAsList response idx modDate =
+viewAsList : Response -> Int -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> List (Html Msg)
+viewAsList response idx displayedVersions navigationLocks =
     let history = response.history !! idx
     in case history of
            Nothing -> [] -- TODO: will never happen. deal with it differently?
-           Just h -> let ctx = mkCtx h modDate
+           Just h -> let ctx = mkCtx h displayedVersions navigationLocks
                      in [div [class "historyPane"] ((objectListPanel response.history idx) ++ (detailPanel ctx))]
 
 -- Selection Panel
@@ -60,12 +58,12 @@ viewSummary sel idx h = li
 detailPanel : Context -> List (Html Msg)
 detailPanel ctx =
     [div [class "detailPanel"] [
-        navPanel ctx Left,
+        navPanel ctx Bkwd,
         div [class "detailCenterPanel"] [
-          versionDatesPanel ctx.versions,
+          versionDatesPanel ctx,
           div [class "diffPanel"] [diffPanel ctx]
         ],
-        navPanel ctx Right
+        navPanel ctx Fwd
     ]]
 
 diffPanel : Context -> Html Msg
@@ -73,36 +71,48 @@ diffPanel ctx =
     let paired   = List.map2 (,) (Nothing :: List.map Just ctx.versions) ctx.versions
     in div [ class "versions" ] (List.map (uncurry (viewVersion ctx)) paired)
 
-versionDatesPanel : List Version -> Html Msg
-versionDatesPanel vs =
-    case vs of
+versionDatesPanel : Context -> Html Msg
+versionDatesPanel ctx =
+    case ctx.versions of
         []            -> text ""
         v :: []       -> div [class "versionDatesPanel"] [
-                                   div [] ((createDateLabel (Just v.from)) ++ [text " >"]),
-                                   div [] ([text "< "] ++ createDateLabel v.until)
+                                   div [class "versionDateLeft"] ((createDateLabel (Just v.from)) ++ [text " >"]),
+                                   div [class "versionDateRight"] ([text "< "] ++ createDateLabel v.until)
                                 ]
-        v1 :: v2 :: _ -> div [class "versionDatesPanel"] [
+        v1 :: v2 :: _ ->
+            let versionsInBetween = (+) (-1) <| Maybe.withDefault 0 <| getDistance v1 v2 ctx.history.versions
+                middleLabel = if versionsInBetween == 0
+                              then createDateLabel (Just v2.from)
+                              else [text <| (toString versionsInBetween) ++
+                                        " version" ++ (if versionsInBetween > 1 then "s" else "")]
+            in div [class "versionDatesPanel"] [
                                    div [class "versionDateLeft"] [span []
                                                                       ((createDateLabel (Just v1.from)) ++ [text " >"])],
-                                   div [class "versionDateCenter"] [span [] ([text "< "] ++
-                                                                        createDateLabel (Just v2.from) ++ [text " >"])],
+                                   div [class "versionDateCenter"] [span [] ([text "< "] ++ middleLabel ++ [text " >"])],
                                    div [class "versionDateRight"] [span [] ([text "< "] ++ createDateLabel v2.until)]
                                 ]
 
-navPanel : Context -> NavigationSide -> Html Msg
-navPanel ctx side =
-    let arrowButton = case side of
-                          Left -> button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack ctx) [arrow "leftArrow"]
-                          Right -> button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd ctx) [arrow "rightArrow"]
+navPanel : Context -> NavigationDirection -> Html Msg
+navPanel ctx direction =
+    let arrowButton =
+            case direction of
+                Bkwd -> button ([class "arrowButton", onClick (NavigateDiff Bkwd)] ++ checkNav ctx direction)
+                        [arrow "leftArrow"]
+                Fwd -> button ([class "arrowButton", onClick (NavigateDiff Fwd)] ++ checkNav ctx direction)
+                       [arrow "rightArrow"]
     in div [class "navPanel"] [
            div [class "versionDatesPanel"] [],
            div [class "navPanelItem"] [],
            arrowButton,
-           div [class "navPanelItem"] [lockButton ctx side]
+           div [class "navPanelItem"] [lockButton ctx direction]
         ]
 
-lockButton : Context -> NavigationSide -> Html Msg
-lockButton x y = button [class "lockButton"] [lockerIcon Locked "lockedIcon"]
+lockButton : Context -> NavigationDirection -> Html Msg
+lockButton ctx direction =
+    let f = if direction == Fwd then second else first
+        state = f ctx.navigationLocks
+        buttonClass = if state == Locked then "lockedButton" else "unlockedButton"
+    in button [class buttonClass, onClick (FlipNavLock direction)] [lockerIcon state "lockedIcon"]
 
 viewVersion : Context -> Maybe Version -> Version -> Html Msg
 viewVersion ctx was is =
@@ -120,18 +130,12 @@ arrow svgClass =
         [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
                    Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
 
-checkNavBack : Context -> List (Html.Attribute Msg)
-checkNavBack ctx = checkNav ctx.history ctx.modificationDate (\h -> h !! ((length h) - 2))
-
-checkNavFwd : Context -> List (Html.Attribute Msg)
-checkNavFwd ctx = checkNav ctx.history ctx.modificationDate List.head
-
-checkNav : History -> Date -> (List Version -> Maybe Version) -> List (Html.Attribute Msg)
-checkNav history modDate f =
-    if Maybe.withDefault False <| Maybe.map ((/=) (Date.toTime modDate)) <| Maybe.map (Date.toTime << .from)
-        <| f history.versions
-    then []
-    else [disabled True]
+checkNav : Context -> NavigationDirection -> List (Html.Attribute a)
+checkNav ctx direction =
+    let f = if direction == Fwd then List.head else List.Extra.last
+        v = if direction == Fwd then ctx.toVersion else ctx.fromVersion
+        disable = Maybe.map2 (is Same) (Maybe.map .from v) (Maybe.map .from <| f ctx.history.versions)
+    in [disabled <| Maybe.withDefault True disable]
 
 createDateLabel : Maybe Date -> List (Html a)
 createDateLabel md =
@@ -159,13 +163,17 @@ moreIcon svgClass tooltipText =
             ]
     ]
 
+-- Note: We need to change the mask name otherwise Chrome won't update the icon. Only updating the mask's path
+--       is not enough.
 lockerIcon : LockerState -> String -> Html a
 lockerIcon state svgClass =
     let maskPathDraw = case state of
                            Locked   -> "M 35 50 v -20 c 0 -20 30 -20 30 0 v 20"
                            Unlocked -> "M 35 50 v -20 c 0 -20 30 -20 30 0"
+        maskName = toString state
+        iconTitle = if state == Locked then "Unlock version" else "Lock version"
     in svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-           Svg.defs [] [Svg.mask [Svg.Attributes.id "lockMask"] [
+           Svg.defs [] [Svg.mask [Svg.Attributes.id maskName] [ 
                    Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
                                  Svg.Attributes.height "100", fill "white"] [],
                    Svg.rect [Svg.Attributes.x "25", Svg.Attributes.y "45", Svg.Attributes.width "50",
@@ -176,10 +184,5 @@ lockerIcon state svgClass =
                    ]
              ],
             Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                           Svg.Attributes.mask "url(#lockMask)"] [Svg.title [] [text "Lock version"]]
+                           Svg.Attributes.mask <| "url(#" ++ maskName ++ ")"] [Svg.title [] [text iconTitle]]
        ]
-
-
-type NavigationSide = Left | Right
-
-type LockerState = Locked | Unlocked

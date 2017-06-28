@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Date exposing (fromString, toTime)
+import Date.Extra.Compare exposing (Compare2(..), is)
 import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
@@ -18,6 +19,7 @@ import Platform.Cmd
 import Regex
 import String
 import Task
+import Tuple exposing (..)
 
 import Model exposing (..)
 import Decode exposing (history)
@@ -26,7 +28,7 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Searching…") 0 Nothing False, search resource )
+            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) False, search resource )
 
 errMsg : Http.Error -> String
 errMsg err = case err of
@@ -61,32 +63,57 @@ update msg model = case msg of
         ( upd { model | selected = i }, Cmd.none )
     StartSearch s ->
         ( model, Navigation.newUrl ("#" ++ s) )
-    NavigateDiffForward ->
-        ( navigateForward model, Cmd.none)
-    NavigateDiffBack ->
-        ( navigateBack model, Cmd.none)
+    NavigateDiff direction -> case direction of
+                                  Bkwd -> ( navigateBack model, Cmd.none)
+                                  Fwd  -> ( navigateForward model, Cmd.none)
+    FlipNavLock direction ->
+        (flipNavigationLock model direction, Cmd.none)
 
 upd : Model -> Model
-upd model = let viewModification = Maybe.map .from <| Maybe.andThen List.head <| versions model
-            in { model | redraw = not model.redraw, viewModification = viewModification }
+upd model =
+    let displayedVersions = case Maybe.withDefault [] (versions model) of
+                               []            -> (Nothing, Nothing)
+                               v :: []       -> (Just v, Nothing)
+                               v1 :: v2 :: _ -> (Just v2, Just v1)
+            in { model | redraw = not model.redraw, displayedVersions = displayedVersions }
 
 navigateForward : Model -> Model
-navigateForward model = let versions = Model.versions model
-                            next = case model.viewModification of
-                                       Nothing   -> Nothing
-                                       Just date -> or (Maybe.map .from <| Maybe.andThen last
-                                                            <| Maybe.map (List.filter (\v -> toTime v.from > toTime date)) versions)
-                                                       (Just date)
-                        in { model | viewModification = next }
+navigateForward model =
+    if (List.length <| Maybe.withDefault [] (versions model)) <= 2 ||
+        Maybe.map2 (is Same) (Maybe.map .from <| Maybe.Extra.join <| Maybe.map List.head (versions model))
+            (Maybe.map .from <| second model.displayedVersions) == Just True
+    then model
+    else let versions = Maybe.withDefault [] <| Model.versions model
+             (currentLeftVersion, currentRightVersion) = model.displayedVersions
+             rightVersion = Maybe.Extra.join <| Maybe.map2 getNextVersion currentRightVersion <| Just versions
+             leftVersion = let nextLeftVersion = Maybe.Extra.join <| Maybe.map2 getNextVersion currentLeftVersion <| Just versions
+                           in if first model.navigationLocks == Locked || nextLeftVersion == rightVersion
+                              then currentLeftVersion
+                              else nextLeftVersion
+         in { model | displayedVersions = (leftVersion, rightVersion) }
 
 navigateBack : Model -> Model
-navigateBack model = let versions = Maybe.andThen List.Extra.init <| Model.versions model
-                         previous = case model.viewModification of
-                                        Nothing   -> Nothing
-                                        Just date -> or (getPrevious date) (Just date)
-                         getPrevious date = Maybe.map .from <| Maybe.andThen List.head
-                                                <| Maybe.map ( List.filter (\v -> toTime v.from < toTime date) ) versions
-                        in { model | viewModification = previous }
+navigateBack model =
+    if (List.length <| Maybe.withDefault [] (versions model)) <= 2 ||
+        Maybe.map2 (is Same) (Maybe.map .from <| Maybe.Extra.join <| Maybe.map List.Extra.last (versions model))
+            (Maybe.map .from <| first model.displayedVersions) == Just True
+    then model
+    else let versions = Maybe.withDefault [] <| Model.versions model
+             (currentLeftVersion, currentRightVersion) = model.displayedVersions
+             leftVersion =  Maybe.Extra.join <| Maybe.map2 getPreviousVersion currentLeftVersion <| Just versions
+             rightVersion = let nextRightVersion = Maybe.Extra.join <| Maybe.map2 getPreviousVersion currentRightVersion <| Just versions
+                            in if second model.navigationLocks == Locked || nextRightVersion == leftVersion
+                               then currentRightVersion
+                               else nextRightVersion
+         in { model | displayedVersions = (leftVersion, rightVersion) }
+
+flipNavigationLock : Model -> NavigationDirection -> Model
+flipNavigationLock model direction =
+    let flip state = if state == Locked then Unlocked else Locked
+        (bkwdState, fwdState) = model.navigationLocks
+    in case direction of
+           Fwd  -> {model | navigationLocks = (bkwdState, flip fwdState)}
+           Bkwd -> {model | navigationLocks = (flip bkwdState, fwdState)}
 
 
 -- View
@@ -98,7 +125,7 @@ view_ : Model -> Html Msg
 view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
-        Right response -> viewAsList response model.selected (Maybe.withDefault response.stamp model.viewModification)
+        Right response -> viewAsList response model.selected model.displayedVersions model.navigationLocks
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)
