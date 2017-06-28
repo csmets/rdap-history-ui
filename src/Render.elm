@@ -59,16 +59,14 @@ viewSummary sel idx h = li
 
 detailPanel : Context -> List (Html Msg)
 detailPanel ctx =
-    [div [class "detailPanel"]
-          [versionDatesPanel ctx.versions, div [class "detailBody"]
-              [arrowPlaceholderBox,
-               button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack ctx) [arrow "leftArrow"] ,
-               div [class "diffPanel"] [diffPanel ctx],
-               button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd ctx) [arrow "rightArrow"],
-               arrowPlaceholderBox
-              ]
-          ]
-    ]
+    [div [class "detailPanel"] [
+        navPanel ctx Left,
+        div [class "detailCenterPanel"] [
+          versionDatesPanel ctx.versions,
+          div [class "diffPanel"] [diffPanel ctx]
+        ],
+        navPanel ctx Right
+    ]]
 
 diffPanel : Context -> Html Msg
 diffPanel ctx =
@@ -80,20 +78,31 @@ versionDatesPanel vs =
     case vs of
         []            -> text ""
         v :: []       -> div [class "versionDatesPanel"] [
-                                   arrowPlaceholderBox,
                                    div [] ((createDateLabel (Just v.from)) ++ [text " >"]),
-                                   div [] ([text "< "] ++ createDateLabel v.until),
-                                   arrowPlaceholderBox
+                                   div [] ([text "< "] ++ createDateLabel v.until)
                                 ]
         v1 :: v2 :: _ -> div [class "versionDatesPanel"] [
-                                   arrowPlaceholderBox,
                                    div [class "versionDateLeft"] [span []
                                                                       ((createDateLabel (Just v1.from)) ++ [text " >"])],
                                    div [class "versionDateCenter"] [span [] ([text "< "] ++
                                                                         createDateLabel (Just v2.from) ++ [text " >"])],
-                                   div [class "versionDateRight"] [span [] ([text "< "] ++ createDateLabel v2.until)],
-                                   arrowPlaceholderBox
+                                   div [class "versionDateRight"] [span [] ([text "< "] ++ createDateLabel v2.until)]
                                 ]
+
+navPanel : Context -> NavigationSide -> Html Msg
+navPanel ctx side =
+    let arrowButton = case side of
+                          Left -> button ([class "arrowButton", onClick NavigateDiffBack] ++ checkNavBack ctx) [arrow "leftArrow"]
+                          Right -> button ([class "arrowButton", onClick NavigateDiffForward] ++ checkNavFwd ctx) [arrow "rightArrow"]
+    in div [class "navPanel"] [
+           div [class "versionDatesPanel"] [],
+           div [class "navPanelItem"] [],
+           arrowButton,
+           div [class "navPanelItem"] [lockButton ctx side]
+        ]
+
+lockButton : Context -> NavigationSide -> Html Msg
+lockButton x y = button [class "lockButton"] [lockerIcon Locked "lockedIcon"]
 
 viewVersion : Context -> Maybe Version -> Version -> Html Msg
 viewVersion ctx was is =
@@ -110,9 +119,6 @@ arrow svgClass =
     svg [width "50", height "100", viewBox "0 0 50 100", Svg.Attributes.class svgClass]
         [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
                    Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
-
-arrowPlaceholderBox : Html a
-arrowPlaceholderBox = div [class "arrowPlaceholderBox"] []
 
 checkNavBack : Context -> List (Html.Attribute Msg)
 checkNavBack ctx = checkNav ctx.history ctx.modificationDate (\h -> h !! ((length h) - 2))
@@ -133,7 +139,6 @@ createDateLabel md =
         Nothing -> [text "Present"]
         Just d  -> [prettifyDate d, moreIcon "moreIconSvg" (toString d)]
 
-
 moreIcon : String -> String -> Html a
 moreIcon svgClass tooltipText =
     svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
@@ -153,3 +158,28 @@ moreIcon svgClass tooltipText =
                 Svg.title [] [text tooltipText]
             ]
     ]
+
+lockerIcon : LockerState -> String -> Html a
+lockerIcon state svgClass =
+    let maskPathDraw = case state of
+                           Locked   -> "M 35 50 v -20 c 0 -20 30 -20 30 0 v 20"
+                           Unlocked -> "M 35 50 v -20 c 0 -20 30 -20 30 0"
+    in svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
+           Svg.defs [] [Svg.mask [Svg.Attributes.id "lockMask"] [
+                   Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
+                                 Svg.Attributes.height "100", fill "white"] [],
+                   Svg.rect [Svg.Attributes.x "25", Svg.Attributes.y "45", Svg.Attributes.width "50",
+                                 Svg.Attributes.height "30", Svg.Attributes.rx "10", Svg.Attributes.ry "10",
+                                 fill "black"] [],
+                   Svg.path [Svg.Attributes.d maskPathDraw, strokeWidth "6", strokeLinecap "round",
+                                 strokeLinejoin "round", fill "transparent", Svg.Attributes.stroke "black"] []
+                   ]
+             ],
+            Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
+                           Svg.Attributes.mask "url(#lockMask)"] [Svg.title [] [text "Lock version"]]
+       ]
+
+
+type NavigationSide = Left | Right
+
+type LockerState = Locked | Unlocked
