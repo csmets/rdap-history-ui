@@ -1,5 +1,28 @@
 @charset "UTF-8";
 @import url("https://fonts.googleapis.com/css?family=Inconsolata|Nunito");
+@keyframes bouncer {
+  from {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.4);
+    margin-left: 90px; }
+  60% {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.4);
+    margin-left: 30px; }
+  85% {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.4);
+    margin-left: 15px; }
+  95% {
+    animation-timing-function: cubic-bezier(0.5, 0, 1, 0.4);
+    margin-left: 5px; }
+  45%, 75%, 90%, to {
+    animation-timing-function: cubic-bezier(0, 0.25, 0.5, 1);
+    margin-left: 0; } }
+
+@keyframes vanish {
+  0% {
+    opacity: 1; }
+  100% {
+    opacity: 0; } }
+
 pre {
   font-family: "Inconsolata", monospace; }
 
@@ -24,21 +47,30 @@ abbr {
   height: 100vh;
   width: 100vw; }
   .main h1 {
-    margin: 0.25em 2em; }
+    margin: 0 2em 0.25em 0; }
   .main .range {
-    margin: 0 0 0.25em 4em; }
+    margin: 0 0 0.25em 0.2em; }
+    .main .range::after {
+      content: "  ⟵ enter IP address or handle";
+      color: #999;
+      animation: bouncer 2s, vanish 0.5s ease 10s forwards; }
     .main .range input {
       font-size: large; }
 
 nav {
-  background-color: #eee;
-  margin: 0; }
+  color: white;
+  background-color: #003D5E;
+  margin: 0;
+  padding: 0.75em; }
   nav ul {
     margin: 0;
     padding: 0; }
     nav ul li {
       display: inline-block;
       list-style-type: none; }
+      nav ul li img {
+        margin-bottom: -0.9em;
+        height: 2.7em; }
 
 .object {
   margin: 5em; }
@@ -54,18 +86,18 @@ nav {
   -ms-flex-direction: row;
   flex-direction: row;
   width: 100vw;
-  border-top: 2px solid black;
   min-width: 0;
   min-height: 0;
   height: 100%; }
   .historyPane .objectList {
+    background-color: #f4f4f4;
     margin: 0;
     padding: 1em 0 0 0;
-    border-right: 2px solid black;
-    font-family: "Inconsolata", monospace;
+    border-right: 1px solid #e5e3e3;
     font-size: small;
     list-style: none;
-    overflow-y: scroll;
+    overflow-y: auto;
+    cursor: default;
     -webkit-flex-shrink: 0;
     -moz-flex-shrink: 0;
     -ms-flex-shrink: 0;
@@ -73,21 +105,106 @@ nav {
     .historyPane .objectList li {
       padding: 0.25em 1em;
       margin: 0; }
-      .historyPane .objectList li.selected {
-        background-color: #eef; }
       .historyPane .objectList li:hover {
-        background-color: #eee; }
-  .historyPane .detail {
-    padding: 1em;
-    background: #fafafa;
+        background-color: #cfcfcf; }
+      .historyPane .objectList li.selected {
+        background-color: #a9c1d6; }
+  .historyPane .detailPanel {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -moz-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
     width: 100%;
-    overflow: hidden; }
+    overflow: auto; }
+    .historyPane .detailPanel .arrowPlaceholderBox {
+      width: 60px;
+      visibility: hidden; }
+  .historyPane .versionDatesPanel {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+    -moz-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    overflow: hidden;
+    flex-wrap: nowrap;
+    color: white;
+    background-color: #006FAB; }
+    .historyPane .versionDatesPanel .versionDateItem, .historyPane .versionDatesPanel .versionDateLeft, .historyPane .versionDatesPanel .versionDateCenter, .historyPane .versionDatesPanel .versionDateRight {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -moz-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-flex-direction: row;
+      -moz-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      flex: 1;
+      justify-content: center; }
+    .historyPane .versionDatesPanel .versionDateLeft span {
+      margin-right: auto; }
+    .historyPane .versionDatesPanel .versionDateRight span {
+      margin-left: auto; }
+    .historyPane .versionDatesPanel .moreIconSvg {
+      fill: white;
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: 0.3em;
+      margin-left: 0.3em; }
+  .historyPane .detailBody {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: row;
+    -moz-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    flex-wrap: nowrap; }
+  .historyPane .diffPanel {
+    flex: 1 1 auto; }
+  .historyPane .arrowButton {
+    flex: 0 1 auto;
+    align-self: center;
+    border: none;
+    background: transparent;
+    outline: none; }
+    .historyPane .arrowButton:enabled {
+      transition-duration: 0.3s; }
+      .historyPane .arrowButton:enabled path {
+        transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out; }
+        .historyPane .arrowButton:enabled path:hover {
+          stroke-width: 13; }
+        .historyPane .arrowButton:enabled path:active {
+          stroke: rgba(0, 0, 0, 0.5);
+          stroke-width: 3; }
+    .historyPane .arrowButton:disabled {
+      transition-duration: 0.3s;
+      opacity: 0.4;
+      cursor: not-allowed; }
+  .historyPane .arrow, .historyPane .rightArrow, .historyPane .leftArrow {
+    stroke: black; }
+  .historyPane .leftArrow {
+    transform: rotate(180deg); }
 
 .rdap {
   padding-top: 0.5em;
   font-family: "Nunito", "Arial", sans-serif; }
   .rdap table {
-    border-collapse: collapse; }
+    border-collapse: collapse;
+    margin: auto; }
   .rdap td {
     padding: 0 0.15em; }
   .rdap td:first-child {
@@ -100,15 +217,23 @@ nav {
     padding: 0.2em; }
 
 .versions {
-  white-space: nowrap;
-  overflow: scroll;
-  height: 100%; }
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -moz-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  overflow: hidden;
+  flex-wrp: nowrap;
+  height: 100%;
+  justify-content: center; }
   .versions .version {
+    flex: 1;
     display: inline-block;
     padding: 0 0.7em; }
-    .versions .version .period {
-      margin-left: 2em;
-      font-weight: bold; }
   .versions .version:first-child .diff {
     border-left: none; }
   .versions .diff {
@@ -171,3 +296,6 @@ nav {
   content: " ";
   float: left;
   text-align: left; }
+
+.logo {
+  transform: scale(0.7, 0.7); }
