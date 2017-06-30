@@ -1,15 +1,15 @@
 module Render exposing (viewAsList)
 
 import Date exposing (Date)
-import Date.Extra.Compare exposing (Compare2(..), is)
 import Date.Extra.Config.Config_en_au exposing (config)
 import Date.Extra.Format exposing (formatUtc, isoDateFormat)
-import Html exposing (..)
+import Html exposing (div, Html, ol, li, span, text, button)
 import Html.Attributes exposing (class, value, id, title, disabled, style, src)
 import Html.Events exposing (onWithOptions, onInput, onClick)
-import List exposing (length)
+import List exposing (length, head)
 import List.Extra exposing ((!!), dropWhile, last)
-import Maybe.Extra exposing (isJust, (?))
+import Maybe exposing (map, map2, map3, withDefault)
+import Maybe.Extra exposing (isJust, (?), join)
 import Svg exposing (svg, path)
 import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
 import Tuple exposing (..)
@@ -22,7 +22,7 @@ type alias Context = {
     history : History,
     fromVersion : Maybe Version,
     toVersion : Maybe Version,
-    versions : List Version,
+    versions : List Version, -- TODO: rename this since it can be mistakely taken as all versions
     navigationLocks : (LockerState, LockerState)
 }
 
@@ -76,18 +76,18 @@ versionDatesPanel ctx =
     case ctx.versions of
         []            -> text ""
         v :: []       -> div [class "versionDatesPanel"] [
-                                   div [class "versionDateLeft"] ((createDateLabel (Just v.from)) ++ [text " >"]),
-                                   div [class "versionDateRight"] ([text "< "] ++ createDateLabel v.until)
-                                ]
+                                div [class "versionDateLeft"] [span [] ((createDateLabel (Just v.from)) ++ [text " >"])],
+                                div [class "versionDateRight"] [span []([text "< "] ++ createDateLabel v.until)]
+                            ]
         v1 :: v2 :: _ ->
-            let versionsInBetween = (+) (-1) <| Maybe.withDefault 0 <| getDistance v1 v2 ctx.history.versions
+            let versionsInBetween = (+) (-1) <| withDefault 0 <| getDistance v1 v2 ctx.history.versions
                 middleLabel = if versionsInBetween == 0
                               then createDateLabel (Just v2.from)
                               else [text <| (toString versionsInBetween) ++
                                         " version" ++ (if versionsInBetween > 1 then "s" else "")]
             in div [class "versionDatesPanel"] [
-                                   div [class "versionDateLeft"] [span []
-                                                                      ((createDateLabel (Just v1.from)) ++ [text " >"])],
+                                   div [class "versionDateLeft"]
+                                       [span [] ((createDateLabel (Just v1.from)) ++ [text " >"])],
                                    div [class "versionDateCenter"] [span [] ([text "< "] ++ middleLabel ++ [text " >"])],
                                    div [class "versionDateRight"] [span [] ([text "< "] ++ createDateLabel v2.until)]
                                 ]
@@ -96,10 +96,10 @@ navPanel : Context -> NavigationDirection -> Html Msg
 navPanel ctx direction =
     let arrowButton =
             case direction of
-                Bkwd -> button ([class "arrowButton", onClick (NavigateDiff Bkwd)] ++ checkNav ctx direction)
-                        [arrow "leftArrow"]
-                Fwd -> button ([class "arrowButton", onClick (NavigateDiff Fwd)] ++ checkNav ctx direction)
-                       [arrow "rightArrow"]
+                Bkwd -> button [class "arrowButton", onClick (NavigateDiff Bkwd),
+                                    disabled <| checkNavDisabled ctx direction] [arrow "leftArrow"]
+                Fwd -> button [class "arrowButton", onClick (NavigateDiff Fwd),
+                                    disabled <| checkNavDisabled ctx direction] [arrow "rightArrow"]
     in div [class "navPanel"] [
            div [class "versionDatesPanel"] [],
            div [class "navPanelItem"] [],
@@ -108,15 +108,15 @@ navPanel ctx direction =
         ]
 
 lockButton : Context -> NavigationDirection -> Html Msg
-lockButton ctx direction =
-    let f = if direction == Fwd then second else first
+lockButton ctx dir =
+    let f = if dir == Fwd then second else first
         state = f ctx.navigationLocks
         buttonClass = if state == Locked then "lockedButton" else "unlockedButton"
-    in button [class buttonClass, onClick (FlipNavLock direction)] [lockerIcon state "lockedIcon"]
+    in button [class buttonClass, onClick (FlipNavLock dir)] [lockerIcon state <| "lockedIcon" ++ (toString dir)]
 
 viewVersion : Context -> Maybe Version -> Version -> Html Msg
 viewVersion ctx was is =
-    let rWas = Maybe.map (Rdap.render ctx.history.identifier << .object) was
+    let rWas = map (Rdap.render ctx.history.identifier << .object) was
         rIs  = Rdap.render ctx.history.identifier is.object
     in  div [ class "version" ]
             [ div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
@@ -130,23 +130,19 @@ arrow svgClass =
         [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
                    Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
 
-checkNav : Context -> NavigationDirection -> List (Html.Attribute a)
-checkNav ctx direction =
-    let f = if direction == Fwd then List.head else List.Extra.last
-        v = if direction == Fwd then ctx.toVersion else ctx.fromVersion
-        disable = Maybe.map2 (is Same) (Maybe.map .from v) (Maybe.map .from <| f ctx.history.versions)
-    in [disabled <| Maybe.withDefault True disable]
-
 createDateLabel : Maybe Date -> List (Html a)
 createDateLabel md =
     case md of
         Nothing -> [text "Present"]
         Just d  -> [prettifyDate d, moreIcon "moreIconSvg" (toString d)]
 
+
+ -- Icons
+
 moreIcon : String -> String -> Html a
 moreIcon svgClass tooltipText =
     svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-        Svg.defs [] [Svg.mask [Svg.Attributes.id "masking"] [
+        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
                 Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
                               Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
                 Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
@@ -158,7 +154,7 @@ moreIcon svgClass tooltipText =
                 ]
           ],
         Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                        Svg.Attributes.mask "url(#masking)"] [
+                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] [
                 Svg.title [] [text tooltipText]
             ]
     ]
@@ -170,10 +166,10 @@ lockerIcon state svgClass =
     let maskPathDraw = case state of
                            Locked   -> "M 35 50 v -20 c 0 -20 30 -20 30 0 v 20"
                            Unlocked -> "M 35 50 v -20 c 0 -20 30 -20 30 0"
-        maskName = toString state
+        maskName = toString state ++ svgClass
         iconTitle = if state == Locked then "Unlock version" else "Lock version"
     in svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-           Svg.defs [] [Svg.mask [Svg.Attributes.id maskName] [ 
+           Svg.defs [] [Svg.mask [Svg.Attributes.id maskName] [
                    Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
                                  Svg.Attributes.height "100", fill "white"] [],
                    Svg.rect [Svg.Attributes.x "25", Svg.Attributes.y "45", Svg.Attributes.width "50",
@@ -186,3 +182,10 @@ lockerIcon state svgClass =
             Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
                            Svg.Attributes.mask <| "url(#" ++ maskName ++ ")"] [Svg.title [] [text iconTitle]]
        ]
+
+
+ -- Utility methods
+
+checkNavDisabled : Context -> NavigationDirection -> Bool
+checkNavDisabled ctx dir =
+    not <| Model.canNavigate ctx.history.versions (ctx.fromVersion, ctx.toVersion) dir ctx.navigationLocks

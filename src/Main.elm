@@ -1,25 +1,24 @@
 module Main exposing (..)
 
 import Date exposing (fromString, toTime)
-import Date.Extra.Compare exposing (Compare2(..), is)
 import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
-import Html exposing (..)
+import Html exposing (nav, div, node, Html, li, h1, text, img, form, input, ul)
 import Html.Attributes exposing (class, value, id, rel, href, src, autofocus)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
 import Http
-import Json.Decode exposing (Decoder, succeed, string, map)
-import List exposing (map, map2)
-import List.Extra exposing (last)
+import Json.Decode exposing (Decoder, succeed, string)
+import List exposing (head, reverse)
 import Navigation
-import Maybe.Extra exposing (or)
+import Maybe exposing (withDefault, map, map2)
+import Maybe.Extra exposing (or, join)
 import Platform.Cmd
 import Regex
 import String
 import Task
-import Tuple exposing (..)
+import Tuple2
 
 import Model exposing (..)
 import Decode exposing (history)
@@ -63,57 +62,51 @@ update msg model = case msg of
         ( upd { model | selected = i }, Cmd.none )
     StartSearch s ->
         ( model, Navigation.newUrl ("#" ++ s) )
-    NavigateDiff direction -> case direction of
-                                  Bkwd -> ( navigateBack model, Cmd.none)
-                                  Fwd  -> ( navigateForward model, Cmd.none)
+    NavigateDiff direction ->
+        ( navigate model direction, Cmd.none )
     FlipNavLock direction ->
         (flipNavigationLock model direction, Cmd.none)
 
 upd : Model -> Model
 upd model =
-    let displayedVersions = case Maybe.withDefault [] (versions model) of
+    let displayedVersions = case withDefault [] (versions model) of
                                []            -> (Nothing, Nothing)
                                v :: []       -> (Just v, Nothing)
                                v1 :: v2 :: _ -> (Just v2, Just v1)
             in { model | redraw = not model.redraw, displayedVersions = displayedVersions }
 
-navigateForward : Model -> Model
-navigateForward model =
-    if (List.length <| Maybe.withDefault [] (versions model)) <= 2 ||
-        Maybe.map2 (is Same) (Maybe.map .from <| Maybe.Extra.join <| Maybe.map List.head (versions model))
-            (Maybe.map .from <| second model.displayedVersions) == Just True
+navigate : Model -> NavigationDirection -> Model
+navigate model dir =
+    if not <| canNavigate (withDefault [] <| versions model) model.displayedVersions dir model.navigationLocks
     then model
-    else let versions = Maybe.withDefault [] <| Model.versions model
-             (currentLeftVersion, currentRightVersion) = model.displayedVersions
-             rightVersion = Maybe.Extra.join <| Maybe.map2 getNextVersion currentRightVersion <| Just versions
-             leftVersion = let nextLeftVersion = Maybe.Extra.join <| Maybe.map2 getNextVersion currentLeftVersion <| Just versions
-                           in if first model.navigationLocks == Locked || nextLeftVersion == rightVersion
-                              then currentLeftVersion
-                              else nextLeftVersion
-         in { model | displayedVersions = (leftVersion, rightVersion) }
-
-navigateBack : Model -> Model
-navigateBack model =
-    if (List.length <| Maybe.withDefault [] (versions model)) <= 2 ||
-        Maybe.map2 (is Same) (Maybe.map .from <| Maybe.Extra.join <| Maybe.map List.Extra.last (versions model))
-            (Maybe.map .from <| first model.displayedVersions) == Just True
-    then model
-    else let versions = Maybe.withDefault [] <| Model.versions model
-             (currentLeftVersion, currentRightVersion) = model.displayedVersions
-             leftVersion =  Maybe.Extra.join <| Maybe.map2 getPreviousVersion currentLeftVersion <| Just versions
-             rightVersion = let nextRightVersion = Maybe.Extra.join <| Maybe.map2 getPreviousVersion currentRightVersion <| Just versions
-                            in if second model.navigationLocks == Locked || nextRightVersion == leftVersion
-                               then currentRightVersion
-                               else nextRightVersion
-         in { model | displayedVersions = (leftVersion, rightVersion) }
+    else let versions = Model.versions model
+             (v1, v2) = (if dir == Fwd then identity else Tuple2.swap) model.displayedVersions
+             (l1, l2) = (if dir == Fwd then identity else Tuple2.swap) model.navigationLocks
+             getAdjacent = if (dir == Fwd) then getNextVersion else getPreviousVersion
+             v1AndV2Adjacent = (join <| map2 getAdjacent v1 versions) == v2
+             newV2 = if (l2 == Unlocked) || (l1 == l2) || ((l2 == Locked) && v1AndV2Adjacent)
+                            then join <| map2 getAdjacent v2 versions
+                            else v2
+             newV1 = let nextV1 = join <| map2 getAdjacent v1 versions
+                           in if (l1 == Locked && l2 == Unlocked) || nextV1 == newV2
+                              then v1
+                              else nextV1
+             newDV = (if dir == Fwd then identity else Tuple2.swap) (newV1, newV2)
+         in { model | displayedVersions = newDV }
 
 flipNavigationLock : Model -> NavigationDirection -> Model
 flipNavigationLock model direction =
     let flip state = if state == Locked then Unlocked else Locked
         (bkwdState, fwdState) = model.navigationLocks
-    in case direction of
-           Fwd  -> {model | navigationLocks = (bkwdState, flip fwdState)}
-           Bkwd -> {model | navigationLocks = (flip bkwdState, fwdState)}
+        newstate = if direction == Fwd then flip fwdState else flip bkwdState
+        (newBkwdState, newFwdState) = case direction of
+                                          Fwd  -> (bkwdState, flip fwdState)
+                                          Bkwd -> (flip bkwdState, fwdState)
+        (leftVersion, rightVersion) = model.displayedVersions
+        newRightVersion = case newstate of
+                              Unlocked -> join <| map2 getNextVersion leftVersion (versions model)
+                              Locked   -> rightVersion
+    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (leftVersion, newRightVersion)}
 
 
 -- View
@@ -129,13 +122,13 @@ view_ model =
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)
-styles = [ node "link" [ rel "stylesheet", href "../css/ui.css" ] [] ]
+styles = [ node "link" [ rel "stylesheet", href "css/ui.css" ] [] ]
 
 headerBar : Model -> List (Html Msg)
 headerBar model =
     [ nav []
         [ ul []
-            [ li [] [ img [ class "logo", src "../images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
+            [ li [] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
             , li [] [ h1 [] [ text "Whowas" ] ]
             , li [] [ searchBox model ]
             ]

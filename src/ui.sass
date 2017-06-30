@@ -124,8 +124,6 @@ nav
 
     .detailPanel
         +flex
-        //padding: 1em
-        //background: #fafafa
         width: 100%
         overflow: hidden
         flex-wrap: nowrap
@@ -221,7 +219,7 @@ nav
         background-color: transparent
         border: none
         outline: none
-        transition-duration: 1s
+        transition-duration: 0.3s
 
 
     .lockedButton
@@ -229,14 +227,14 @@ nav
         fill: $lockedButtonColour
 
         &:hover
-            fill: black
+            fill: #006FAB
 
     .unlockedButton
         @extend .lockButton
         fill: black
 
         &:hover
-            fill: $lockedButtonColour
+            fill: #006FAB
 
 .rdap
     // padding: 0 0.5em

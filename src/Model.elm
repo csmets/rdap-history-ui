@@ -1,14 +1,17 @@
 module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected
                       , history, versions, LockerState (..), NavigationDirection (..), getNextVersion
-                      , getPreviousVersion, getDistance)
+                      , getPreviousVersion, getDistance, canNavigate)
 
 import Date exposing (Date, toTime)
 import Date.Extra.Compare exposing (Compare2(..), is)
 import Either exposing (Either)
 import Http
 import Json.Encode exposing (Value)
+import Maybe exposing (map, map2, map3, withDefault)
+import Maybe.Extra exposing (join)
 import Navigation exposing (Location)
-import List.Extra exposing ((!!))
+import List exposing (head)
+import List.Extra exposing ((!!), last)
 
 type alias Response =
     { stamp : Date.Date  -- TODO: this can probably be removed
@@ -68,7 +71,7 @@ type LockerState = Locked | Unlocked
 
 -- Utility methods
 history : Model -> Maybe History
-history model = Maybe.andThen ( flip (!!) model.selected) <| Maybe.map .history <| Either.toMaybe model.response
+history model = Maybe.andThen (flip (!!) model.selected) <| Maybe.map .history <| Either.toMaybe model.response
 
 versions : Model -> Maybe (List Version)
 versions = Maybe.map .versions << history
@@ -81,3 +84,19 @@ getPreviousVersion current = List.head << List.Extra.dropWhile (\v -> is SameOrA
 
 getDistance : Version -> Version -> List Version -> Maybe Int
 getDistance v1 v2 vs = Maybe.map2 (-) (List.Extra.elemIndex v1 vs) (List.Extra.elemIndex v2 vs)
+
+canNavigate : List Version -> (Maybe Version, Maybe Version) -> NavigationDirection -> (LockerState, LockerState) -> Bool
+canNavigate vs (leftVersion, rightVersion) dir (bkwdState, fwdState) =
+    let displayedVersions = Maybe.Extra.values [leftVersion, rightVersion]
+        finalVersion = if dir == Fwd then head vs else last vs
+        displayed = (if dir == Fwd then last else head) displayedVersions
+        isOnlyDirectionLocked = case dir of
+                                    Fwd  -> fwdState == Locked && bkwdState == Unlocked
+                                    Bkwd -> bkwdState == Locked && fwdState == Unlocked
+        isNotOnEdge = withDefault False <| map ((flip (>)) 0) <| map abs <| join <|
+                       map3 (getDistance) finalVersion displayed (Just vs)
+        leftAndRightAreNotAdjacent = withDefault False <| map ((flip (>)) 1) <| map abs <| join <|
+                                  map3 (getDistance) leftVersion rightVersion (Just vs)
+    in if isOnlyDirectionLocked
+       then leftAndRightAreNotAdjacent || isNotOnEdge
+       else isNotOnEdge
