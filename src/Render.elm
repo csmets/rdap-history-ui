@@ -126,13 +126,6 @@ viewDiff ctx was is =
                         div [class "diffPanelItem rdap-is"] [diffOutput]
                       ]
 
-viewVersion : Context -> Maybe Version -> Version -> Html Msg -- TODO: delete
-viewVersion ctx was is =
-    let rWas = map (Rdap.render ctx.history.identifier << .object) was
-        rIs  = Rdap.render ctx.history.identifier is.object
-    in  div [ class "version" ]
-            [ div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
-
 prettifyDate : Date -> Html a
 prettifyDate = text << formatUtc config "%d/%m/%Y %H:%M"
 

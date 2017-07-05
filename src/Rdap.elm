@@ -264,12 +264,13 @@ diffObject orig new = diffed <| Diff.diff orig new
 
 diffed : List (Change (DisplayLine {})) -> DisplayObject Diff
 diffed changes = case changes of
-    []      -> []
-    Added l :: cs -> setDiff New l :: diffed cs
+    []              -> []
+    Added l :: cs   -> setDiff New l :: diffed cs
     Removed l :: cs ->
+        -- this is required since Diff.diff groups adjacent "Removed" entries
         let mc = find (\c -> case c of
-                                       Added l2 -> l.label == l2.label
-                                       _        -> False
+                                 Added l2 -> l.label == l2.label
+                                 _        -> False
                       ) cs
         in case mc of
                Nothing -> setDiff Deleted l :: diffed cs
@@ -292,8 +293,9 @@ setModifiedDiff from to =
                             Added w    -> (w, New)
                             Removed w  -> (w, Deleted)
                             NoChange w -> (w, Unchanged)
-        -- convert whitespaces between two modified words in modified as well
+        -- convert "non-modified" whitespaces between two modified words to "modified" as well for aesthetic purposes
         sanatiseWS cs = case cs of
+                            [] -> []
                             NoChange w1 :: NoChange w2 :: c :: rem ->
                                 NoChange w1 :: NoChange w2 :: (sanatiseWS <| c :: rem)
                             c :: NoChange w1 :: NoChange w2  :: rem ->
@@ -304,7 +306,6 @@ setModifiedDiff from to =
                                 else c1 :: NoChange w :: (sanatiseWS <| c2 :: rem)
                             c :: rem ->
                                 c :: (sanatiseWS rem)
-                            rem -> rem
         modValue = foldr (\d ds -> convertDiff d :: ds) [] <| sanatiseWS  <| wordsDiff
     in { label = to.label, value = ModifiedValue modValue, display = to.display, diffMode = Modified }
 
