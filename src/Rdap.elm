@@ -9,8 +9,11 @@ import Html             exposing (..)
 import Html.Attributes  exposing (class, colspan, href)
 import Json.Decode      exposing (..)
 import Json.Encode
+import List             exposing (foldr, concat, intersperse, filter)
+import List.Extra       exposing (groupWhile, findIndex, (!!), removeAt, find, remove)
 import Maybe            exposing (Maybe)
 import Result
+import String           exposing (words, lines, split)
 
 import Model exposing (..)
 
@@ -24,13 +27,14 @@ type alias VCardEntry =
 
 -- A structure to represent an RDAP object interpreted for display
 type DisplayMode = Text | Lookup | Preformatted
-type alias DisplayLine a = { a | label : String, value : String, display : DisplayMode }
+type DisplayValue = Value String | ModifiedValue (List (String, DiffMode))
+type alias DisplayLine a = { a | label : String, value : DisplayValue, display : DisplayMode }
 type alias DisplayObject a = List (DisplayLine a)
 type alias DisplayRecord a = { identifier : Identifier, object : DisplayObject a }
 type alias RdapDisplay a = List (DisplayRecord a)
 
 -- Annotating a display line with a diff state
-type DiffMode = Unchanged | Modified | New
+type DiffMode = Unchanged | Modified | New | Deleted
 type alias Diff = { diffMode : DiffMode }
 
 extract : Value -> (a -> Maybe b) -> Decoder a -> Maybe b
@@ -81,11 +85,12 @@ mapObject v = identifier v
         |> Maybe.withDefault []
 
     -- like `text`, but will produce interspersed text and <br>
-newlined : String -> List (Html a)
-newlined s = String.split "\n" s
-        |> List.map text
-        |> List.intersperse (br [] [])
-    
+newlined : DisplayValue -> List (Html a)
+newlined dv =
+    case dv of
+        Value s           -> split "\n" s |> List.map text |> List.intersperse (br [] [])
+        ModifiedValue mvs -> List.map (\(s,d) -> if (s == "\n") then br [] [] else convertModifiedValue (s,d)) mvs
+
 output : RdapDisplay Diff -> Html Msg
 output rdap = table []
         <| List.concat
@@ -98,8 +103,30 @@ object lines = List.map line lines
 line : DisplayLine Diff -> Html Msg
 line { label, value, display, diffMode } = case display of
     Text         -> row diffMode (text label) (newlined value)
-    Lookup       -> row diffMode (text label) [ a [ href ("#" ++ value) ] [ text value ] ]
-    Preformatted -> row diffMode (text label) [ pre [] [ text value ] ]
+    Lookup       -> row diffMode (text label) [ a [ href ("#" ++ flatText value) ] (convertValue value) ]
+    Preformatted -> row diffMode (text label) [ pre [] (convertValue value) ]
+
+flatText : DisplayValue -> String
+flatText dv =
+    case dv of
+        Value s           -> s
+        ModifiedValue mvs -> String.concat <| intersperse " " <| List.map (\(s,d) -> s) mvs
+
+convertValue : DisplayValue -> List (Html a)
+convertValue dv =
+    case dv of
+        Value s           -> [text s]
+        ModifiedValue mvs -> List.map convertModifiedValue mvs
+
+convertModifiedValue : (String, DiffMode) -> Html a
+convertModifiedValue (s, dm) =
+    let spanClass diffMode = case diffMode of
+                                 New     -> "diff-word-new"
+                                 Deleted -> "diff-word-deleted"
+                                 _       -> ""
+    in case dm of
+           Unchanged -> text s
+           _         -> span [class <| spanClass dm] [text s]
 
 row : DiffMode -> Html a -> List (Html a) -> Html a
 row d l r = tr [ diffattr d ] [ td [] [ l ], td [] r ]
@@ -109,6 +136,7 @@ diffattr d = case d of
     Unchanged   -> class "diff-unchanged"
     Modified    -> class "diff-modified"
     New         -> class "diff-new"
+    Deleted     -> class "diff-deleted"
 
 spacer : Html a
 spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
@@ -116,7 +144,7 @@ spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
 {- Functions to assist rendering into an RdapDisplay -}
 
 display : DisplayMode -> String -> String -> DisplayLine {}
-display d l v = { label = l, value = v, display = d }
+display d l v = { label = l, value = Value v, display = d }
 
 run : (a -> List b) -> Decoder a -> Value -> List b
 run f d v = Result.withDefault [] <| Result.map f (decodeValue d v)
@@ -131,7 +159,7 @@ tabulated : Decoder (List (DisplayLine a)) -> Value -> DisplayObject a
 tabulated = run identity
 
 remark : Remark -> DisplayLine {}
-remark r = { label = r.title, value = String.join "\n" r.description, display = Preformatted }
+remark r = { label = r.title, value = Value <| String.join "\n" r.description, display = Preformatted }
 
 {- Renderers for the RDAP objects -}
 
@@ -221,17 +249,13 @@ vcardEntry v = case v.name of
 diff : Maybe (RdapDisplay {}) -> RdapDisplay {} -> RdapDisplay Diff
 diff mOrig new = case mOrig of
     Nothing     -> List.map (using Unchanged) new
-    Just orig   -> List.map (diffRecord orig) new
-
--- Return the first element of the list satisfying the predicate, if any
-lookup : (a -> Bool) -> List a -> Maybe a
-lookup f xs = case xs of
-    []      -> Nothing
-    v :: vs -> if f v then Just v else lookup f vs
+    Just orig   -> (List.map (diffRecord orig) new) ++
+                        (List.map (using Deleted)
+                                  (filter (\r -> find (\r2 -> r2.identifier == r.identifier) new == Nothing) orig))
 
 -- object-by-object check: brand-new objects are just "brandNew"
 diffRecord : RdapDisplay {} -> DisplayRecord {} -> DisplayRecord Diff
-diffRecord orig obj = case lookup (\r -> r.identifier == obj.identifier) orig of
+diffRecord orig obj = case find (\r -> r.identifier == obj.identifier) orig of
     Nothing     -> using New obj
     Just old    -> let new = diffObject old.object obj.object in { obj | object = new }
 
@@ -242,12 +266,47 @@ diffed : List (Change (DisplayLine {})) -> DisplayObject Diff
 diffed changes = case changes of
     []      -> []
     Added l :: cs -> setDiff New l :: diffed cs
-    Removed l :: Added m :: cs -> if l.label == m.label then setDiff Modified m :: diffed cs else diffed (Added m :: cs)
-    Removed l :: cs -> diffed cs
+    Removed l :: cs ->
+        let mc = find (\c -> case c of
+                                       Added l2 -> l.label == l2.label
+                                       _        -> False
+                      ) cs
+        in case mc of
+               Nothing -> setDiff Deleted l :: diffed cs
+               Just (Added c) -> setModifiedDiff l c :: diffed (remove (Added c) cs)
+               _              -> setDiff Deleted l :: diffed cs
     NoChange l :: cs -> setDiff Unchanged l :: diffed cs
 
 setDiff : DiffMode -> DisplayLine a -> DisplayLine Diff
 setDiff d a = { label = a.label, value = a.value, display = a.display, diffMode = d }
+
+setModifiedDiff : DisplayLine a -> DisplayLine a -> DisplayLine Diff
+setModifiedDiff from to =
+    let splitValue = concat << intersperse ["\n"] << List.map splitLine << lines
+        splitLine = List.map String.fromList << groupWhile (\c1 c2 -> if c1 == ' ' then c1 == c2 else c2 /= ' ')
+                        << String.toList
+        fromString = flatText from.value
+        toString   = flatText to.value
+        wordsDiff = Diff.diff (splitValue fromString) (splitValue toString)
+        convertDiff d = case d of
+                            Added w    -> (w, New)
+                            Removed w  -> (w, Deleted)
+                            NoChange w -> (w, Unchanged)
+        -- convert whitespaces between two modified words in modified as well
+        sanatiseWS cs = case cs of
+                            NoChange w1 :: NoChange w2 :: c :: rem ->
+                                NoChange w1 :: NoChange w2 :: (sanatiseWS <| c :: rem)
+                            c :: NoChange w1 :: NoChange w2  :: rem ->
+                                c :: NoChange w1 :: NoChange w2 :: (sanatiseWS rem)
+                            c1 :: NoChange w :: c2 :: rem ->
+                                if (String.all ((==) ' ') w)
+                                then c1 :: Added w :: Removed w :: (sanatiseWS <| c2 :: rem)
+                                else c1 :: NoChange w :: (sanatiseWS <| c2 :: rem)
+                            c :: rem ->
+                                c :: (sanatiseWS rem)
+                            rem -> rem
+        modValue = foldr (\d ds -> convertDiff d :: ds) [] <| sanatiseWS  <| wordsDiff
+    in { label = to.label, value = ModifiedValue modValue, display = to.display, diffMode = Modified }
 
 using : DiffMode -> DisplayRecord {} -> DisplayRecord Diff
 using m d = DisplayRecord d.identifier
