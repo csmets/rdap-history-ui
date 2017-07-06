@@ -103,10 +103,10 @@ flipNavigationLock model direction =
                                           Fwd  -> (bkwdState, flip fwdState)
                                           Bkwd -> (flip bkwdState, fwdState)
         (leftVersion, rightVersion) = model.displayedVersions
-        newRightVersion = case newstate of
-                              Unlocked -> join <| map2 getNextVersion leftVersion (versions model)
-                              Locked   -> rightVersion
-    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (leftVersion, newRightVersion)}
+        newLeftVersion = case newstate of
+                              Unlocked -> join <| map2 getPreviousVersion rightVersion (versions model)
+                              Locked   -> leftVersion
+    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (newLeftVersion, rightVersion)}
 
 
 -- View
