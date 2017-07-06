@@ -121,7 +121,7 @@ viewDiff ctx was is =
         rIs  = Rdap.render ctx.history.identifier is.object
         diffOutput = Rdap.output <| Rdap.diff rWas rIs
     in case was of
-           Nothing -> [ div [class "diffPanelItem"] [ div [class "rdap-unique"] [diffOutput] ] ]
+           Nothing -> [ div [class "diffPanelItem"] [ div [class "rdap-is"] [diffOutput] ] ]
            _       -> [ div [class "diffPanelItem rdap-was"] [diffOutput],
                         div [class "diffPanelItem rdap-is"] [diffOutput]
                       ]

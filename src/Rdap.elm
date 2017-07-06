@@ -89,7 +89,9 @@ newlined : DisplayValue -> List (Html a)
 newlined dv =
     case dv of
         Value s           -> split "\n" s |> List.map text |> List.intersperse (br [] [])
-        ModifiedValue mvs -> List.map (\(s,d) -> if (s == "\n") then br [] [] else convertModifiedValue (s,d)) mvs
+        ModifiedValue mvs -> List.map (\(s,d) -> if (s == "\n")
+                                                 then br [class <| modifiedWordClass d] []
+                                                 else convertModifiedValue (s,d)) mvs
 
 output : RdapDisplay Diff -> Html Msg
 output rdap = table []
@@ -120,13 +122,16 @@ convertValue dv =
 
 convertModifiedValue : (String, DiffMode) -> Html a
 convertModifiedValue (s, dm) =
-    let spanClass diffMode = case diffMode of
-                                 New     -> "diff-word-new"
-                                 Deleted -> "diff-word-deleted"
-                                 _       -> ""
-    in case dm of
-           Unchanged -> text s
-           _         -> span [class <| spanClass dm] [text s]
+    case dm of
+        Unchanged -> text s
+        _         -> span [class <| modifiedWordClass dm] [text s]
+
+modifiedWordClass : DiffMode -> String
+modifiedWordClass dm =
+    case dm of
+        New     -> "diff-word-new"
+        Deleted -> "diff-word-deleted"
+        _       -> ""
 
 row : DiffMode -> Html a -> List (Html a) -> Html a
 row d l r = tr [ diffattr d ] [ td [] [ l ], td [] r ]

@@ -71,7 +71,7 @@ upd : Model -> Model
 upd model =
     let displayedVersions = case withDefault [] (versions model) of
                                []            -> (Nothing, Nothing)
-                               v :: []       -> (Just v, Nothing)
+                               v :: []       -> (Nothing, Just v)
                                v1 :: v2 :: _ -> (Just v2, Just v1)
             in { model | redraw = not model.redraw, displayedVersions = displayedVersions }
 
