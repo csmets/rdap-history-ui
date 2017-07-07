@@ -26,6 +26,13 @@ $lockedButtonColour: #732a2a
 =flex-shrink($factor: 0)
     +prefixed(flex-shrink, $factor)
 
+=floaty($char)
+    td:first-child:before
+        width: 1em
+        content: $char
+        float: left
+        text-align: left
+
 @keyframes bouncer
     from
         animation-timing-function: cubic-bezier(.5,0,1,0.4)
@@ -255,20 +262,68 @@ nav
     .spacer td
         padding: 0.2em
 
-.versions
+.rdap-was
+    @extend .rdap
+
+    .diff-modified
+        background-color: #ffffdd
+        +floaty("!")
+    .diff-new
+        color: transparent
+        background-color: #f4f4f4
+        td:first-child
+            color: transparent
+        a
+            display: none
+    .diff-unchanged
+        +floaty(" ")
+    .diff-deleted
+        +floaty("-")
+        background-color: #ffdce0
+    .diff-word-new
+        display: none
+    .diff-word-deleted
+        background-color: #ffff00
+
+.rdap-is
+    @extend .rdap
+
+    .diff-modified
+        background-color: #ffffdd
+        +floaty("!")
+    .diff-new
+        background-color: #ddffdd
+        +floaty("+")
+    .diff-unchanged
+        +floaty(" ")
+    .diff-deleted
+        color: transparent
+        background-color: #f4f4f4
+        td:first-child
+            color: transparent
+        a
+            display: none
+    .diff-word-new
+        background-color: #ffff00
+    .diff-word-deleted
+        display: none
+
+.diffPanel
     +flex
     overflow: hidden
-    flex-wrp: nowrap
+    flex-wrap: nowrap
     height: 100%
     justify-content: center
+    padding-top: 1em
 
-    .version
+    .diffPanelItem
         flex: 1
         display: inline-block
         padding: 0 0.7em
 
-    .version:first-child .diff
+    .diffPanelItem:first-child .diff
         border-left: none
+
     .diff
         display: inline-block
         border-left: 1px dashed black
@@ -310,22 +365,6 @@ nav
         fill: $existed
         &:hover
             fill: lighten($existed, 10%)
-
-=floaty($char)
-    td:first-child:before
-        width: 1em
-        content: $char
-        float: left
-        text-align: left
-
-.diff-modified
-    background-color: #ffffdd
-    +floaty("!")
-.diff-new
-    background-color: #ddffdd
-    +floaty("+")
-.diff-unchanged
-    +floaty(" ")
 
 .logo
     transform: scale(0.7, 0.7)

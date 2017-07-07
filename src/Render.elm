@@ -61,15 +61,16 @@ detailPanel ctx =
         navPanel ctx Bkwd,
         div [class "detailCenterPanel"] [
           versionDatesPanel ctx,
-          div [class "diffPanel"] [diffPanel ctx]
+          diffPanel ctx
         ],
         navPanel ctx Fwd
     ]]
 
 diffPanel : Context -> Html Msg
 diffPanel ctx =
-    let paired   = List.map2 (,) (Nothing :: List.map Just ctx.versions) ctx.versions
-    in div [ class "versions" ] (List.map (uncurry (viewVersion ctx)) paired)
+    case ctx.toVersion of
+        Nothing -> text "Nothing to show"
+        Just v  -> div [class "diffPanel"] (viewDiff ctx ctx.fromVersion v)
 
 versionDatesPanel : Context -> Html Msg
 versionDatesPanel ctx =
@@ -114,12 +115,16 @@ lockButton ctx dir =
         buttonClass = if state == Locked then "lockedButton" else "unlockedButton"
     in button [class buttonClass, onClick (FlipNavLock dir)] [lockerIcon state <| "lockedIcon" ++ (toString dir)]
 
-viewVersion : Context -> Maybe Version -> Version -> Html Msg
-viewVersion ctx was is =
+viewDiff : Context -> Maybe Version -> Version -> List (Html Msg)
+viewDiff ctx was is =
     let rWas = map (Rdap.render ctx.history.identifier << .object) was
         rIs  = Rdap.render ctx.history.identifier is.object
-    in  div [ class "version" ]
-            [ div [ class "rdap" ] [ Rdap.output <| Rdap.diff rWas rIs ] ]
+        diffOutput = Rdap.output <| Rdap.diff rWas rIs
+    in case was of
+           Nothing -> [ div [class "diffPanelItem"] [ div [class "rdap-is"] [diffOutput] ] ]
+           _       -> [ div [class "diffPanelItem rdap-was"] [diffOutput],
+                        div [class "diffPanelItem rdap-is"] [diffOutput]
+                      ]
 
 prettifyDate : Date -> Html a
 prettifyDate = text << formatUtc config "%d/%m/%Y %H:%M"
