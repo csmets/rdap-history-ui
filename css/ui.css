@@ -115,15 +115,41 @@ nav {
     display: -moz-flex;
     display: -ms-flexbox;
     display: flex;
+    -webkit-flex-direction: row;
+    -moz-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    width: 100%;
+    overflow: hidden;
+    flex-wrap: nowrap; }
+  .historyPane .navPanel {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: flex;
     -webkit-flex-direction: column;
     -moz-flex-direction: column;
     -ms-flex-direction: column;
     flex-direction: column;
-    width: 100%;
-    overflow: auto; }
-    .historyPane .detailPanel .arrowPlaceholderBox {
-      width: 60px;
-      visibility: hidden; }
+    height: 100%;
+    flex: 0 0 auto;
+    width: 6em; }
+    .historyPane .navPanel .navPanelItem {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -moz-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-flex-direction: column;
+      -moz-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      flex: 1;
+      justify-content: flex-start;
+      align-items: center; }
+  .historyPane .detailCenterPanel {
+    flex: 5 1 auto; }
   .historyPane .versionDatesPanel {
     display: -webkit-box;
     display: -webkit-flex;
@@ -137,7 +163,9 @@ nav {
     overflow: hidden;
     flex-wrap: nowrap;
     color: white;
-    background-color: #006FAB; }
+    background-color: #006FAB;
+    height: 1.2em;
+    align-items: center; }
     .historyPane .versionDatesPanel .versionDateItem, .historyPane .versionDatesPanel .versionDateLeft, .historyPane .versionDatesPanel .versionDateCenter, .historyPane .versionDatesPanel .versionDateRight {
       display: -webkit-box;
       display: -webkit-flex;
@@ -160,23 +188,10 @@ nav {
       height: 0.8em;
       margin-right: 0.3em;
       margin-left: 0.3em; }
-  .historyPane .detailBody {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -moz-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-flex-direction: row;
-    -moz-flex-direction: row;
-    -ms-flex-direction: row;
-    flex-direction: row;
-    width: 100%;
-    height: 100%;
-    flex-wrap: nowrap; }
   .historyPane .diffPanel {
     flex: 1 1 auto; }
   .historyPane .arrowButton {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     align-self: center;
     border: none;
     background: transparent;
@@ -198,25 +213,114 @@ nav {
     stroke: black; }
   .historyPane .leftArrow {
     transform: rotate(180deg); }
+  .historyPane .lockButton, .historyPane .lockedButton, .historyPane .unlockedButton {
+    flex: 0 0 auto;
+    margin-top: 1em;
+    height: 30px;
+    width: 30px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    transition-duration: 0.3s; }
+  .historyPane .lockedButton {
+    fill: #732a2a; }
+    .historyPane .lockedButton:hover {
+      fill: #006FAB; }
+  .historyPane .unlockedButton {
+    fill: black; }
+    .historyPane .unlockedButton:hover {
+      fill: #006FAB; }
 
-.rdap {
+.rdap, .rdap-was, .rdap-is {
   padding-top: 0.5em;
   font-family: "Nunito", "Arial", sans-serif; }
-  .rdap table {
+  .rdap table, .rdap-was table, .rdap-is table {
     border-collapse: collapse;
     margin: auto; }
-  .rdap td {
+  .rdap td, .rdap-was td, .rdap-is td {
     padding: 0 0.15em; }
-  .rdap td:first-child {
+  .rdap td:first-child, .rdap-was td:first-child, .rdap-is td:first-child {
     vertical-align: top;
     font-family: "Nunito", "Arial", sans-serif;
     color: #8c8c8c;
     text-align: right;
     padding-right: 1em; }
-  .rdap .spacer td {
+  .rdap .spacer td, .rdap-was .spacer td, .rdap-is .spacer td {
     padding: 0.2em; }
 
-.versions {
+.rdap-was .diff-modified {
+  background-color: #ffffdd; }
+  .rdap-was .diff-modified td:first-child:before {
+    width: 1em;
+    content: "!";
+    float: left;
+    text-align: left; }
+
+.rdap-was .diff-new {
+  color: transparent;
+  background-color: #f4f4f4; }
+  .rdap-was .diff-new td:first-child {
+    color: transparent; }
+  .rdap-was .diff-new a {
+    display: none; }
+
+.rdap-was .diff-unchanged td:first-child:before {
+  width: 1em;
+  content: " ";
+  float: left;
+  text-align: left; }
+
+.rdap-was .diff-deleted {
+  background-color: #ffdce0; }
+  .rdap-was .diff-deleted td:first-child:before {
+    width: 1em;
+    content: "-";
+    float: left;
+    text-align: left; }
+
+.rdap-was .diff-word-new {
+  display: none; }
+
+.rdap-was .diff-word-deleted {
+  background-color: #ffff00; }
+
+.rdap-is .diff-modified {
+  background-color: #ffffdd; }
+  .rdap-is .diff-modified td:first-child:before {
+    width: 1em;
+    content: "!";
+    float: left;
+    text-align: left; }
+
+.rdap-is .diff-new {
+  background-color: #ddffdd; }
+  .rdap-is .diff-new td:first-child:before {
+    width: 1em;
+    content: "+";
+    float: left;
+    text-align: left; }
+
+.rdap-is .diff-unchanged td:first-child:before {
+  width: 1em;
+  content: " ";
+  float: left;
+  text-align: left; }
+
+.rdap-is .diff-deleted {
+  color: transparent;
+  background-color: #f4f4f4; }
+  .rdap-is .diff-deleted td:first-child {
+    color: transparent; }
+  .rdap-is .diff-deleted a {
+    display: none; }
+
+.rdap-is .diff-word-new {
+  background-color: #ffff00; }
+
+.rdap-is .diff-word-deleted {
+  display: none; }
+
+.diffPanel {
   display: -webkit-box;
   display: -webkit-flex;
   display: -moz-flex;
@@ -227,16 +331,17 @@ nav {
   -ms-flex-direction: row;
   flex-direction: row;
   overflow: hidden;
-  flex-wrp: nowrap;
+  flex-wrap: nowrap;
   height: 100%;
-  justify-content: center; }
-  .versions .version {
+  justify-content: center;
+  padding-top: 1em; }
+  .diffPanel .diffPanelItem {
     flex: 1;
     display: inline-block;
     padding: 0 0.7em; }
-  .versions .version:first-child .diff {
+  .diffPanel .diffPanelItem:first-child .diff {
     border-left: none; }
-  .versions .diff {
+  .diffPanel .diff {
     display: inline-block;
     border-left: 1px dashed black;
     padding-left: 1.2em;
@@ -245,17 +350,17 @@ nav {
     font-family: "Inconsolata", monospace;
     font-size: 80%;
     vertical-align: top; }
-    .versions .diff .changed {
+    .diffPanel .diff .changed {
       background-color: #ffffdd; }
-    .versions .diff .added {
+    .diffPanel .diff .added {
       background-color: #ddffdd; }
-    .versions .diff .removed::before {
+    .diffPanel .diff .removed::before {
       margin-left: -1.1em;
       position: relative;
       top: -0.6em;
       content: '▶';
       color: #cc4444; }
-    .versions .diff .removed {
+    .diffPanel .diff .removed {
       height: 2px;
       display: block;
       background-color: #cc4444; }
@@ -274,28 +379,6 @@ nav {
     fill: #97df81; }
     .timeline .existed:hover {
       fill: #b9e9aa; }
-
-.diff-modified {
-  background-color: #ffffdd; }
-  .diff-modified td:first-child:before {
-    width: 1em;
-    content: "!";
-    float: left;
-    text-align: left; }
-
-.diff-new {
-  background-color: #ddffdd; }
-  .diff-new td:first-child:before {
-    width: 1em;
-    content: "+";
-    float: left;
-    text-align: left; }
-
-.diff-unchanged td:first-child:before {
-  width: 1em;
-  content: " ";
-  float: left;
-  text-align: left; }
 
 .logo {
   transform: scale(0.7, 0.7); }

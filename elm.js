@@ -3321,6 +3321,92 @@ _Fresheyeball$elm_guards$Guards_ops['|='] = F2(
 		}
 	});
 
+var _Fresheyeball$elm_tuple_extra$Tuple2$toList = function (_p0) {
+	var _p1 = _p0;
+	return {
+		ctor: '::',
+		_0: _p1._0,
+		_1: {
+			ctor: '::',
+			_0: _p1._1,
+			_1: {ctor: '[]'}
+		}
+	};
+};
+var _Fresheyeball$elm_tuple_extra$Tuple2$sortWith = F2(
+	function (cmp, _p2) {
+		var _p3 = _p2;
+		var _p6 = _p3._1;
+		var _p5 = _p3._0;
+		var _p4 = A2(cmp, _p5, _p6);
+		if (_p4.ctor === 'GT') {
+			return {ctor: '_Tuple2', _0: _p6, _1: _p5};
+		} else {
+			return {ctor: '_Tuple2', _0: _p5, _1: _p6};
+		}
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2$sortBy = F2(
+	function (f, _p7) {
+		var _p8 = _p7;
+		var _p10 = _p8._1;
+		var _p9 = _p8._0;
+		return (_elm_lang$core$Native_Utils.cmp(
+			f(_p9),
+			f(_p10)) > 0) ? {ctor: '_Tuple2', _0: _p10, _1: _p9} : {ctor: '_Tuple2', _0: _p9, _1: _p10};
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2$sort = function (_p11) {
+	var _p12 = _p11;
+	var _p14 = _p12._1;
+	var _p13 = _p12._0;
+	return (_elm_lang$core$Native_Utils.cmp(_p13, _p14) > 0) ? {ctor: '_Tuple2', _0: _p14, _1: _p13} : {ctor: '_Tuple2', _0: _p13, _1: _p14};
+};
+var _Fresheyeball$elm_tuple_extra$Tuple2$swap = function (_p15) {
+	var _p16 = _p15;
+	return {ctor: '_Tuple2', _0: _p16._1, _1: _p16._0};
+};
+var _Fresheyeball$elm_tuple_extra$Tuple2$mapBoth = F2(
+	function (f, _p17) {
+		var _p18 = _p17;
+		return {
+			ctor: '_Tuple2',
+			_0: f(_p18._0),
+			_1: f(_p18._1)
+		};
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2$mapEach = F3(
+	function (f, f_, _p19) {
+		var _p20 = _p19;
+		return {
+			ctor: '_Tuple2',
+			_0: f(_p20._0),
+			_1: f_(_p20._1)
+		};
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2$mapSecond = F2(
+	function (f, _p21) {
+		var _p22 = _p21;
+		return {
+			ctor: '_Tuple2',
+			_0: _p22._0,
+			_1: f(_p22._1)
+		};
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2$map = _Fresheyeball$elm_tuple_extra$Tuple2$mapSecond;
+var _Fresheyeball$elm_tuple_extra$Tuple2$mapFirst = F2(
+	function (f, _p23) {
+		var _p24 = _p23;
+		return {
+			ctor: '_Tuple2',
+			_0: f(_p24._0),
+			_1: _p24._1
+		};
+	});
+var _Fresheyeball$elm_tuple_extra$Tuple2_ops = _Fresheyeball$elm_tuple_extra$Tuple2_ops || {};
+_Fresheyeball$elm_tuple_extra$Tuple2_ops['=>'] = F2(
+	function (a, b) {
+		return {ctor: '_Tuple2', _0: a, _1: b};
+	});
+
 //import Native.List //
 
 var _elm_lang$core$Native_Array = function() {
@@ -13588,6 +13674,39 @@ var _toastal$either$Either$swap = function (e) {
 	}
 };
 
+var _user$project$Model$getDistance = F3(
+	function (v1, v2, vs) {
+		return A3(
+			_elm_lang$core$Maybe$map2,
+			F2(
+				function (x, y) {
+					return x - y;
+				}),
+			A2(_elm_community$list_extra$List_Extra$elemIndex, v1, vs),
+			A2(_elm_community$list_extra$List_Extra$elemIndex, v2, vs));
+	});
+var _user$project$Model$getPreviousVersion = function (current) {
+	return function (_p0) {
+		return _elm_lang$core$List$head(
+			A2(
+				_elm_community$list_extra$List_Extra$dropWhile,
+				function (v) {
+					return A3(_rluiten$elm_date_extra$Date_Extra_Compare$is, _rluiten$elm_date_extra$Date_Extra_Compare$SameOrAfter, v.from, current.from);
+				},
+				_p0));
+	};
+};
+var _user$project$Model$getNextVersion = function (current) {
+	return function (_p1) {
+		return _elm_community$list_extra$List_Extra$last(
+			A2(
+				_elm_community$list_extra$List_Extra$takeWhile,
+				function (v) {
+					return A3(_rluiten$elm_date_extra$Date_Extra_Compare$is, _rluiten$elm_date_extra$Date_Extra_Compare$After, v.from, current.from);
+				},
+				_p1));
+	};
+};
 var _user$project$Model$history = function (model) {
 	return A2(
 		_elm_lang$core$Maybe$andThen,
@@ -13605,21 +13724,21 @@ var _user$project$Model$history = function (model) {
 			},
 			_toastal$either$Either$toMaybe(model.response)));
 };
-var _user$project$Model$versions = function (_p0) {
+var _user$project$Model$versions = function (_p2) {
 	return A2(
 		_elm_lang$core$Maybe$map,
 		function (_) {
 			return _.versions;
 		},
-		_user$project$Model$history(_p0));
+		_user$project$Model$history(_p2));
 };
 var _user$project$Model$Response = F2(
 	function (a, b) {
 		return {stamp: a, history: b};
 	});
-var _user$project$Model$Model = F5(
-	function (a, b, c, d, e) {
-		return {resource: a, response: b, selected: c, viewModification: d, redraw: e};
+var _user$project$Model$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {resource: a, response: b, selected: c, displayedVersions: d, navigationLocks: e, redraw: f};
 	});
 var _user$project$Model$Identifier = F2(
 	function (a, b) {
@@ -13633,8 +13752,12 @@ var _user$project$Model$Version = F3(
 	function (a, b, c) {
 		return {from: a, until: b, object: c};
 	});
-var _user$project$Model$NavigateDiffBack = {ctor: 'NavigateDiffBack'};
-var _user$project$Model$NavigateDiffForward = {ctor: 'NavigateDiffForward'};
+var _user$project$Model$FlipNavLock = function (a) {
+	return {ctor: 'FlipNavLock', _0: a};
+};
+var _user$project$Model$NavigateDiff = function (a) {
+	return {ctor: 'NavigateDiff', _0: a};
+};
 var _user$project$Model$Select = function (a) {
 	return {ctor: 'Select', _0: a};
 };
@@ -13654,31 +13777,88 @@ var _user$project$Model$Domain = {ctor: 'Domain'};
 var _user$project$Model$Entity = {ctor: 'Entity'};
 var _user$project$Model$AutNum = {ctor: 'AutNum'};
 var _user$project$Model$InetNum = {ctor: 'InetNum'};
+var _user$project$Model$Bkwd = {ctor: 'Bkwd'};
+var _user$project$Model$Fwd = {ctor: 'Fwd'};
+var _user$project$Model$Unlocked = {ctor: 'Unlocked'};
+var _user$project$Model$Locked = {ctor: 'Locked'};
+var _user$project$Model$canNavigate = F4(
+	function (vs, _p4, dir, _p3) {
+		var _p5 = _p4;
+		var _p11 = _p5._1;
+		var _p10 = _p5._0;
+		var _p6 = _p3;
+		var _p9 = _p6._1;
+		var _p8 = _p6._0;
+		var leftAndRightAreNotAdjacent = A2(
+			_elm_lang$core$Maybe$withDefault,
+			false,
+			A2(
+				_elm_lang$core$Maybe$map,
+				A2(
+					_elm_lang$core$Basics$flip,
+					F2(
+						function (x, y) {
+							return _elm_lang$core$Native_Utils.cmp(x, y) > 0;
+						}),
+					1),
+				A2(
+					_elm_lang$core$Maybe$map,
+					_elm_lang$core$Basics$abs,
+					_elm_community$maybe_extra$Maybe_Extra$join(
+						A4(
+							_elm_lang$core$Maybe$map3,
+							_user$project$Model$getDistance,
+							_p10,
+							_p11,
+							_elm_lang$core$Maybe$Just(vs))))));
+		var isOnlyDirectionLocked = function () {
+			var _p7 = dir;
+			if (_p7.ctor === 'Fwd') {
+				return _elm_lang$core$Native_Utils.eq(_p9, _user$project$Model$Locked) && _elm_lang$core$Native_Utils.eq(_p8, _user$project$Model$Unlocked);
+			} else {
+				return _elm_lang$core$Native_Utils.eq(_p8, _user$project$Model$Locked) && _elm_lang$core$Native_Utils.eq(_p9, _user$project$Model$Unlocked);
+			}
+		}();
+		var finalVersion = _elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_lang$core$List$head(vs) : _elm_community$list_extra$List_Extra$last(vs);
+		var displayedVersions = _elm_community$maybe_extra$Maybe_Extra$values(
+			{
+				ctor: '::',
+				_0: _p10,
+				_1: {
+					ctor: '::',
+					_0: _p11,
+					_1: {ctor: '[]'}
+				}
+			});
+		var displayed = (_elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_community$list_extra$List_Extra$last : _elm_lang$core$List$head)(displayedVersions);
+		var isNotOnEdge = A2(
+			_elm_lang$core$Maybe$withDefault,
+			false,
+			A2(
+				_elm_lang$core$Maybe$map,
+				A2(
+					_elm_lang$core$Basics$flip,
+					F2(
+						function (x, y) {
+							return _elm_lang$core$Native_Utils.cmp(x, y) > 0;
+						}),
+					0),
+				A2(
+					_elm_lang$core$Maybe$map,
+					_elm_lang$core$Basics$abs,
+					_elm_community$maybe_extra$Maybe_Extra$join(
+						A4(
+							_elm_lang$core$Maybe$map3,
+							_user$project$Model$getDistance,
+							finalVersion,
+							displayed,
+							_elm_lang$core$Maybe$Just(vs))))));
+		return isOnlyDirectionLocked ? (leftAndRightAreNotAdjacent || isNotOnEdge) : isNotOnEdge;
+	});
 
 var _user$project$Rdap$setDiff = F2(
 	function (d, a) {
 		return {label: a.label, value: a.value, display: a.display, diffMode: d};
-	});
-var _user$project$Rdap$lookup = F2(
-	function (f, xs) {
-		lookup:
-		while (true) {
-			var _p0 = xs;
-			if (_p0.ctor === '[]') {
-				return _elm_lang$core$Maybe$Nothing;
-			} else {
-				var _p1 = _p0._0;
-				if (f(_p1)) {
-					return _elm_lang$core$Maybe$Just(_p1);
-				} else {
-					var _v1 = f,
-						_v2 = _p0._1;
-					f = _v1;
-					xs = _v2;
-					continue lookup;
-				}
-			}
-		}
 	});
 var _user$project$Rdap$structured = F2(
 	function (sep, part) {
@@ -13698,24 +13878,6 @@ var _user$project$Rdap$run = F3(
 				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
 	});
 var _user$project$Rdap$tabulated = _user$project$Rdap$run(_elm_lang$core$Basics$identity);
-var _user$project$Rdap$display = F3(
-	function (d, l, v) {
-		return {label: l, value: v, display: d};
-	});
-var _user$project$Rdap$mode = F4(
-	function (m, k, d, v) {
-		return A2(
-			_user$project$Rdap$run(
-				function (h) {
-					return {
-						ctor: '::',
-						_0: A3(_user$project$Rdap$display, m, k, h),
-						_1: {ctor: '[]'}
-					};
-				}),
-			d,
-			v);
-	});
 var _user$project$Rdap$spacer = A2(
 	_elm_lang$html$Html$tr,
 	{
@@ -13743,14 +13905,16 @@ var _user$project$Rdap$spacer = A2(
 		_1: {ctor: '[]'}
 	});
 var _user$project$Rdap$diffattr = function (d) {
-	var _p2 = d;
-	switch (_p2.ctor) {
+	var _p0 = d;
+	switch (_p0.ctor) {
 		case 'Unchanged':
 			return _elm_lang$html$Html_Attributes$class('diff-unchanged');
 		case 'Modified':
 			return _elm_lang$html$Html_Attributes$class('diff-modified');
-		default:
+		case 'New':
 			return _elm_lang$html$Html_Attributes$class('diff-new');
+		default:
+			return _elm_lang$html$Html_Attributes$class('diff-deleted');
 	}
 };
 var _user$project$Rdap$row = F3(
@@ -13782,36 +13946,122 @@ var _user$project$Rdap$row = F3(
 				}
 			});
 	});
-var _user$project$Rdap$newlined = function (s) {
-	return A2(
-		_elm_lang$core$List$intersperse,
-		A2(
-			_elm_lang$html$Html$br,
-			{ctor: '[]'},
-			{ctor: '[]'}),
-		A2(
-			_elm_lang$core$List$map,
-			_elm_lang$html$Html$text,
-			A2(_elm_lang$core$String$split, '\n', s)));
+var _user$project$Rdap$modifiedWordClass = function (dm) {
+	var _p1 = dm;
+	switch (_p1.ctor) {
+		case 'New':
+			return 'diff-word-new';
+		case 'Deleted':
+			return 'diff-word-deleted';
+		default:
+			return '';
+	}
 };
-var _user$project$Rdap$line = function (_p3) {
-	var _p4 = _p3;
-	var _p8 = _p4.value;
-	var _p7 = _p4.label;
-	var _p6 = _p4.diffMode;
-	var _p5 = _p4.display;
-	switch (_p5.ctor) {
+var _user$project$Rdap$convertModifiedValue = function (_p2) {
+	var _p3 = _p2;
+	var _p6 = _p3._0;
+	var _p5 = _p3._1;
+	var _p4 = _p5;
+	if (_p4.ctor === 'Unchanged') {
+		return _elm_lang$html$Html$text(_p6);
+	} else {
+		return A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class(
+					_user$project$Rdap$modifiedWordClass(_p5)),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(_p6),
+				_1: {ctor: '[]'}
+			});
+	}
+};
+var _user$project$Rdap$convertValue = function (dv) {
+	var _p7 = dv;
+	if (_p7.ctor === 'Value') {
+		return {
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(_p7._0),
+			_1: {ctor: '[]'}
+		};
+	} else {
+		return A2(_elm_lang$core$List$map, _user$project$Rdap$convertModifiedValue, _p7._0);
+	}
+};
+var _user$project$Rdap$flatText = function (dv) {
+	var _p8 = dv;
+	if (_p8.ctor === 'Value') {
+		return _p8._0;
+	} else {
+		return _elm_lang$core$String$concat(
+			A2(
+				_elm_lang$core$List$intersperse,
+				' ',
+				A2(
+					_elm_lang$core$List$map,
+					function (_p9) {
+						var _p10 = _p9;
+						return _p10._0;
+					},
+					_p8._0)));
+	}
+};
+var _user$project$Rdap$newlined = function (dv) {
+	var _p11 = dv;
+	if (_p11.ctor === 'Value') {
+		return A2(
+			_elm_lang$core$List$intersperse,
+			A2(
+				_elm_lang$html$Html$br,
+				{ctor: '[]'},
+				{ctor: '[]'}),
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$html$Html$text,
+				A2(_elm_lang$core$String$split, '\n', _p11._0)));
+	} else {
+		return A2(
+			_elm_lang$core$List$map,
+			function (_p12) {
+				var _p13 = _p12;
+				var _p15 = _p13._0;
+				var _p14 = _p13._1;
+				return _elm_lang$core$Native_Utils.eq(_p15, '\n') ? A2(
+					_elm_lang$html$Html$br,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class(
+							_user$project$Rdap$modifiedWordClass(_p14)),
+						_1: {ctor: '[]'}
+					},
+					{ctor: '[]'}) : _user$project$Rdap$convertModifiedValue(
+					{ctor: '_Tuple2', _0: _p15, _1: _p14});
+			},
+			_p11._0);
+	}
+};
+var _user$project$Rdap$line = function (_p16) {
+	var _p17 = _p16;
+	var _p21 = _p17.value;
+	var _p20 = _p17.label;
+	var _p19 = _p17.diffMode;
+	var _p18 = _p17.display;
+	switch (_p18.ctor) {
 		case 'Text':
 			return A3(
 				_user$project$Rdap$row,
-				_p6,
-				_elm_lang$html$Html$text(_p7),
-				_user$project$Rdap$newlined(_p8));
+				_p19,
+				_elm_lang$html$Html$text(_p20),
+				_user$project$Rdap$newlined(_p21));
 		case 'Lookup':
 			return A3(
 				_user$project$Rdap$row,
-				_p6,
-				_elm_lang$html$Html$text(_p7),
+				_p19,
+				_elm_lang$html$Html$text(_p20),
 				{
 					ctor: '::',
 					_0: A2(
@@ -13819,31 +14069,26 @@ var _user$project$Rdap$line = function (_p3) {
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$href(
-								A2(_elm_lang$core$Basics_ops['++'], '#', _p8)),
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									'#',
+									_user$project$Rdap$flatText(_p21))),
 							_1: {ctor: '[]'}
 						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p8),
-							_1: {ctor: '[]'}
-						}),
+						_user$project$Rdap$convertValue(_p21)),
 					_1: {ctor: '[]'}
 				});
 		default:
 			return A3(
 				_user$project$Rdap$row,
-				_p6,
-				_elm_lang$html$Html$text(_p7),
+				_p19,
+				_elm_lang$html$Html$text(_p20),
 				{
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$pre,
 						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p8),
-							_1: {ctor: '[]'}
-						}),
+						_user$project$Rdap$convertValue(_p21)),
 					_1: {ctor: '[]'}
 				});
 	}
@@ -13865,17 +14110,17 @@ var _user$project$Rdap$output = function (rdap) {
 				},
 				A2(
 					_elm_lang$core$List$map,
-					function (_p9) {
+					function (_p22) {
 						return _user$project$Rdap$object(
 							function (_) {
 								return _.object;
-							}(_p9));
+							}(_p22));
 					},
 					rdap))));
 };
 var _user$project$Rdap$ot = function (s) {
-	var _p10 = s;
-	switch (_p10) {
+	var _p23 = s;
+	switch (_p23) {
 		case 'ip network':
 			return _elm_lang$core$Maybe$Just(_user$project$Model$InetNum);
 		case 'autnum':
@@ -13967,15 +14212,22 @@ var _user$project$Rdap$Diff = function (a) {
 	return {diffMode: a};
 };
 var _user$project$Rdap$Preformatted = {ctor: 'Preformatted'};
-var _user$project$Rdap$remark = function (r) {
-	return {
-		label: r.title,
-		value: A2(_elm_lang$core$String$join, '\n', r.description),
-		display: _user$project$Rdap$Preformatted
-	};
-};
 var _user$project$Rdap$Lookup = {ctor: 'Lookup'};
 var _user$project$Rdap$Text = {ctor: 'Text'};
+var _user$project$Rdap$ModifiedValue = function (a) {
+	return {ctor: 'ModifiedValue', _0: a};
+};
+var _user$project$Rdap$Value = function (a) {
+	return {ctor: 'Value', _0: a};
+};
+var _user$project$Rdap$display = F3(
+	function (d, l, v) {
+		return {
+			label: l,
+			value: _user$project$Rdap$Value(v),
+			display: d
+		};
+	});
 var _user$project$Rdap$labelled = F3(
 	function (k, d, v) {
 		return A2(
@@ -13990,6 +14242,158 @@ var _user$project$Rdap$labelled = F3(
 			d,
 			v);
 	});
+var _user$project$Rdap$mode = F4(
+	function (m, k, d, v) {
+		return A2(
+			_user$project$Rdap$run(
+				function (h) {
+					return {
+						ctor: '::',
+						_0: A3(_user$project$Rdap$display, m, k, h),
+						_1: {ctor: '[]'}
+					};
+				}),
+			d,
+			v);
+	});
+var _user$project$Rdap$adr = function (v) {
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		{ctor: '[]'},
+		A2(
+			_elm_lang$core$Result$map,
+			function (a) {
+				return {
+					ctor: '::',
+					_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, 'address', a),
+					_1: {ctor: '[]'}
+				};
+			},
+			A2(
+				_elm_lang$core$Result$withDefault,
+				A2(
+					_elm_lang$core$Json_Decode$decodeValue,
+					A2(
+						_user$project$Rdap$structured,
+						';',
+						_elm_lang$core$Json_Decode$oneOf(
+							{
+								ctor: '::',
+								_0: _elm_lang$core$Json_Decode$string,
+								_1: {
+									ctor: '::',
+									_0: A2(_user$project$Rdap$structured, ',', _elm_lang$core$Json_Decode$string),
+									_1: {ctor: '[]'}
+								}
+							})),
+					v.content),
+				A2(
+					_elm_lang$core$Result$map,
+					_elm_lang$core$Result$Ok,
+					A2(
+						_elm_lang$core$Result$andThen,
+						_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
+						A2(
+							_elm_lang$core$Result$fromMaybe,
+							'unused error description',
+							A2(_elm_lang$core$Dict$get, 'label', v.parameters)))))));
+};
+var _user$project$Rdap$simple = F2(
+	function (l, v) {
+		return A3(
+			_user$project$Rdap$run,
+			function (n) {
+				return {
+					ctor: '::',
+					_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, l, n),
+					_1: {ctor: '[]'}
+				};
+			},
+			_elm_lang$core$Json_Decode$string,
+			v.content);
+	});
+var _user$project$Rdap$tel = function (v) {
+	return function (t) {
+		return function (t) {
+			return A3(
+				_user$project$Rdap$run,
+				function (n) {
+					return {
+						ctor: '::',
+						_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, t, n),
+						_1: {ctor: '[]'}
+					};
+				},
+				_elm_lang$core$Json_Decode$string,
+				v.content);
+		}(
+			(!_elm_lang$core$Native_Utils.eq(t, 'fax')) ? 'voice' : 'fax');
+	}(
+		A2(
+			_elm_lang$core$Result$withDefault,
+			'no type parameter',
+			A2(
+				_elm_lang$core$Result$andThen,
+				_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
+				A2(
+					_elm_lang$core$Result$fromMaybe,
+					'unused error description',
+					A2(_elm_lang$core$Dict$get, 'type', v.parameters)))));
+};
+var _user$project$Rdap$vcardEntry = function (v) {
+	var _p24 = v.name;
+	switch (_p24) {
+		case 'fn':
+			return A2(_user$project$Rdap$simple, 'name', v);
+		case 'kind':
+			return A2(_user$project$Rdap$simple, 'kind', v);
+		case 'adr':
+			return _user$project$Rdap$adr(v);
+		case 'tel':
+			return _user$project$Rdap$tel(v);
+		case 'email':
+			return A2(_user$project$Rdap$simple, 'email', v);
+		default:
+			return A3(
+				_user$project$Rdap$run,
+				function (raw) {
+					return {
+						ctor: '::',
+						_0: A3(
+							_user$project$Rdap$display,
+							_user$project$Rdap$Text,
+							v.name,
+							A2(_elm_lang$core$Json_Encode$encode, 0, raw)),
+						_1: {ctor: '[]'}
+					};
+				},
+				_elm_lang$core$Json_Decode$value,
+				v.content);
+	}
+};
+var _user$project$Rdap$vcard = F2(
+	function (d, v) {
+		return A2(
+			_elm_lang$core$Result$withDefault,
+			{ctor: '[]'},
+			A2(
+				_elm_lang$core$Result$map,
+				function (_p25) {
+					return A2(
+						_elm_lang$core$List$concatMap,
+						_user$project$Rdap$vcardEntry,
+						A2(_elm_lang$core$List$drop, 1, _p25));
+				},
+				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
+	});
+var _user$project$Rdap$remark = function (r) {
+	return {
+		label: r.title,
+		value: _user$project$Rdap$Value(
+			A2(_elm_lang$core$String$join, '\n', r.description)),
+		display: _user$project$Rdap$Preformatted
+	};
+};
 var _user$project$Rdap$inetnum = function (v) {
 	return A2(
 		_elm_lang$core$List$concatMap,
@@ -14047,6 +14451,103 @@ var _user$project$Rdap$inetnum = function (v) {
 				}
 			}
 		});
+};
+var _user$project$Rdap$entity = F2(
+	function (d, v) {
+		return A2(
+			_elm_lang$core$List$concatMap,
+			function (i) {
+				return i(v);
+			},
+			{
+				ctor: '::',
+				_0: A3(
+					_user$project$Rdap$mode,
+					d,
+					'handle',
+					A2(_elm_lang$core$Json_Decode$field, 'handle', _elm_lang$core$Json_Decode$string)),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_user$project$Rdap$labelled,
+						'country',
+						A2(_elm_lang$core$Json_Decode$field, 'country', _elm_lang$core$Json_Decode$string)),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Rdap$vcard(
+							A2(
+								_elm_lang$core$Json_Decode$field,
+								'vcardArray',
+								A2(
+									_elm_lang$core$Json_Decode$index,
+									1,
+									_elm_lang$core$Json_Decode$list(_user$project$Rdap$decodeVcard)))),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_user$project$Rdap$labelled,
+								'roles',
+								A2(_elm_lang$core$Json_Decode$field, 'roles', _elm_lang$core$Json_Decode$string)),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Rdap$tabulated(
+									A2(
+										_elm_lang$core$Json_Decode$field,
+										'remarks',
+										A2(
+											_elm_lang$core$Json_Decode$map,
+											_elm_lang$core$List$map(_user$project$Rdap$remark),
+											_user$project$Rdap$remarks))),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Rdap$tabulated(
+										A2(
+											_elm_lang$core$Json_Decode$field,
+											'notices',
+											A2(
+												_elm_lang$core$Json_Decode$map,
+												_elm_lang$core$List$map(_user$project$Rdap$remark),
+												_user$project$Rdap$remarks))),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			});
+	});
+var _user$project$Rdap$mapObject = function (v) {
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		{ctor: '[]'},
+		A2(
+			_elm_lang$core$Maybe$map,
+			function (i) {
+				return {
+					ctor: '::',
+					_0: {
+						identifier: i,
+						object: A2(_user$project$Rdap$entity, _user$project$Rdap$Lookup, v)
+					},
+					_1: {ctor: '[]'}
+				};
+			},
+			_user$project$Rdap$identifier(v)));
+};
+var _user$project$Rdap$entities = function (v) {
+	return function (d) {
+		return A2(
+			_elm_lang$core$Result$withDefault,
+			{ctor: '[]'},
+			A2(_elm_lang$core$Json_Decode$decodeValue, d, v));
+	}(
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			_elm_lang$core$List$concatMap(_user$project$Rdap$mapObject),
+			A2(
+				_elm_lang$core$Json_Decode$field,
+				'entities',
+				_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value))));
 };
 var _user$project$Rdap$autnum = function (v) {
 	return A2(
@@ -14157,237 +14658,10 @@ var _user$project$Rdap$domain = function (v) {
 			}
 		});
 };
-var _user$project$Rdap$adr = function (v) {
-	return A2(
-		_elm_lang$core$Result$withDefault,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$Result$map,
-			function (a) {
-				return {
-					ctor: '::',
-					_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, 'address', a),
-					_1: {ctor: '[]'}
-				};
-			},
-			A2(
-				_elm_lang$core$Result$withDefault,
-				A2(
-					_elm_lang$core$Json_Decode$decodeValue,
-					A2(
-						_user$project$Rdap$structured,
-						';',
-						_elm_lang$core$Json_Decode$oneOf(
-							{
-								ctor: '::',
-								_0: _elm_lang$core$Json_Decode$string,
-								_1: {
-									ctor: '::',
-									_0: A2(_user$project$Rdap$structured, ',', _elm_lang$core$Json_Decode$string),
-									_1: {ctor: '[]'}
-								}
-							})),
-					v.content),
-				A2(
-					_elm_lang$core$Result$map,
-					_elm_lang$core$Result$Ok,
-					A2(
-						_elm_lang$core$Result$andThen,
-						_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
-						A2(
-							_elm_lang$core$Result$fromMaybe,
-							'unused error description',
-							A2(_elm_lang$core$Dict$get, 'label', v.parameters)))))));
-};
-var _user$project$Rdap$simple = F2(
-	function (l, v) {
-		return A3(
-			_user$project$Rdap$run,
-			function (n) {
-				return {
-					ctor: '::',
-					_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, l, n),
-					_1: {ctor: '[]'}
-				};
-			},
-			_elm_lang$core$Json_Decode$string,
-			v.content);
-	});
-var _user$project$Rdap$tel = function (v) {
-	return function (t) {
-		return function (t) {
-			return A3(
-				_user$project$Rdap$run,
-				function (n) {
-					return {
-						ctor: '::',
-						_0: A3(_user$project$Rdap$display, _user$project$Rdap$Text, t, n),
-						_1: {ctor: '[]'}
-					};
-				},
-				_elm_lang$core$Json_Decode$string,
-				v.content);
-		}(
-			(!_elm_lang$core$Native_Utils.eq(t, 'fax')) ? 'voice' : 'fax');
-	}(
-		A2(
-			_elm_lang$core$Result$withDefault,
-			'no type parameter',
-			A2(
-				_elm_lang$core$Result$andThen,
-				_elm_lang$core$Json_Decode$decodeValue(_elm_lang$core$Json_Decode$string),
-				A2(
-					_elm_lang$core$Result$fromMaybe,
-					'unused error description',
-					A2(_elm_lang$core$Dict$get, 'type', v.parameters)))));
-};
-var _user$project$Rdap$vcardEntry = function (v) {
-	var _p11 = v.name;
-	switch (_p11) {
-		case 'fn':
-			return A2(_user$project$Rdap$simple, 'name', v);
-		case 'kind':
-			return A2(_user$project$Rdap$simple, 'kind', v);
-		case 'adr':
-			return _user$project$Rdap$adr(v);
-		case 'tel':
-			return _user$project$Rdap$tel(v);
-		case 'email':
-			return A2(_user$project$Rdap$simple, 'email', v);
-		default:
-			return A3(
-				_user$project$Rdap$run,
-				function (raw) {
-					return {
-						ctor: '::',
-						_0: A3(
-							_user$project$Rdap$display,
-							_user$project$Rdap$Text,
-							v.name,
-							A2(_elm_lang$core$Json_Encode$encode, 0, raw)),
-						_1: {ctor: '[]'}
-					};
-				},
-				_elm_lang$core$Json_Decode$value,
-				v.content);
-	}
-};
-var _user$project$Rdap$vcard = F2(
-	function (d, v) {
-		return A2(
-			_elm_lang$core$Result$withDefault,
-			{ctor: '[]'},
-			A2(
-				_elm_lang$core$Result$map,
-				function (_p12) {
-					return A2(
-						_elm_lang$core$List$concatMap,
-						_user$project$Rdap$vcardEntry,
-						A2(_elm_lang$core$List$drop, 1, _p12));
-				},
-				A2(_elm_lang$core$Json_Decode$decodeValue, d, v)));
-	});
-var _user$project$Rdap$entity = F2(
-	function (d, v) {
-		return A2(
-			_elm_lang$core$List$concatMap,
-			function (i) {
-				return i(v);
-			},
-			{
-				ctor: '::',
-				_0: A3(
-					_user$project$Rdap$mode,
-					d,
-					'handle',
-					A2(_elm_lang$core$Json_Decode$field, 'handle', _elm_lang$core$Json_Decode$string)),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_user$project$Rdap$labelled,
-						'country',
-						A2(_elm_lang$core$Json_Decode$field, 'country', _elm_lang$core$Json_Decode$string)),
-					_1: {
-						ctor: '::',
-						_0: _user$project$Rdap$vcard(
-							A2(
-								_elm_lang$core$Json_Decode$field,
-								'vcardArray',
-								A2(
-									_elm_lang$core$Json_Decode$index,
-									1,
-									_elm_lang$core$Json_Decode$list(_user$project$Rdap$decodeVcard)))),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_user$project$Rdap$labelled,
-								'roles',
-								A2(_elm_lang$core$Json_Decode$field, 'roles', _elm_lang$core$Json_Decode$string)),
-							_1: {
-								ctor: '::',
-								_0: _user$project$Rdap$tabulated(
-									A2(
-										_elm_lang$core$Json_Decode$field,
-										'remarks',
-										A2(
-											_elm_lang$core$Json_Decode$map,
-											_elm_lang$core$List$map(_user$project$Rdap$remark),
-											_user$project$Rdap$remarks))),
-								_1: {
-									ctor: '::',
-									_0: _user$project$Rdap$tabulated(
-										A2(
-											_elm_lang$core$Json_Decode$field,
-											'notices',
-											A2(
-												_elm_lang$core$Json_Decode$map,
-												_elm_lang$core$List$map(_user$project$Rdap$remark),
-												_user$project$Rdap$remarks))),
-									_1: {ctor: '[]'}
-								}
-							}
-						}
-					}
-				}
-			});
-	});
-var _user$project$Rdap$mapObject = function (v) {
-	return A2(
-		_elm_lang$core$Maybe$withDefault,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$Maybe$map,
-			function (i) {
-				return {
-					ctor: '::',
-					_0: {
-						identifier: i,
-						object: A2(_user$project$Rdap$entity, _user$project$Rdap$Lookup, v)
-					},
-					_1: {ctor: '[]'}
-				};
-			},
-			_user$project$Rdap$identifier(v)));
-};
-var _user$project$Rdap$entities = function (v) {
-	return function (d) {
-		return A2(
-			_elm_lang$core$Result$withDefault,
-			{ctor: '[]'},
-			A2(_elm_lang$core$Json_Decode$decodeValue, d, v));
-	}(
-		A2(
-			_elm_lang$core$Json_Decode$map,
-			_elm_lang$core$List$concatMap(_user$project$Rdap$mapObject),
-			A2(
-				_elm_lang$core$Json_Decode$field,
-				'entities',
-				_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value))));
-};
 var _user$project$Rdap$render = F2(
 	function (i, value) {
-		var _p13 = i.objectClass;
-		switch (_p13.ctor) {
+		var _p26 = i.objectClass;
+		switch (_p26.ctor) {
 			case 'InetNum':
 				return {
 					ctor: '::',
@@ -14426,54 +14700,215 @@ var _user$project$Rdap$render = F2(
 				};
 		}
 	});
+var _user$project$Rdap$Deleted = {ctor: 'Deleted'};
 var _user$project$Rdap$New = {ctor: 'New'};
 var _user$project$Rdap$Modified = {ctor: 'Modified'};
 var _user$project$Rdap$Unchanged = {ctor: 'Unchanged'};
-var _user$project$Rdap$diffed = function (changes) {
-	diffed:
-	while (true) {
-		var _p14 = changes;
-		if (_p14.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			switch (_p14._0.ctor) {
-				case 'Added':
-					return {
-						ctor: '::',
-						_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$New, _p14._0._0),
-						_1: _user$project$Rdap$diffed(_p14._1)
-					};
-				case 'Removed':
-					if ((_p14._1.ctor === '::') && (_p14._1._0.ctor === 'Added')) {
-						var _p16 = _p14._1._0._0;
-						var _p15 = _p14._1._1;
-						if (_elm_lang$core$Native_Utils.eq(_p14._0._0.label, _p16.label)) {
+var _user$project$Rdap$setModifiedDiff = F2(
+	function (from, to) {
+		var sanatiseWS = function (cs) {
+			var _p27 = cs;
+			if (_p27.ctor === '[]') {
+				return {ctor: '[]'};
+			} else {
+				if (((_p27._1.ctor === '::') && (_p27._1._0.ctor === 'NoChange')) && (_p27._1._1.ctor === '::')) {
+					if (_p27._0.ctor === 'NoChange') {
+						return {
+							ctor: '::',
+							_0: _jinjor$elm_diff$Diff$NoChange(_p27._0._0),
+							_1: {
+								ctor: '::',
+								_0: _jinjor$elm_diff$Diff$NoChange(_p27._1._0._0),
+								_1: sanatiseWS(
+									{ctor: '::', _0: _p27._1._1._0, _1: _p27._1._1._1})
+							}
+						};
+					} else {
+						if (_p27._1._1._0.ctor === 'NoChange') {
 							return {
 								ctor: '::',
-								_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$Modified, _p16),
-								_1: _user$project$Rdap$diffed(_p15)
+								_0: _p27._0,
+								_1: {
+									ctor: '::',
+									_0: _jinjor$elm_diff$Diff$NoChange(_p27._1._0._0),
+									_1: {
+										ctor: '::',
+										_0: _jinjor$elm_diff$Diff$NoChange(_p27._1._1._0._0),
+										_1: sanatiseWS(_p27._1._1._1)
+									}
+								}
 							};
 						} else {
-							var _v10 = {
+							var _p31 = _p27._1._0._0;
+							var _p30 = _p27._1._1._1;
+							var _p29 = _p27._1._1._0;
+							var _p28 = _p27._0;
+							return A2(
+								_elm_lang$core$String$all,
+								F2(
+									function (x, y) {
+										return _elm_lang$core$Native_Utils.eq(x, y);
+									})(
+									_elm_lang$core$Native_Utils.chr(' ')),
+								_p31) ? {
 								ctor: '::',
-								_0: _jinjor$elm_diff$Diff$Added(_p16),
-								_1: _p15
+								_0: _p28,
+								_1: {
+									ctor: '::',
+									_0: _jinjor$elm_diff$Diff$Added(_p31),
+									_1: {
+										ctor: '::',
+										_0: _jinjor$elm_diff$Diff$Removed(_p31),
+										_1: sanatiseWS(
+											{ctor: '::', _0: _p29, _1: _p30})
+									}
+								}
+							} : {
+								ctor: '::',
+								_0: _p28,
+								_1: {
+									ctor: '::',
+									_0: _jinjor$elm_diff$Diff$NoChange(_p31),
+									_1: sanatiseWS(
+										{ctor: '::', _0: _p29, _1: _p30})
+								}
 							};
-							changes = _v10;
-							continue diffed;
 						}
-					} else {
-						var _v11 = _p14._1;
-						changes = _v11;
-						continue diffed;
 					}
-				default:
+				} else {
 					return {
 						ctor: '::',
-						_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$Unchanged, _p14._0._0),
-						_1: _user$project$Rdap$diffed(_p14._1)
+						_0: _p27._0,
+						_1: sanatiseWS(_p27._1)
 					};
+				}
 			}
+		};
+		var convertDiff = function (d) {
+			var _p32 = d;
+			switch (_p32.ctor) {
+				case 'Added':
+					return {ctor: '_Tuple2', _0: _p32._0, _1: _user$project$Rdap$New};
+				case 'Removed':
+					return {ctor: '_Tuple2', _0: _p32._0, _1: _user$project$Rdap$Deleted};
+				default:
+					return {ctor: '_Tuple2', _0: _p32._0, _1: _user$project$Rdap$Unchanged};
+			}
+		};
+		var toString = _user$project$Rdap$flatText(to.value);
+		var fromString = _user$project$Rdap$flatText(from.value);
+		var splitLine = function (_p33) {
+			return A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$String$fromList,
+				A2(
+					_elm_community$list_extra$List_Extra$groupWhile,
+					F2(
+						function (c1, c2) {
+							return _elm_lang$core$Native_Utils.eq(
+								c1,
+								_elm_lang$core$Native_Utils.chr(' ')) ? _elm_lang$core$Native_Utils.eq(c1, c2) : (!_elm_lang$core$Native_Utils.eq(
+								c2,
+								_elm_lang$core$Native_Utils.chr(' ')));
+						}),
+					_elm_lang$core$String$toList(_p33)));
+		};
+		var splitValue = function (_p34) {
+			return _elm_lang$core$List$concat(
+				A2(
+					_elm_lang$core$List$intersperse,
+					{
+						ctor: '::',
+						_0: '\n',
+						_1: {ctor: '[]'}
+					},
+					A2(
+						_elm_lang$core$List$map,
+						splitLine,
+						_elm_lang$core$String$lines(_p34))));
+		};
+		var wordsDiff = A2(
+			_jinjor$elm_diff$Diff$diff,
+			splitValue(fromString),
+			splitValue(toString));
+		var modValue = A3(
+			_elm_lang$core$List$foldr,
+			F2(
+				function (d, ds) {
+					return {
+						ctor: '::',
+						_0: convertDiff(d),
+						_1: ds
+					};
+				}),
+			{ctor: '[]'},
+			sanatiseWS(wordsDiff));
+		return {
+			label: to.label,
+			value: _user$project$Rdap$ModifiedValue(modValue),
+			display: to.display,
+			diffMode: _user$project$Rdap$Modified
+		};
+	});
+var _user$project$Rdap$diffed = function (changes) {
+	var _p35 = changes;
+	if (_p35.ctor === '[]') {
+		return {ctor: '[]'};
+	} else {
+		switch (_p35._0.ctor) {
+			case 'Added':
+				return {
+					ctor: '::',
+					_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$New, _p35._0._0),
+					_1: _user$project$Rdap$diffed(_p35._1)
+				};
+			case 'Removed':
+				var _p40 = _p35._0._0;
+				var _p39 = _p35._1;
+				var mc = A2(
+					_elm_community$list_extra$List_Extra$find,
+					function (c) {
+						var _p36 = c;
+						if (_p36.ctor === 'Added') {
+							return _elm_lang$core$Native_Utils.eq(_p40.label, _p36._0.label);
+						} else {
+							return false;
+						}
+					},
+					_p39);
+				var _p37 = mc;
+				if (_p37.ctor === 'Nothing') {
+					return {
+						ctor: '::',
+						_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$Deleted, _p40),
+						_1: _user$project$Rdap$diffed(_p39)
+					};
+				} else {
+					if (_p37._0.ctor === 'Added') {
+						var _p38 = _p37._0._0;
+						return {
+							ctor: '::',
+							_0: A2(_user$project$Rdap$setModifiedDiff, _p40, _p38),
+							_1: _user$project$Rdap$diffed(
+								A2(
+									_elm_community$list_extra$List_Extra$remove,
+									_jinjor$elm_diff$Diff$Added(_p38),
+									_p39))
+						};
+					} else {
+						return {
+							ctor: '::',
+							_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$Deleted, _p40),
+							_1: _user$project$Rdap$diffed(_p39)
+						};
+					}
+				}
+			default:
+				return {
+					ctor: '::',
+					_0: A2(_user$project$Rdap$setDiff, _user$project$Rdap$Unchanged, _p35._0._0),
+					_1: _user$project$Rdap$diffed(_p35._1)
+				};
 		}
 	}
 };
@@ -14484,16 +14919,16 @@ var _user$project$Rdap$diffObject = F2(
 	});
 var _user$project$Rdap$diffRecord = F2(
 	function (orig, obj) {
-		var _p17 = A2(
-			_user$project$Rdap$lookup,
+		var _p41 = A2(
+			_elm_community$list_extra$List_Extra$find,
 			function (r) {
 				return _elm_lang$core$Native_Utils.eq(r.identifier, obj.identifier);
 			},
 			orig);
-		if (_p17.ctor === 'Nothing') {
+		if (_p41.ctor === 'Nothing') {
 			return A2(_user$project$Rdap$using, _user$project$Rdap$New, obj);
 		} else {
-			var $new = A2(_user$project$Rdap$diffObject, _p17._0.object, obj.object);
+			var $new = A2(_user$project$Rdap$diffObject, _p41._0.object, obj.object);
 			return _elm_lang$core$Native_Utils.update(
 				obj,
 				{object: $new});
@@ -14501,17 +14936,36 @@ var _user$project$Rdap$diffRecord = F2(
 	});
 var _user$project$Rdap$diff = F2(
 	function (mOrig, $new) {
-		var _p18 = mOrig;
-		if (_p18.ctor === 'Nothing') {
+		var _p42 = mOrig;
+		if (_p42.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$core$List$map,
 				_user$project$Rdap$using(_user$project$Rdap$Unchanged),
 				$new);
 		} else {
+			var _p43 = _p42._0;
 			return A2(
-				_elm_lang$core$List$map,
-				_user$project$Rdap$diffRecord(_p18._0),
-				$new);
+				_elm_lang$core$Basics_ops['++'],
+				A2(
+					_elm_lang$core$List$map,
+					_user$project$Rdap$diffRecord(_p43),
+					$new),
+				A2(
+					_elm_lang$core$List$map,
+					_user$project$Rdap$using(_user$project$Rdap$Deleted),
+					A2(
+						_elm_lang$core$List$filter,
+						function (r) {
+							return _elm_lang$core$Native_Utils.eq(
+								A2(
+									_elm_community$list_extra$List_Extra$find,
+									function (r2) {
+										return _elm_lang$core$Native_Utils.eq(r2.identifier, r.identifier);
+									},
+									$new),
+								_elm_lang$core$Maybe$Nothing);
+						},
+						_p43)));
 		}
 	});
 
@@ -14663,6 +15117,192 @@ var _user$project$Decode$history = A2(
 				'records',
 				_elm_lang$core$Json_Decode$list(_user$project$Decode$record)))));
 
+var _user$project$Render$checkNavDisabled = F2(
+	function (ctx, dir) {
+		return !A4(
+			_user$project$Model$canNavigate,
+			ctx.history.versions,
+			{ctor: '_Tuple2', _0: ctx.fromVersion, _1: ctx.toVersion},
+			dir,
+			ctx.navigationLocks);
+	});
+var _user$project$Render$lockerIcon = F2(
+	function (state, svgClass) {
+		var iconTitle = _elm_lang$core$Native_Utils.eq(state, _user$project$Model$Locked) ? 'Unlock version' : 'Lock version';
+		var maskName = A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(state),
+			svgClass);
+		var maskPathDraw = function () {
+			var _p0 = state;
+			if (_p0.ctor === 'Locked') {
+				return 'M 35 50 v -20 c 0 -20 30 -20 30 0 v 20';
+			} else {
+				return 'M 35 50 v -20 c 0 -20 30 -20 30 0';
+			}
+		}();
+		return A2(
+			_elm_lang$svg$Svg$svg,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$viewBox('0 0 100 100'),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$class(svgClass),
+					_1: {ctor: '[]'}
+				}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$svg$Svg$defs,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$mask,
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$id(maskName),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$svg$Svg$rect,
+									{
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$x('0'),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$y('0'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$svg$Svg_Attributes$width('100'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$svg$Svg_Attributes$height('100'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$fill('white'),
+														_1: {ctor: '[]'}
+													}
+												}
+											}
+										}
+									},
+									{ctor: '[]'}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$svg$Svg$rect,
+										{
+											ctor: '::',
+											_0: _elm_lang$svg$Svg_Attributes$x('25'),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$svg$Svg_Attributes$y('45'),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$svg$Svg_Attributes$width('50'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$height('30'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$svg$Svg_Attributes$rx('10'),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$svg$Svg_Attributes$ry('10'),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$svg$Svg_Attributes$fill('black'),
+																	_1: {ctor: '[]'}
+																}
+															}
+														}
+													}
+												}
+											}
+										},
+										{ctor: '[]'}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$svg$Svg$path,
+											{
+												ctor: '::',
+												_0: _elm_lang$svg$Svg_Attributes$d(maskPathDraw),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$svg$Svg_Attributes$strokeWidth('6'),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$svg$Svg_Attributes$strokeLinecap('round'),
+														_1: {
+															ctor: '::',
+															_0: _elm_lang$svg$Svg_Attributes$strokeLinejoin('round'),
+															_1: {
+																ctor: '::',
+																_0: _elm_lang$svg$Svg_Attributes$fill('transparent'),
+																_1: {
+																	ctor: '::',
+																	_0: _elm_lang$svg$Svg_Attributes$stroke('black'),
+																	_1: {ctor: '[]'}
+																}
+															}
+														}
+													}
+												}
+											},
+											{ctor: '[]'}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$svg$Svg$circle,
+						{
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$cx('50'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$cy('50'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$svg$Svg_Attributes$r('50'),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$svg$Svg_Attributes$mask(
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'url(#',
+												A2(_elm_lang$core$Basics_ops['++'], maskName, ')'))),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$title,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(iconTitle),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
 var _user$project$Render$moreIcon = F2(
 	function (svgClass, tooltipText) {
 		return A2(
@@ -14687,7 +15327,7 @@ var _user$project$Render$moreIcon = F2(
 							_elm_lang$svg$Svg$mask,
 							{
 								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$id('masking'),
+								_0: _elm_lang$svg$Svg_Attributes$id(svgClass),
 								_1: {ctor: '[]'}
 							},
 							{
@@ -14804,7 +15444,11 @@ var _user$project$Render$moreIcon = F2(
 									_0: _elm_lang$svg$Svg_Attributes$r('50'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$svg$Svg_Attributes$mask('url(#masking)'),
+										_0: _elm_lang$svg$Svg_Attributes$mask(
+											A2(
+												_elm_lang$core$Basics_ops['++'],
+												'url(#',
+												A2(_elm_lang$core$Basics_ops['++'], svgClass, ')'))),
 										_1: {ctor: '[]'}
 									}
 								}
@@ -14826,55 +15470,6 @@ var _user$project$Render$moreIcon = F2(
 				}
 			});
 	});
-var _user$project$Render$checkNav = F3(
-	function (history, modDate, f) {
-		return A2(
-			_elm_lang$core$Maybe$withDefault,
-			false,
-			A2(
-				_elm_lang$core$Maybe$map,
-				F2(
-					function (x, y) {
-						return !_elm_lang$core$Native_Utils.eq(x, y);
-					})(
-					_elm_lang$core$Date$toTime(modDate)),
-				A2(
-					_elm_lang$core$Maybe$map,
-					function (_p0) {
-						return _elm_lang$core$Date$toTime(
-							function (_) {
-								return _.from;
-							}(_p0));
-					},
-					f(history.versions)))) ? {ctor: '[]'} : {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$disabled(true),
-			_1: {ctor: '[]'}
-		};
-	});
-var _user$project$Render$checkNavFwd = function (ctx) {
-	return A3(_user$project$Render$checkNav, ctx.history, ctx.modificationDate, _elm_lang$core$List$head);
-};
-var _user$project$Render$checkNavBack = function (ctx) {
-	return A3(
-		_user$project$Render$checkNav,
-		ctx.history,
-		ctx.modificationDate,
-		function (h) {
-			return A2(
-				_elm_community$list_extra$List_Extra_ops['!!'],
-				h,
-				_elm_lang$core$List$length(h) - 2);
-		});
-};
-var _user$project$Render$arrowPlaceholderBox = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$class('arrowPlaceholderBox'),
-		_1: {ctor: '[]'}
-	},
-	{ctor: '[]'});
 var _user$project$Render$arrow = function (svgClass) {
 	return A2(
 		_elm_lang$svg$Svg$svg,
@@ -14952,7 +15547,7 @@ var _user$project$Render$createDateLabel = function (md) {
 		};
 	}
 };
-var _user$project$Render$viewVersion = F3(
+var _user$project$Render$viewDiff = F3(
 	function (ctx, was, is) {
 		var rIs = A2(_user$project$Rdap$render, ctx.history.identifier, is.object);
 		var rWas = A2(
@@ -14966,11 +15561,157 @@ var _user$project$Render$viewVersion = F3(
 					}(_p4));
 			},
 			was);
+		var diffOutput = _user$project$Rdap$output(
+			A2(_user$project$Rdap$diff, rWas, rIs));
+		var _p5 = was;
+		if (_p5.ctor === 'Nothing') {
+			return {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('diffPanelItem'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('rdap-is'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: diffOutput,
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			};
+		} else {
+			return {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('diffPanelItem rdap-was'),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: diffOutput,
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('diffPanelItem rdap-is'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: diffOutput,
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			};
+		}
+	});
+var _user$project$Render$lockButton = F2(
+	function (ctx, dir) {
+		var f = _elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_lang$core$Tuple$second : _elm_lang$core$Tuple$first;
+		var state = f(ctx.navigationLocks);
+		var buttonClass = _elm_lang$core$Native_Utils.eq(state, _user$project$Model$Locked) ? 'lockedButton' : 'unlockedButton';
+		return A2(
+			_elm_lang$html$Html$button,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class(buttonClass),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onClick(
+						_user$project$Model$FlipNavLock(dir)),
+					_1: {ctor: '[]'}
+				}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_user$project$Render$lockerIcon,
+					state,
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						'lockedIcon',
+						_elm_lang$core$Basics$toString(dir))),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$Render$navPanel = F2(
+	function (ctx, direction) {
+		var arrowButton = function () {
+			var _p6 = direction;
+			if (_p6.ctor === 'Bkwd') {
+				return A2(
+					_elm_lang$html$Html$button,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('arrowButton'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Model$NavigateDiff(_user$project$Model$Bkwd)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$disabled(
+									A2(_user$project$Render$checkNavDisabled, ctx, direction)),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _user$project$Render$arrow('leftArrow'),
+						_1: {ctor: '[]'}
+					});
+			} else {
+				return A2(
+					_elm_lang$html$Html$button,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('arrowButton'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Model$NavigateDiff(_user$project$Model$Fwd)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$disabled(
+									A2(_user$project$Render$checkNavDisabled, ctx, direction)),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _user$project$Render$arrow('rightArrow'),
+						_1: {ctor: '[]'}
+					});
+			}
+		}();
 		return A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('version'),
+				_0: _elm_lang$html$Html_Attributes$class('navPanel'),
 				_1: {ctor: '[]'}
 			},
 			{
@@ -14979,72 +15720,50 @@ var _user$project$Render$viewVersion = F3(
 					_elm_lang$html$Html$div,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('rdap'),
+						_0: _elm_lang$html$Html_Attributes$class('versionDatesPanel'),
 						_1: {ctor: '[]'}
 					},
-					{
-						ctor: '::',
-						_0: _user$project$Rdap$output(
-							A2(_user$project$Rdap$diff, rWas, rIs)),
-						_1: {ctor: '[]'}
-					}),
-				_1: {ctor: '[]'}
-			});
-	});
-var _user$project$Render$versionDatesPanel = function (vs) {
-	var _p5 = vs;
-	if (_p5.ctor === '[]') {
-		return _elm_lang$html$Html$text('');
-	} else {
-		if (_p5._1.ctor === '[]') {
-			var _p6 = _p5._0;
-			return A2(
-				_elm_lang$html$Html$div,
-				{
+					{ctor: '[]'}),
+				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('versionDatesPanel'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _user$project$Render$arrowPlaceholderBox,
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('navPanelItem'),
+							_1: {ctor: '[]'}
+						},
+						{ctor: '[]'}),
 					_1: {
 						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								_user$project$Render$createDateLabel(
-									_elm_lang$core$Maybe$Just(_p6.from)),
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(' >'),
-									_1: {ctor: '[]'}
-								})),
+						_0: arrowButton,
 						_1: {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								A2(
-									_elm_lang$core$Basics_ops['++'],
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('< '),
-										_1: {ctor: '[]'}
-									},
-									_user$project$Render$createDateLabel(_p6.until))),
-							_1: {
-								ctor: '::',
-								_0: _user$project$Render$arrowPlaceholderBox,
-								_1: {ctor: '[]'}
-							}
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$class('navPanelItem'),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: A2(_user$project$Render$lockButton, ctx, direction),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
 						}
 					}
-				});
-		} else {
-			var _p7 = _p5._1._0;
+				}
+			});
+	});
+var _user$project$Render$versionDatesPanel = function (ctx) {
+	var _p7 = ctx.versions;
+	if (_p7.ctor === '[]') {
+		return _elm_lang$html$Html$text('');
+	} else {
+		if (_p7._1.ctor === '[]') {
+			var _p8 = _p7._0;
 			return A2(
 				_elm_lang$html$Html$div,
 				{
@@ -15054,14 +15773,36 @@ var _user$project$Render$versionDatesPanel = function (vs) {
 				},
 				{
 					ctor: '::',
-					_0: _user$project$Render$arrowPlaceholderBox,
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('versionDateLeft'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{ctor: '[]'},
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_user$project$Render$createDateLabel(
+										_elm_lang$core$Maybe$Just(_p8.from)),
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(' >'),
+										_1: {ctor: '[]'}
+									})),
+							_1: {ctor: '[]'}
+						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('versionDateLeft'),
+								_0: _elm_lang$html$Html_Attributes$class('versionDateRight'),
 								_1: {ctor: '[]'}
 							},
 							{
@@ -15071,13 +15812,104 @@ var _user$project$Render$versionDatesPanel = function (vs) {
 									{ctor: '[]'},
 									A2(
 										_elm_lang$core$Basics_ops['++'],
-										_user$project$Render$createDateLabel(
-											_elm_lang$core$Maybe$Just(_p5._0.from)),
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(' >'),
+											_0: _elm_lang$html$Html$text('< '),
 											_1: {ctor: '[]'}
-										})),
+										},
+										_user$project$Render$createDateLabel(_p8.until))),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				});
+		} else {
+			var _p10 = _p7._1._0;
+			var _p9 = _p7._0;
+			var versionsInBetween = A2(
+				F2(
+					function (x, y) {
+						return x + y;
+					}),
+				-1,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					0,
+					A3(_user$project$Model$getDistance, _p9, _p10, ctx.history.versions)));
+			var middleLabel = _elm_lang$core$Native_Utils.eq(versionsInBetween, 0) ? _user$project$Render$createDateLabel(
+				_elm_lang$core$Maybe$Just(_p10.from)) : {
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						_elm_lang$core$Basics$toString(versionsInBetween),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							' version',
+							(_elm_lang$core$Native_Utils.cmp(versionsInBetween, 1) > 0) ? 's' : ''))),
+				_1: {ctor: '[]'}
+			};
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('versionDatesPanel'),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('versionDateLeft'),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{ctor: '[]'},
+								A2(
+									_elm_lang$core$Basics_ops['++'],
+									_user$project$Render$createDateLabel(
+										_elm_lang$core$Maybe$Just(_p9.from)),
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(' >'),
+										_1: {ctor: '[]'}
+									})),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('versionDateCenter'),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$span,
+									{ctor: '[]'},
+									A2(
+										_elm_lang$core$Basics_ops['++'],
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('< '),
+											_1: {ctor: '[]'}
+										},
+										A2(
+											_elm_lang$core$Basics_ops['++'],
+											middleLabel,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(' >'),
+												_1: {ctor: '[]'}
+											}))),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -15086,7 +15918,7 @@ var _user$project$Render$versionDatesPanel = function (vs) {
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('versionDateCenter'),
+									_0: _elm_lang$html$Html_Attributes$class('versionDateRight'),
 									_1: {ctor: '[]'}
 								},
 								{
@@ -15101,47 +15933,10 @@ var _user$project$Render$versionDatesPanel = function (vs) {
 												_0: _elm_lang$html$Html$text('< '),
 												_1: {ctor: '[]'}
 											},
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												_user$project$Render$createDateLabel(
-													_elm_lang$core$Maybe$Just(_p7.from)),
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text(' >'),
-													_1: {ctor: '[]'}
-												}))),
+											_user$project$Render$createDateLabel(_p10.until))),
 									_1: {ctor: '[]'}
 								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('versionDateRight'),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$span,
-											{ctor: '[]'},
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text('< '),
-													_1: {ctor: '[]'}
-												},
-												_user$project$Render$createDateLabel(_p7.until))),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: _user$project$Render$arrowPlaceholderBox,
-									_1: {ctor: '[]'}
-								}
-							}
+							_1: {ctor: '[]'}
 						}
 					}
 				});
@@ -15149,30 +15944,19 @@ var _user$project$Render$versionDatesPanel = function (vs) {
 	}
 };
 var _user$project$Render$diffPanel = function (ctx) {
-	var paired = A3(
-		_elm_lang$core$List$map2,
-		F2(
-			function (v0, v1) {
-				return {ctor: '_Tuple2', _0: v0, _1: v1};
-			}),
-		{
-			ctor: '::',
-			_0: _elm_lang$core$Maybe$Nothing,
-			_1: A2(_elm_lang$core$List$map, _elm_lang$core$Maybe$Just, ctx.versions)
-		},
-		ctx.versions);
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('versions'),
-			_1: {ctor: '[]'}
-		},
-		A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Basics$uncurry(
-				_user$project$Render$viewVersion(ctx)),
-			paired));
+	var _p11 = ctx.toVersion;
+	if (_p11.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('Nothing to show');
+	} else {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('diffPanel'),
+				_1: {ctor: '[]'}
+			},
+			A3(_user$project$Render$viewDiff, ctx, ctx.fromVersion, _p11._0));
+	}
 };
 var _user$project$Render$detailPanel = function (ctx) {
 	return {
@@ -15186,85 +15970,30 @@ var _user$project$Render$detailPanel = function (ctx) {
 			},
 			{
 				ctor: '::',
-				_0: _user$project$Render$versionDatesPanel(ctx.versions),
+				_0: A2(_user$project$Render$navPanel, ctx, _user$project$Model$Bkwd),
 				_1: {
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$div,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('detailBody'),
+							_0: _elm_lang$html$Html_Attributes$class('detailCenterPanel'),
 							_1: {ctor: '[]'}
 						},
 						{
 							ctor: '::',
-							_0: _user$project$Render$arrowPlaceholderBox,
+							_0: _user$project$Render$versionDatesPanel(ctx),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$button,
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('arrowButton'),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$NavigateDiffBack),
-												_1: {ctor: '[]'}
-											}
-										},
-										_user$project$Render$checkNavBack(ctx)),
-									{
-										ctor: '::',
-										_0: _user$project$Render$arrow('leftArrow'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('diffPanel'),
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: _user$project$Render$diffPanel(ctx),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$button,
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('arrowButton'),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Events$onClick(_user$project$Model$NavigateDiffForward),
-														_1: {ctor: '[]'}
-													}
-												},
-												_user$project$Render$checkNavFwd(ctx)),
-											{
-												ctor: '::',
-												_0: _user$project$Render$arrow('rightArrow'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {
-											ctor: '::',
-											_0: _user$project$Render$arrowPlaceholderBox,
-											_1: {ctor: '[]'}
-										}
-									}
-								}
+								_0: _user$project$Render$diffPanel(ctx),
+								_1: {ctor: '[]'}
 							}
 						}),
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: A2(_user$project$Render$navPanel, ctx, _user$project$Model$Fwd),
+						_1: {ctor: '[]'}
+					}
 				}
 			}),
 		_1: {ctor: '[]'}
@@ -15324,38 +16053,33 @@ var _user$project$Render$objectListPanel = F2(
 	});
 var _user$project$Render$Context = F5(
 	function (a, b, c, d, e) {
-		return {history: a, wasVersion: b, isVersion: c, versions: d, modificationDate: e};
+		return {history: a, fromVersion: b, toVersion: c, versions: d, navigationLocks: e};
 	});
-var _user$project$Render$mkCtx = F2(
-	function (h, modDate) {
-		var split = A2(
-			_elm_community$list_extra$List_Extra$dropWhile,
-			function (v) {
-				return A3(_rluiten$elm_date_extra$Date_Extra_Compare$is, _rluiten$elm_date_extra$Date_Extra_Compare$After, v.from, modDate);
-			},
-			h.versions);
-		var isVersion = A2(_elm_community$list_extra$List_Extra_ops['!!'], split, 0);
-		var wasVersion = A2(_elm_community$list_extra$List_Extra_ops['!!'], split, 1);
+var _user$project$Render$mkCtx = F3(
+	function (h, _p12, navigationLockers) {
+		var _p13 = _p12;
+		var _p15 = _p13._1;
+		var _p14 = _p13._0;
 		var versions = _elm_community$maybe_extra$Maybe_Extra$values(
 			{
 				ctor: '::',
-				_0: wasVersion,
+				_0: _p14,
 				_1: {
 					ctor: '::',
-					_0: isVersion,
+					_0: _p15,
 					_1: {ctor: '[]'}
 				}
 			});
-		return A5(_user$project$Render$Context, h, wasVersion, isVersion, versions, modDate);
+		return A5(_user$project$Render$Context, h, _p14, _p15, versions, navigationLockers);
 	});
-var _user$project$Render$viewAsList = F3(
-	function (response, idx, modDate) {
+var _user$project$Render$viewAsList = F4(
+	function (response, idx, displayedVersions, navigationLocks) {
 		var history = A2(_elm_community$list_extra$List_Extra_ops['!!'], response.history, idx);
-		var _p8 = history;
-		if (_p8.ctor === 'Nothing') {
+		var _p16 = history;
+		if (_p16.ctor === 'Nothing') {
 			return {ctor: '[]'};
 		} else {
-			var ctx = A2(_user$project$Render$mkCtx, _p8._0, modDate);
+			var ctx = A3(_user$project$Render$mkCtx, _p16._0, displayedVersions, navigationLocks);
 			return {
 				ctor: '::',
 				_0: A2(
@@ -15511,7 +16235,7 @@ var _user$project$Main$headerBar = function (model) {
 										_0: _elm_lang$html$Html_Attributes$class('logo'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$src('../images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg'),
+											_0: _elm_lang$html$Html_Attributes$src('images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg'),
 											_1: {ctor: '[]'}
 										}
 									},
@@ -15564,7 +16288,7 @@ var _user$project$Main$styles = {
 			_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
 			_1: {
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$href('../css/ui.css'),
+				_0: _elm_lang$html$Html_Attributes$href('css/ui.css'),
 				_1: {ctor: '[]'}
 			}
 		},
@@ -15592,12 +16316,7 @@ var _user$project$Main$view_ = function (model) {
 				_1: {ctor: '[]'}
 			};
 		} else {
-			var _p3 = _p2._0;
-			return A3(
-				_user$project$Render$viewAsList,
-				_p3,
-				model.selected,
-				A2(_elm_lang$core$Maybe$withDefault, _p3.stamp, model.viewModification));
+			return A4(_user$project$Render$viewAsList, _p2._0, model.selected, model.displayedVersions, model.navigationLocks);
 		}
 	}();
 	return A2(
@@ -15630,97 +16349,126 @@ var _user$project$Main$view = function (model) {
 		},
 		model.redraw);
 };
-var _user$project$Main$navigateBack = function (model) {
-	var versions = A2(
-		_elm_lang$core$Maybe$andThen,
-		_elm_community$list_extra$List_Extra$init,
-		_user$project$Model$versions(model));
-	var getPrevious = function (date) {
-		return A2(
-			_elm_lang$core$Maybe$map,
-			function (_) {
-				return _.from;
-			},
+var _user$project$Main$flipNavigationLock = F2(
+	function (model, direction) {
+		var _p3 = model.displayedVersions;
+		var leftVersion = _p3._0;
+		var rightVersion = _p3._1;
+		var _p4 = model.navigationLocks;
+		var bkwdState = _p4._0;
+		var fwdState = _p4._1;
+		var flip = function (state) {
+			return _elm_lang$core$Native_Utils.eq(state, _user$project$Model$Locked) ? _user$project$Model$Unlocked : _user$project$Model$Locked;
+		};
+		var newstate = _elm_lang$core$Native_Utils.eq(direction, _user$project$Model$Fwd) ? flip(fwdState) : flip(bkwdState);
+		var newLeftVersion = function () {
+			var _p5 = newstate;
+			if (_p5.ctor === 'Unlocked') {
+				return _elm_community$maybe_extra$Maybe_Extra$join(
+					A3(
+						_elm_lang$core$Maybe$map2,
+						_user$project$Model$getPreviousVersion,
+						rightVersion,
+						_user$project$Model$versions(model)));
+			} else {
+				return leftVersion;
+			}
+		}();
+		var _p6 = function () {
+			var _p7 = direction;
+			if (_p7.ctor === 'Fwd') {
+				return {
+					ctor: '_Tuple2',
+					_0: bkwdState,
+					_1: flip(fwdState)
+				};
+			} else {
+				return {
+					ctor: '_Tuple2',
+					_0: flip(bkwdState),
+					_1: fwdState
+				};
+			}
+		}();
+		var newBkwdState = _p6._0;
+		var newFwdState = _p6._1;
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				navigationLocks: {ctor: '_Tuple2', _0: newBkwdState, _1: newFwdState},
+				displayedVersions: {ctor: '_Tuple2', _0: newLeftVersion, _1: rightVersion}
+			});
+	});
+var _user$project$Main$navigate = F2(
+	function (model, dir) {
+		if (!A4(
+			_user$project$Model$canNavigate,
 			A2(
-				_elm_lang$core$Maybe$andThen,
-				_elm_lang$core$List$head,
-				A2(
-					_elm_lang$core$Maybe$map,
-					_elm_lang$core$List$filter(
-						function (v) {
-							return _elm_lang$core$Native_Utils.cmp(
-								_elm_lang$core$Date$toTime(v.from),
-								_elm_lang$core$Date$toTime(date)) < 0;
-						}),
-					versions)));
-	};
-	var previous = function () {
-		var _p4 = model.viewModification;
-		if (_p4.ctor === 'Nothing') {
-			return _elm_lang$core$Maybe$Nothing;
+				_elm_lang$core$Maybe$withDefault,
+				{ctor: '[]'},
+				_user$project$Model$versions(model)),
+			model.displayedVersions,
+			dir,
+			model.navigationLocks)) {
+			return model;
 		} else {
-			var _p5 = _p4._0;
-			return A2(
-				_elm_community$maybe_extra$Maybe_Extra$or,
-				getPrevious(_p5),
-				_elm_lang$core$Maybe$Just(_p5));
+			var getAdjacent = _elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _user$project$Model$getNextVersion : _user$project$Model$getPreviousVersion;
+			var _p8 = (_elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_lang$core$Basics$identity : _Fresheyeball$elm_tuple_extra$Tuple2$swap)(model.navigationLocks);
+			var l1 = _p8._0;
+			var l2 = _p8._1;
+			var _p9 = (_elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_lang$core$Basics$identity : _Fresheyeball$elm_tuple_extra$Tuple2$swap)(model.displayedVersions);
+			var v1 = _p9._0;
+			var v2 = _p9._1;
+			var versions = _user$project$Model$versions(model);
+			var v1AndV2Adjacent = _elm_lang$core$Native_Utils.eq(
+				_elm_community$maybe_extra$Maybe_Extra$join(
+					A3(_elm_lang$core$Maybe$map2, getAdjacent, v1, versions)),
+				v2);
+			var newV2 = (_elm_lang$core$Native_Utils.eq(l2, _user$project$Model$Unlocked) || (_elm_lang$core$Native_Utils.eq(l1, l2) || (_elm_lang$core$Native_Utils.eq(l2, _user$project$Model$Locked) && v1AndV2Adjacent))) ? _elm_community$maybe_extra$Maybe_Extra$join(
+				A3(_elm_lang$core$Maybe$map2, getAdjacent, v2, versions)) : v2;
+			var newV1 = function () {
+				var nextV1 = _elm_community$maybe_extra$Maybe_Extra$join(
+					A3(_elm_lang$core$Maybe$map2, getAdjacent, v1, versions));
+				return ((_elm_lang$core$Native_Utils.eq(l1, _user$project$Model$Locked) && _elm_lang$core$Native_Utils.eq(l2, _user$project$Model$Unlocked)) || _elm_lang$core$Native_Utils.eq(nextV1, newV2)) ? v1 : nextV1;
+			}();
+			var newDV = (_elm_lang$core$Native_Utils.eq(dir, _user$project$Model$Fwd) ? _elm_lang$core$Basics$identity : _Fresheyeball$elm_tuple_extra$Tuple2$swap)(
+				{ctor: '_Tuple2', _0: newV1, _1: newV2});
+			return _elm_lang$core$Native_Utils.update(
+				model,
+				{displayedVersions: newDV});
 		}
-	}();
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{viewModification: previous});
-};
-var _user$project$Main$navigateForward = function (model) {
-	var versions = _user$project$Model$versions(model);
-	var next = function () {
-		var _p6 = model.viewModification;
-		if (_p6.ctor === 'Nothing') {
-			return _elm_lang$core$Maybe$Nothing;
-		} else {
-			var _p7 = _p6._0;
-			return A2(
-				_elm_community$maybe_extra$Maybe_Extra$or,
-				A2(
-					_elm_lang$core$Maybe$map,
-					function (_) {
-						return _.from;
-					},
-					A2(
-						_elm_lang$core$Maybe$andThen,
-						_elm_community$list_extra$List_Extra$last,
-						A2(
-							_elm_lang$core$Maybe$map,
-							_elm_lang$core$List$filter(
-								function (v) {
-									return _elm_lang$core$Native_Utils.cmp(
-										_elm_lang$core$Date$toTime(v.from),
-										_elm_lang$core$Date$toTime(_p7)) > 0;
-								}),
-							versions))),
-				_elm_lang$core$Maybe$Just(_p7));
-		}
-	}();
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{viewModification: next});
-};
+	});
 var _user$project$Main$upd = function (model) {
-	var viewModification = A2(
-		_elm_lang$core$Maybe$map,
-		function (_) {
-			return _.from;
-		},
-		A2(
-			_elm_lang$core$Maybe$andThen,
-			_elm_lang$core$List$head,
-			_user$project$Model$versions(model)));
+	var displayedVersions = function () {
+		var _p10 = A2(
+			_elm_lang$core$Maybe$withDefault,
+			{ctor: '[]'},
+			_user$project$Model$versions(model));
+		if (_p10.ctor === '[]') {
+			return {ctor: '_Tuple2', _0: _elm_lang$core$Maybe$Nothing, _1: _elm_lang$core$Maybe$Nothing};
+		} else {
+			if (_p10._1.ctor === '[]') {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Maybe$Nothing,
+					_1: _elm_lang$core$Maybe$Just(_p10._0)
+				};
+			} else {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Maybe$Just(_p10._1._0),
+					_1: _elm_lang$core$Maybe$Just(_p10._0)
+				};
+			}
+		}
+	}();
 	return _elm_lang$core$Native_Utils.update(
 		model,
-		{redraw: !model.redraw, viewModification: viewModification});
+		{redraw: !model.redraw, displayedVersions: displayedVersions});
 };
 var _user$project$Main$errMsg = function (err) {
-	var _p8 = err;
-	switch (_p8.ctor) {
+	var _p11 = err;
+	switch (_p11.ctor) {
 		case 'Timeout':
 			return 'timeout';
 		case 'NetworkError':
@@ -15728,18 +16476,18 @@ var _user$project$Main$errMsg = function (err) {
 		case 'BadStatus':
 			return 'unexpected status';
 		case 'BadPayload':
-			return A2(_elm_lang$core$Basics_ops['++'], 'bad response ', _p8._0);
+			return A2(_elm_lang$core$Basics_ops['++'], 'bad response ', _p11._0);
 		default:
 			return 'invalid URL';
 	}
 };
 var _user$project$Main$fromFetch = function (r) {
-	var _p9 = r;
-	if (_p9.ctor === 'Ok') {
-		return _toastal$either$Either$Right(_p9._0);
+	var _p12 = r;
+	if (_p12.ctor === 'Ok') {
+		return _toastal$either$Either$Right(_p12._0);
 	} else {
 		return _toastal$either$Either$Left(
-			_user$project$Main$errMsg(_p9._0));
+			_user$project$Main$errMsg(_p12._0));
 	}
 };
 var _user$project$Main$init = function (loc) {
@@ -15747,20 +16495,21 @@ var _user$project$Main$init = function (loc) {
 	var resource = _elm_lang$core$String$isEmpty(hash) ? '203.133.248.0/24' : hash;
 	return {
 		ctor: '_Tuple2',
-		_0: A5(
+		_0: A6(
 			_user$project$Model$Model,
 			resource,
 			_toastal$either$Either$Left('Searching…'),
 			0,
-			_elm_lang$core$Maybe$Nothing,
+			{ctor: '_Tuple2', _0: _elm_lang$core$Maybe$Nothing, _1: _elm_lang$core$Maybe$Nothing},
+			{ctor: '_Tuple2', _0: _user$project$Model$Unlocked, _1: _user$project$Model$Unlocked},
 			false),
 		_1: _user$project$Main$search(resource)
 	};
 };
 var _user$project$Main$update = F2(
 	function (msg, model) {
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p13 = msg;
+		switch (_p13.ctor) {
 			case 'Nada':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'Fetched':
@@ -15770,20 +16519,20 @@ var _user$project$Main$update = F2(
 						_elm_lang$core$Native_Utils.update(
 							model,
 							{
-								response: _user$project$Main$fromFetch(_p10._0),
+								response: _user$project$Main$fromFetch(_p13._0),
 								selected: 0
 							})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UrlChange':
-				return _user$project$Main$init(_p10._0);
+				return _user$project$Main$init(_p13._0);
 			case 'Select':
 				return {
 					ctor: '_Tuple2',
 					_0: _user$project$Main$upd(
 						_elm_lang$core$Native_Utils.update(
 							model,
-							{selected: _p10._0})),
+							{selected: _p13._0})),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'StartSearch':
@@ -15791,18 +16540,18 @@ var _user$project$Main$update = F2(
 					ctor: '_Tuple2',
 					_0: model,
 					_1: _elm_lang$navigation$Navigation$newUrl(
-						A2(_elm_lang$core$Basics_ops['++'], '#', _p10._0))
+						A2(_elm_lang$core$Basics_ops['++'], '#', _p13._0))
 				};
-			case 'NavigateDiffForward':
+			case 'NavigateDiff':
 				return {
 					ctor: '_Tuple2',
-					_0: _user$project$Main$navigateForward(model),
+					_0: A2(_user$project$Main$navigate, model, _p13._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
 				return {
 					ctor: '_Tuple2',
-					_0: _user$project$Main$navigateBack(model),
+					_0: A2(_user$project$Main$flipNavigationLock, model, _p13._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
