@@ -122,12 +122,12 @@ viewDiff ctx was is =
         diffOutput = Rdap.output <| Rdap.diff rWas rIs
     in case was of
            Nothing -> [ div [class "diffPanelItem"] [ div [class "rdap-is"] [diffOutput] ] ]
-           _       -> [ div [class "diffPanelItem rdap-was"] [diffOutput],
+           _       -> [ --div [class "diffPanelItem rdap-was"] [diffOutput],
                         div [class "diffPanelItem rdap-is"] [diffOutput]
                       ]
 
 prettifyDate : Date -> Html a
-prettifyDate = text << formatUtc config "%d/%m/%Y %H:%M"
+prettifyDate = text << formatUtc config "%d/%m/%y"
 
 arrow : String -> Html a
 arrow svgClass =

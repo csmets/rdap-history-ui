@@ -94,7 +94,7 @@ newlined dv =
                                                  else convertModifiedValue (s,d)) mvs
 
 output : RdapDisplay Diff -> Html Msg
-output rdap = table []
+output rdap = ul [class "rdap-display"]
         <| List.concat
         <| List.intersperse [spacer]
         <| List.map (.object >> object) rdap
@@ -134,17 +134,18 @@ modifiedWordClass dm =
         _       -> ""
 
 row : DiffMode -> Html a -> List (Html a) -> Html a
-row d l r = tr [ diffattr d ] [ td [] [ l ], td [] r ]
+row d l r = li [ class <| "rdap-row " ++ (diffClass d) ] [ div [ class "rdap-label" ] [ l ],
+                                                            div [ class "rdap-value" ] r ]
 
-diffattr : DiffMode -> Attribute a
-diffattr d = case d of
-    Unchanged   -> class "diff-unchanged"
-    Modified    -> class "diff-modified"
-    New         -> class "diff-new"
-    Deleted     -> class "diff-deleted"
+diffClass : DiffMode -> String
+diffClass d = case d of
+    Unchanged   -> "diff-unchanged"
+    Modified    -> "diff-modified"
+    New         -> "diff-new"
+    Deleted     -> "diff-deleted"
 
 spacer : Html a
-spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
+spacer = li [ class "spacer" ] [ hr [] []  ]
 
 {- Functions to assist rendering into an RdapDisplay -}
 

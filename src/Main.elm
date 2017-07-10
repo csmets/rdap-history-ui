@@ -4,7 +4,7 @@ import Date exposing (fromString, toTime)
 import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
-import Html exposing (nav, div, node, Html, li, h1, text, img, form, input, ul)
+import Html exposing (nav, div, node, Html, li, h1, text, img, form, input, ul, select, option)
 import Html.Attributes exposing (class, value, id, rel, href, src, autofocus)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
@@ -126,13 +126,18 @@ styles = [ node "link" [ rel "stylesheet", href "css/ui.css" ] [] ]
 
 headerBar : Model -> List (Html Msg)
 headerBar model =
-    [ nav []
-        [ ul []
-            [ li [] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
-            , li [] [ h1 [] [ text "Whowas" ] ]
-            , li [] [ searchBox model ]
+    [ div [class "header"]
+            [ div [class "headerItem"] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] [] ]
+            , div [class "headerItem title"] [ text "Whowas" ]
+            , div [class "headerItem"] [ searchBox model ]
             ]
-        ]
+             , div [class "searchResult"] [ div [] [text "Search results:"],
+                                            div [] [select [class "selectResource"] [
+                                               option [] [text "203.133.248.0 - 203.133.251.255"],
+                                               option [] [text "203.0.0.0 - 203.133.251.255"],
+                                               option [] [text "202.0.0.0 - 203.133.251.255"],
+                                               option [] [text "0.0.0.0 - 203.133.251.255"]
+                                             ]]]
     ]
 
 searchBox : Model -> Html Msg

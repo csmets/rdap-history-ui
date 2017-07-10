@@ -27,7 +27,7 @@ $lockedButtonColour: #732a2a
     +prefixed(flex-shrink, $factor)
 
 =floaty($char)
-    td:first-child:before
+    .rdap-lable:before
         width: 1em
         content: $char
         float: left
@@ -74,31 +74,36 @@ abbr
     h1
         margin: 0 2em 0.25em 0
     .range
-        margin: 0 0 0.25em 0.2em
-        &::after
-            content: "  ⟵ enter IP address or handle"
-            color: #999
-            animation: bouncer 2s, vanish 0.5s ease 10s forwards
-        input
-            font-size: large
+        //margin: 0 0 0.25em 0.2em
+        margin: 0.5em
+//        &::after
+//            content: "  ⟵ enter IP address or handle"
+//            color: #999
+//            animation: bouncer 2s, vanish 0.5s ease 10s forwards
 
-nav
+.header
+    +flex
+    flex-wrap: wrap
+    justify-content: space-around
+    align-items: center
     color: white
     background-color: #003D5E
     margin: 0
     padding: 0.75em
 
-    ul
-        margin: 0
-        padding: 0
+    .headerItem
+        //flex: 1 1 auto
 
-        li
-            display: inline-block
-            list-style-type: none
+    .title
+      font-size: x-large
+      font-weight: bold
 
-            img
-                margin-bottom: -0.9em
-                height: 2.7em
+    img
+        margin-bottom: -0.9em
+        height: 2.7em
+
+    input
+        font-size: large
 
 .object
     margin: 5em
@@ -111,6 +116,7 @@ nav
     height: 100%
 
     .objectList
+        display: none
         background-color: #f4f4f4
         margin: 0
         padding: 1em 0 0 0
@@ -139,7 +145,7 @@ nav
         +flex(column)
         height: 100%
         flex: 0 0 auto
-        width: 6em
+        width: 2em
 
         .navPanelItem
             +flex(column)
@@ -149,7 +155,11 @@ nav
 
 
     .detailCenterPanel
+        +flex(column)
         flex: 5 1 auto
+        // width: 100vw
+        height: 100%
+        overflow: hidden
 
     .versionDatesPanel
         +flex
@@ -159,6 +169,7 @@ nav
         background-color: #006FAB
         height: 1.2em
         align-items: center
+        //font-size: x-small
 
         .versionDateItem
             +flex
@@ -178,6 +189,7 @@ nav
             span
                 margin-left: auto
         .moreIconSvg
+            display: none
             fill: white
             width: 0.8em
             height: 0.8em
@@ -186,6 +198,9 @@ nav
 
     .diffPanel
         flex: 1 1 auto
+        //width: 100vw
+        height: 100vw
+        overflow: auto
 
     .arrowButton
         flex: 0 0 auto
@@ -210,6 +225,7 @@ nav
 
     .arrow
         stroke: black
+        height: 5em
 
     .rightArrow
         @extend .arrow
@@ -221,13 +237,12 @@ nav
     .lockButton
         flex: 0 0 auto
         margin-top: 1em
-        height: 30px
-        width: 30px
+        height: 2em
+        width: 2em
         background-color: transparent
         border: none
         outline: none
         transition-duration: 0.3s
-
 
     .lockedButton
         @extend .lockButton
@@ -265,6 +280,9 @@ nav
 .rdap-was
     @extend .rdap
 
+    //TODO: remove
+    display: none
+
     .diff-modified
         background-color: #ffffdd
         +floaty("!")
@@ -297,16 +315,47 @@ nav
     .diff-unchanged
         +floaty(" ")
     .diff-deleted
-        color: transparent
-        background-color: #f4f4f4
-        td:first-child
-            color: transparent
-        a
-            display: none
+        //color: transparent
+        background-color: #ffdce0
+        //background-color: #f4f4f4
+        //td:first-child
+        //    color: transparent
+        //a
+        //    display: none
     .diff-word-new
-        background-color: #ffff00
+        //background-color: #ffff00
+        background-color: #ddffdd
     .diff-word-deleted
-        display: none
+        //display: none
+        //background-color: #ffff00
+        background-color: #ffdce0
+        text-decoration: line-through
+
+.rdap-display
+    //+flex
+    //flex-wrap: wrap;
+    // align-items: center;
+    margin: 0 auto
+    max-width: 800px
+
+    .rdap-row
+        +flex
+        flex-wrap: wrap
+        align-items: center;
+        //max-width: 360px
+        margin-bottom: 0.5em
+        .rdap-label
+            flex: 1 0 340px
+            max-width: 340px
+            vertical-align: top
+            font-family: $title-font
+            color: rgb(140, 140, 140)
+            //text-align: right
+            padding-right: 1em
+        .rdap-value
+            flex: 1 0 340px
+            max-width: 340px
+
 
 .diffPanel
     +flex
