@@ -24,6 +24,7 @@ type alias Model =
     , selected : Int
     , displayedVersions : (Maybe Version, Maybe Version)
     , navigationLocks : (LockerState, LockerState)
+    , versionDateDetail : Maybe Date
     , redraw : Bool
     }
 
@@ -35,6 +36,7 @@ type Msg
     | Select Int
     | NavigateDiff NavigationDirection
     | FlipNavLock NavigationDirection
+    | FlipShowVersionDateDetail (Maybe Date)
 
 type Selected
     = Selected
