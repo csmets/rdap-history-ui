@@ -63,7 +63,7 @@ $phone-bp: 640px
     0%
         opacity: 1
     50%
-        opacity: 0
+        opacity: 0.5
     100%
         opacity: 1
 
@@ -201,7 +201,7 @@ abbr
         flex-wrap: nowrap
         color: white
         background-color: #006FAB
-        height: 1.2em
+        height: 1.4em
         align-items: center
 
         .versionDateItem
@@ -234,16 +234,21 @@ abbr
             background: transparent
             border: none
             outline: none
+            svg
+                transform: rotate(0deg)
+                transition: transform 1s ease-in-out
         .pulseFlipShowVersionButton
             @extend .flipShowVersionButton
-            animation: pulse 1.3s infinite
+            //animation: pulse 1.3s infinite
+            svg
+                transform: rotate(540deg)
+                transition: transform 1s ease-in-out
 
         .moreIconSvg
             fill: white
-            width: 0.8em
-            height: 0.8em
-            margin-right: 0.3em
-            margin-left: 0.3em
+            width: 1.1em
+            height: 1.1em
+            margin-left: 0.5em
 
 
     .versionDateDetailPanel
@@ -256,7 +261,7 @@ abbr
         border-radius: 0px 0px 15px 15px
 
     .showPanel
-        height: 1.3em
+        height: 1.4em
 
     .hidePanel
         height: 0em

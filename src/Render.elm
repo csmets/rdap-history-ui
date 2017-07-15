@@ -150,12 +150,6 @@ prettifyDate d df =
                         Long  -> "dateLong"
     in span [class spanClass] [text <| formatUtc config pattern d]
 
-arrow : String -> Html a
-arrow svgClass =
-    svg [viewBox "0 0 50 100", Svg.Attributes.class svgClass]
-        [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
-                   Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
-
 createDateLabel : Maybe Date -> Maybe Date -> List (Html Msg)
 createDateLabel md versionDateDetail =
     case md of
@@ -166,11 +160,17 @@ createDateLabel md versionDateDetail =
                        buttonClass = if flipTo == Nothing then "pulseFlipShowVersionButton" else "flipShowVersionButton"
                    in [ prettifyDate d Short, prettifyDate d Long,
                          button [class buttonClass, onClick (FlipShowVersionDateDetail flipTo)]
-                                [moreIcon "moreIconSvg"]
+                                [expandIcon "moreIconSvg"]
                       ]
 
 
  -- Icons
+
+arrow : String -> Html a
+arrow svgClass =
+    svg [viewBox "0 0 50 100", Svg.Attributes.class svgClass]
+        [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
+                   Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
 
 moreIcon : String -> Html a
 moreIcon svgClass =
@@ -185,6 +185,20 @@ moreIcon svgClass =
                 Svg.circle [Svg.Attributes.cx "81.66", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
                                 Svg.Attributes.fill "black"] []
                 ]
+          ],
+        Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
+                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []
+    ]
+
+expandIcon : String -> Html a
+expandIcon svgClass =
+    svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
+        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
+                Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
+                              Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
+                path [strokeWidth "17", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
+                          Svg.Attributes.d "M 20 35 L 50 65 L 80 35", Svg.Attributes.stroke "black"] []
+              ]
           ],
         Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
                         Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []

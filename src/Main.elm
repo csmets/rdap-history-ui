@@ -78,7 +78,7 @@ upd model =
                                []            -> (Nothing, Nothing)
                                v :: []       -> (Nothing, Just v)
                                v1 :: v2 :: _ -> (Just v2, Just v1)
-            in { model | redraw = not model.redraw, displayedVersions = displayedVersions }
+            in { model | redraw = not model.redraw, displayedVersions = displayedVersions, versionDateDetail = Nothing }
 
 navigate : Model -> NavigationDirection -> Model
 navigate model dir =
@@ -97,7 +97,7 @@ navigate model dir =
                               then v1
                               else nextV1
              newDV = (if dir == Fwd then identity else Tuple2.swap) (newV1, newV2)
-         in { model | displayedVersions = newDV }
+         in { model | displayedVersions = newDV , versionDateDetail = Nothing }
 
 flipNavigationLock : Model -> NavigationDirection -> Model
 flipNavigationLock model direction =
@@ -111,7 +111,8 @@ flipNavigationLock model direction =
         newLeftVersion = case newstate of
                               Unlocked -> join <| map2 getPreviousVersion rightVersion (versions model)
                               Locked   -> leftVersion
-    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (newLeftVersion, rightVersion)}
+    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (newLeftVersion, rightVersion),
+                                  versionDateDetail = Nothing}
 
 flipShowVersionDateDetail : Model -> Maybe Date -> Model
 flipShowVersionDateDetail m d = { m | versionDateDetail = d }
@@ -165,7 +166,9 @@ searchForm = target (childNode 0 (Json.Decode.map StartSearch (Json.Decode.field
 search : String -> Cmd Msg
 search resource =
     let typ   = url_of_typ <| infer_type resource
-        url   = "//rdap.apnic.net/history/" ++ typ ++ "/" ++ resource
+        -- TODO: revert the following
+        -- url   = "//rdap.apnic.net/history/" ++ typ ++ "/" ++ resource
+        url   = "//localhost:8000/rdap_output.json"
         fetch = Http.toTask <| Http.get url Decode.history
     in fetch |> Task.andThen (\r -> Task.map (\d -> Response d r) Date.now)
              |> Task.attempt Fetched
