@@ -4,7 +4,7 @@ import Date exposing (Date)
 import Date.Extra.Config.Config_en_au exposing (config)
 import Date.Extra.Compare exposing (Compare2(..), is)
 import Date.Extra.Format exposing (formatUtc, isoDateFormat)
-import Html exposing (div, Html, ol, li, span, text, button)
+import Html exposing (div, Html, ol, li, span, text, button, select, option)
 import Html.Attributes exposing (class, value, id, title, disabled, style, src)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import List exposing (length, head)
@@ -43,7 +43,9 @@ viewAsList response idx displayedVersions navigationLocks versionDateDetail =
     in case history of
            Nothing -> [] -- TODO: will never happen. deal with it differently?
            Just h -> let ctx = mkCtx h displayedVersions navigationLocks versionDateDetail
-                     in [div [class "historyPane"] ((objectListPanel response.history idx) ++ (detailPanel ctx))]
+                     in [div [class "historyPane"] ((objectListPanel response.history idx) ++
+                                                        (objectListMobile response.history idx) ++
+                                                        (detailPanel ctx))]
 
 -- Selection Panel
 
@@ -58,6 +60,17 @@ viewSummary sel idx h = li
         [ class (if sel == idx then "selected" else "" )
         , onClick (Select idx) ]
         [ span [ class "handle" ] [ text h.identifier.handle ] ]
+
+objectListMobile : List History -> Int -> List (Html Msg)
+objectListMobile historyList idx =
+    if length historyList <= 1
+    then []
+    else [div[class "objectListMobile"] [text "Search results: ", dropdownResultsMobile historyList idx]]
+
+dropdownResultsMobile : List History -> Int -> Html Msg
+dropdownResultsMobile historyList idx =
+    let clickedIndex s = Result.withDefault 0 (String.toInt s)
+    in select [Html.Events.onInput (\s -> Select <| clickedIndex s)] <| List.indexedMap (\x h -> option [Html.Attributes.value <| toString x] [text h.identifier.handle]) historyList
 
 -- Detail Panel
 
@@ -133,11 +146,15 @@ viewDiff : Context -> Maybe Version -> Version -> List (Html Msg)
 viewDiff ctx was is =
     let rWas = map (Rdap.render ctx.history.identifier << .object) was
         rIs  = Rdap.render ctx.history.identifier is.object
-        diffOutput = Rdap.output <| Rdap.diff rWas rIs
+        diff = Rdap.diff rWas rIs
+        diffOutput = Rdap.output diff
+        mobileDiffOutput = Rdap.mobileOutput diff
     in case was of
-           Nothing -> [ div [class "diffPanelItem"] [ div [class "rdap-is"] [diffOutput] ] ]
+           Nothing -> [ div [class "diffPanelItem"] [div [class "rdap-is"] [diffOutput] ],
+                             div [class "rdap-mobile"] [mobileDiffOutput]]
            _       -> [ div [class "diffPanelItem rdap-was"] [diffOutput],
-                        div [class "diffPanelItem rdap-is"] [diffOutput]
+                        div [class "diffPanelItem rdap-is"] [diffOutput],
+                        div [class "rdap-mobile"] [mobileDiffOutput]
                       ]
 
 prettifyDate : Date -> DateFormat -> Html a

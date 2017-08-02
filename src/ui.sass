@@ -5,7 +5,7 @@ $title-font: 'Nunito', 'Arial', sans-serif
 $detail-font: 'Nunito', 'Arial', sans-serif
 $existed: rgb(151, 223, 129)
 $lockedButtonColour: #732a2a
-$phone-bp: 640px
+$phone-bp: 800px
 
 =prefixed($name, $value)
     -webkit-#{$name}: $value
@@ -29,6 +29,14 @@ $phone-bp: 640px
 
 =floaty($char)
     td:first-child:before
+        width: 1em
+        content: $char
+        float: left
+        text-align: left
+
+=floaty-mobile($char)
+    &:before
+        color: rgb(140, 140, 140)
         width: 1em
         content: $char
         float: left
@@ -141,12 +149,13 @@ abbr
     margin: 5em
 
 .historyPane
-    +flex
+    +flex(column)
     width: 100vw
     min-width: 0
     min-height: 0
     height: 100%
-
+    @media screen and (min-width: $phone-bp)
+        +flex
     .objectList
         display: none
 
@@ -170,9 +179,21 @@ abbr
                 &.selected
                     background-color: #a9c1d6
 
+
+    .objectListMobile
+        display: flex
+        justify-content: space-around
+        flex: 0 0 auto
+        padding: 0.5em
+        color: white
+        background: darkgray
+        @media screen and (min-width: $phone-bp)
+            display: none
+
     .detailPanel
         +flex
         width: 100%
+        height: 100%
         overflow: hidden
         flex-wrap: nowrap
 
@@ -193,7 +214,10 @@ abbr
 
 
     .detailCenterPanel
+        +flex(column)
         flex: 5 1 auto
+        height: 100%
+        overflow: hidden
 
     .versionDatesPanel
         +flex
@@ -203,6 +227,7 @@ abbr
         background-color: #006FAB
         height: 1.4em
         align-items: center
+        flex: 0 0 auto
 
         .versionDateItem
             +flex
@@ -262,12 +287,16 @@ abbr
 
     .showPanel
         height: 1.4em
+        flex: 0 0 auto
 
     .hidePanel
         height: 0em
+        flex: 0 0 auto
 
     .diffPanel
         flex: 1 1 auto
+        height: 100vw
+        overflow: auto
 
     .arrowButton
         flex: 0 0 auto
@@ -397,6 +426,40 @@ abbr
     .diff-word-deleted
         display: none
 
+.rdap-mobile
+    padding-top: 0.5em
+    font-family: $detail-font
+
+    @media screen and (min-width: $phone-bp)
+        display: none
+
+    .diff-modified
+        background-color: #ffffdd
+        +floaty-mobile("!")
+    .diff-new
+        background-color: #ddffdd
+        +floaty-mobile("+")
+    .diff-unchanged
+        +floaty-mobile(" ")
+    .diff-deleted
+        color: transparent
+        background-color: #f4f4f4
+    .diff-word-new
+        background-color: #acf2bd
+    .diff-word-deleted
+        background-color: #ffa2ad
+        text-decoration: line-through
+    .mobileLineTitle
+        color: rgb(140, 140, 140)
+    .mobileRemovedLine
+        background-color: #ffdce0
+        text-decoration: line-through
+    .mobileAddedLine
+        background-color: #ddffdd
+    hr
+        margin-top: 0.5em
+        margin-bottom: 0.5em
+
 .diffPanel
     +flex
     overflow: hidden
@@ -407,8 +470,10 @@ abbr
 
     .diffPanelItem
         flex: 1
-        display: inline-block
+        display: none
         padding: 0 0.7em
+        @media screen and (min-width: $phone-bp)
+            display: inline-block
 
     .diffPanelItem:first-child .diff
         border-left: none

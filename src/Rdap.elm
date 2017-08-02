@@ -1,4 +1,4 @@
-module Rdap exposing (objectClass, handle, render, output, diff)
+module Rdap exposing (objectClass, handle, render, output, mobileOutput, diff)
 
 -- The renderers in this module are quite specific to APNIC's use profile of RDAP.
 -- Pull requests making the rendering less rigidly fixed to one profile are very welcome.
@@ -108,6 +108,38 @@ line { label, value, display, diffMode } = case display of
     Lookup       -> row diffMode (text label) [ a [ href ("#" ++ flatText value) ] (convertValue value) ]
     Preformatted -> row diffMode (text label) [ pre [] (convertValue value) ]
 
+mobileOutput : RdapDisplay Diff -> Html Msg
+mobileOutput rdap =
+    div [class "mobileRdapDiff"]
+        (List.concat <| List.intersperse [mobileSpacer] <| List.map (mobileObject << .object) rdap)
+
+mobileObject : DisplayObject Diff -> List (Html Msg)
+mobileObject = List.map mobileLine
+
+mobileLine : DisplayLine Diff -> Html Msg
+mobileLine {label, value, display, diffMode} =
+    let values =
+          case value of
+            ModifiedValue mvs -> mobileModifiedValue display mvs
+            _                 -> mobileValue display value
+    in div [class "mobileLine"] [
+         div [class <| diffattr diffMode] <| [div [class "mobileLineTitle" ] [text label]] ++ values
+        ]
+
+mobileValue : DisplayMode -> DisplayValue -> List (Html Msg)
+mobileValue mode value =
+    case mode of
+        Text         -> newlined value
+        Lookup       -> [ a [ href ("#" ++ flatText value) ] (convertValue value) ]
+        Preformatted -> [ pre [] (convertValue value) ]
+
+mobileModifiedValue : DisplayMode -> List (String, DiffMode) -> List (Html Msg)
+mobileModifiedValue mode mvs =
+    let removed = filter (\(v, dm) -> dm /= New) mvs
+        added = filter (\(v, dm) -> dm /= Deleted) mvs
+    in [div [class "mobileRemovedLine"] (mobileValue mode <| ModifiedValue removed),
+        div [class "mobileAddedLine"] (mobileValue mode <| ModifiedValue added)]
+
 flatText : DisplayValue -> String
 flatText dv =
     case dv of
@@ -134,17 +166,20 @@ modifiedWordClass dm =
         _       -> ""
 
 row : DiffMode -> Html a -> List (Html a) -> Html a
-row d l r = tr [ diffattr d ] [ td [] [ l ], td [] r ]
+row d l r = tr [ class <| diffattr d ] [ td [] [ l ], td [] r ]
 
-diffattr : DiffMode -> Attribute a
+diffattr : DiffMode -> String
 diffattr d = case d of
-    Unchanged   -> class "diff-unchanged"
-    Modified    -> class "diff-modified"
-    New         -> class "diff-new"
-    Deleted     -> class "diff-deleted"
+    Unchanged   -> "diff-unchanged"
+    Modified    -> "diff-modified"
+    New         -> "diff-new"
+    Deleted     -> "diff-deleted"
 
 spacer : Html a
 spacer = tr [ class "spacer" ] [ td [ colspan 2 ] [ hr [] [] ] ]
+
+mobileSpacer : Html a
+mobileSpacer = hr [] []
 
 {- Functions to assist rendering into an RdapDisplay -}
 
