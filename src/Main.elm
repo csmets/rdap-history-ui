@@ -62,7 +62,7 @@ update msg model = case msg of
     UrlChange l ->
         init l
     Select i ->
-        ( upd { model | selected = i }, Cmd.none )
+        ( upd { model | selected = i, navigationLocks = (Unlocked, Unlocked) }, Cmd.none )
     StartSearch s ->
         ( model, Navigation.newUrl ("#" ++ s) )
     NavigateDiff direction ->

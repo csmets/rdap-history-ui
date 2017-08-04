@@ -97,8 +97,8 @@ versionDatesPanel ctx =
     case ctx.versions of
         []            -> text ""
         v :: []       -> div [class "versionDatesPanel"] [
-                                div [class "versionDateLeft"] [span [] ((createDateLabel (Just v.from) ctx.versionDateDetail) ++ [text " >"])],
-                                div [class "versionDateRight"] [span []([text "< "] ++ createDateLabel v.until ctx.versionDateDetail)]
+                                div [class "versionDateLeft"] [span [] ((createDateLabel (Just v.from) ctx.versionDateDetail) ++ [text ">"])],
+                                div [class "versionDateRight"] [span []([text "<"] ++ createDateLabel v.until ctx.versionDateDetail)]
                             ]
         v1 :: v2 :: _ ->
             let versionsInBetween = (+) (-1) <| withDefault 0 <| getDistance v1 v2 ctx.history.versions
@@ -108,9 +108,9 @@ versionDatesPanel ctx =
                                         " version" ++ (if versionsInBetween > 1 then "s" else "")]
             in div [class "versionDatesPanel"] [
                                    div [class "versionDateLeft"]
-                                       [span [] ((createDateLabel (Just v1.from) ctx.versionDateDetail) ++ [text " >"])],
-                                   div [class "versionDateCenter"] [span [] ([text "< "] ++ middleLabel ++ [text " >"])],
-                                   div [class "versionDateRight"] [span [] ([text "< "] ++ createDateLabel v2.until ctx.versionDateDetail)]
+                                       [span [] ((createDateLabel (Just v1.from) ctx.versionDateDetail) ++ [text ">"])],
+                                   div [class "versionDateCenter"] [span [] ([text "<"] ++ middleLabel ++ [text ">"])],
+                                   div [class "versionDateRight"] [span [] ([text "<"] ++ createDateLabel v2.until ctx.versionDateDetail)]
                                 ]
 
 versionDateDetailPanel : Context -> Html a
@@ -174,12 +174,13 @@ createDateLabel md versionDateDetail =
         Just d  -> let flipTo = case versionDateDetail of
                                     Nothing -> md
                                     Just vd -> if (is Same d vd) then Nothing else md
-                       buttonClass = if flipTo == Nothing then "pulseFlipShowVersionButton" else "flipShowVersionButton"
+                       (buttonClass, tooltipText) = if flipTo == Nothing
+                                                    then ("pressedFlipShowVersionButton", "Hide date detail")
+                                                    else ("flipShowVersionButton", "Show date detail")
                    in [ prettifyDate d Short, prettifyDate d Long,
-                         button [class buttonClass, onClick (FlipShowVersionDateDetail flipTo)]
+                         button [class buttonClass, onClick (FlipShowVersionDateDetail flipTo), title tooltipText]
                                 [expandIcon "moreIconSvg"]
                       ]
-
 
  -- Icons
 
