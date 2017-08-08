@@ -149,19 +149,22 @@ abbr
             display: none
 
     .detailPanel
-        +flex
+        +flex(column)
         width: 100%
         height: 100%
         overflow: hidden
         flex-wrap: nowrap
 
+        @media screen and (min-width: $phone-bp)
+            +flex
+
     .navPanel
-        +flex(column)
-        height: 100%
-        flex: 0 0 auto
-        width: 2.2em
+        display: none
 
         @media screen and (min-width: $phone-bp)
+            +flex(column)
+            height: 100%
+            flex: 0 0 auto
             width: 6em
 
         .navPanelItem
@@ -169,6 +172,19 @@ abbr
             flex: 1
             justify-content: flex-start
             align-items: center
+
+    .navBottomPanel
+        +flex
+        flex: 0 0 auto
+        height: 5em
+        justify-content: space-around
+
+        @media screen and (min-width: $phone-bp)
+            display: none
+
+        button
+            margin-right: 0.6em
+            margin-left: 0.6em
 
     .detailCenterPanel
         +flex(column)
@@ -186,6 +202,12 @@ abbr
         align-items: center
         flex: 0 0 auto
         font-size: 3.5vw
+        padding-right: 0.6em
+        padding-left: 0.6em
+
+        @media screen and (min-width: $phone-bp)
+            padding-right: 0
+            padding-left: 0
 
         @media screen and (min-width: 400px)
             font-size: inherit
@@ -438,6 +460,12 @@ abbr
     flex-wrap: nowrap
     height: 100%
     padding-top: 1em
+    padding-right: 0.6em
+    padding-left: 0.6em
+
+    @media screen and (min-width: $phone-bp)
+        padding-right: 0
+        padding-left: 0
 
     .diffPanelItem
         flex: 1

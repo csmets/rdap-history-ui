@@ -83,7 +83,8 @@ detailPanel ctx =
           versionDateDetailPanel ctx,
           diffPanel ctx
         ],
-        navPanel ctx Fwd
+        navPanel ctx Fwd,
+        navBottomPanel ctx
     ]]
 
 diffPanel : Context -> Html Msg
@@ -122,25 +123,35 @@ versionDateDetailPanel ctx =
 
 navPanel : Context -> NavigationDirection -> Html Msg
 navPanel ctx direction =
-    let arrowButton =
-            case direction of
-                Bkwd -> button [class "arrowButton", onClick (NavigateDiff Bkwd),
-                                    disabled <| checkNavDisabled ctx direction] [arrow "leftArrow"]
-                Fwd -> button [class "arrowButton", onClick (NavigateDiff Fwd),
-                                    disabled <| checkNavDisabled ctx direction] [arrow "rightArrow"]
-    in div [class "navPanel"] [
-           div [class "versionDatesPanel"] [],
-           div [class "navPanelItem"] [],
-           arrowButton,
-           div [class "navPanelItem"] [lockButton ctx direction]
+    div [class "navPanel"] [
+        div [class "versionDatesPanel"] [],
+        div [class "navPanelItem"] [],
+        arrowButton ctx direction,
+        div [class "navPanelItem"] [lockButton ctx direction <| "navPanel" ++ toString direction]
+     ]
+
+navBottomPanel : Context -> Html Msg
+navBottomPanel ctx =
+    div [class "navBottomPanel"]
+        [
+            div [] [lockButton ctx Bkwd "navBottomBkwd", arrowButton ctx Bkwd],
+            div [] [arrowButton ctx Fwd, lockButton ctx Fwd "navBottomFwd"]
         ]
 
-lockButton : Context -> NavigationDirection -> Html Msg
-lockButton ctx dir =
+arrowButton : Context -> NavigationDirection -> Html Msg
+arrowButton ctx direction =
+    case direction of
+        Bkwd -> button [class "arrowButton", onClick (NavigateDiff Bkwd),
+                            disabled <| checkNavDisabled ctx direction] [arrow "leftArrow"]
+        Fwd -> button [class "arrowButton", onClick (NavigateDiff Fwd),
+                            disabled <| checkNavDisabled ctx direction] [arrow "rightArrow"]
+
+lockButton : Context -> NavigationDirection -> String -> Html Msg
+lockButton ctx dir id =
     let f = if dir == Fwd then second else first
         state = f ctx.navigationLocks
         buttonClass = if state == Locked then "lockedButton" else "unlockedButton"
-    in button [class buttonClass, onClick (FlipNavLock dir)] [lockerIcon state "lockerIcon" <| toString dir ]
+    in button [class buttonClass, onClick (FlipNavLock dir)] [lockerIcon state "lockerIcon" id]
 
 viewDiff : Context -> Maybe Version -> Version -> List (Html Msg)
 viewDiff ctx was is =
