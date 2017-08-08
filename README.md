@@ -14,6 +14,10 @@ And if you like:
 
     npm start
 
+To build:
+
+	npm run build
+
 ### Coding guide
 
 The interface is written in [Elm](https://elm-lang.org/), so if you're not familiar with Elm the tutorials there are a good starting point.
