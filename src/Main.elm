@@ -167,7 +167,6 @@ search : String -> Cmd Msg
 search resource =
     let typ   = url_of_typ <| infer_type resource
         url   = "//rdap.apnic.net/history/" ++ typ ++ "/" ++ resource
-        -- url   = "//localhost:8000/rdap_output.json"
         fetch = Http.toTask <| Http.get url Decode.history
     in fetch |> Task.andThen (\r -> Task.map (\d -> Response d r) Date.now)
              |> Task.attempt Fetched
