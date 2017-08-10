@@ -35,7 +35,6 @@ mkCtx h (fromVersion, toVersion) navigationLockers =
     let versions = Maybe.Extra.values [fromVersion, toVersion]
     in Context h fromVersion toVersion versions navigationLockers
 
--- TODO: consider ditching Context and working directly with Model
 viewAsList : Response -> Int -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) ->
              Maybe Date -> List (Html Msg)
 viewAsList response idx displayedVersions navigationLocks versionDateDetail =
