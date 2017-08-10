@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "elm reactor",
-    "install": "elm package install -y && elm make src/Main.elm --output elm.js && node-sass --output css src/*.sass"
+    "install": "elm make src/Main.elm --output elm.js && node-sass --output css src/*.sass"
   },
   "repository": {
     "type": "git",

@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css?family=Inconsolata|Nunito')
+@import url('https://fonts.googleapis.com/css?family=Inconsolata|Nunito');
 
 $fixed-font: 'Inconsolata', monospace
 $title-font: 'Nunito', 'Arial', sans-serif
 $detail-font: 'Nunito', 'Arial', sans-serif
 $existed: rgb(151, 223, 129)
 $lockedButtonColour: #732a2a
+$phone-bp: 800px
+$unified-diff-bp: 1500px
 
 =prefixed($name, $value)
     -webkit-#{$name}: $value
@@ -33,28 +35,13 @@ $lockedButtonColour: #732a2a
         float: left
         text-align: left
 
-@keyframes bouncer
-    from
-        animation-timing-function: cubic-bezier(.5,0,1,0.4)
-        margin-left: 90px
-    60%
-        animation-timing-function: cubic-bezier(.5,0,1,.4)
-        margin-left: 30px
-    85%
-        animation-timing-function: cubic-bezier(.5,0,1,.4)
-        margin-left: 15px
-    95%
-        animation-timing-function: cubic-bezier(.5,0,1,.4)
-        margin-left: 5px
-    45%,75%,90%,to
-        animation-timing-function: cubic-bezier(0,.25,.5,1)
-        margin-left: 0
-
-@keyframes vanish
-    0%
-        opacity: 1
-    100%
-        opacity: 0
+=floaty-mobile($char)
+    &:before
+        color: rgb(140, 140, 140)
+        width: 1em
+        content: $char
+        float: left
+        text-align: left
 
 pre
     font-family: $fixed-font
@@ -71,75 +58,114 @@ abbr
     +flex(column)
     height: 100vh
     width: 100vw
-    h1
-        margin: 0 2em 0.25em 0
+
     .range
-        margin: 0 0 0.25em 0.2em
-        &::after
-            content: "  ⟵ enter IP address or handle"
-            color: #999
-            animation: bouncer 2s, vanish 0.5s ease 10s forwards
+        +flex
+        align-item: center
+        .searchButton
+            background-color: white
+            width: 2em
+            border: none
+            outline: none
+        .searchIcon
+            stroke: transparent
+            fill: darkgray
         input
             font-size: large
+            border: none
+            outline: none
 
-nav
+.headerBar
+    +flex(column)
+    align-items: center
     color: white
     background-color: #003D5E
     margin: 0
-    padding: 0.75em
+    padding: 0.5em
+    .title
+        font-size: x-large
+        font-weight: bold
+    img
+        height: 2em
+        padding-right: 2em
+    div
+        +flex
+        align-items: center
+        justify-content: center
+        padding: 0.5em
 
-    ul
-        margin: 0
-        padding: 0
-
-        li
-            display: inline-block
-            list-style-type: none
-
-            img
-                margin-bottom: -0.9em
-                height: 2.7em
+    @media screen and (min-width: 650px)
+        +flex
+        img
+            height: 2em
+        div
+            +flex
+            align-items: center
+            margin-right: 2.5em
+            width: inherit
 
 .object
     margin: 5em
 
 .historyPane
-    +flex
+    +flex(column)
     width: 100vw
     min-width: 0
     min-height: 0
     height: 100%
-
+    @media screen and (min-width: $phone-bp)
+        +flex
     .objectList
-        background-color: #f4f4f4
-        margin: 0
-        padding: 1em 0 0 0
-        border-right: 1px solid #e5e3e3
-        font-size: small
-        list-style: none
-        overflow-y: auto
-        cursor: default
-        +flex-shrink(0)
+        display: none
 
-        li
-            padding: 0.25em 1em
+        @media screen and (min-width: $phone-bp)
+            display: block
+            background-color: #f4f4f4
             margin: 0
-            &:hover
-                background-color: #cfcfcf
-            &.selected
-                background-color: #a9c1d6
+            padding: 1em 0 0 0
+            border-right: 1px solid #e5e3e3
+            font-size: small
+            list-style: none
+            overflow-y: auto
+            cursor: default
+            +flex-shrink(0)
+
+            li
+                padding: 0.25em 1em
+                margin: 0
+                &:hover
+                    background-color: #cfcfcf
+                &.selected
+                    background-color: #a9c1d6
+
+    .objectListMobile
+        display: flex
+        justify-content: space-around
+        flex: 0 0 auto
+        padding: 0.5em
+        color: white
+        background: darkgray
+        @media screen and (min-width: $phone-bp)
+            display: none
 
     .detailPanel
-        +flex
+        +flex(column)
         width: 100%
+        height: 100%
         overflow: hidden
         flex-wrap: nowrap
 
+        @media screen and (min-width: $phone-bp)
+            +flex
+
     .navPanel
-        +flex(column)
-        height: 100%
-        flex: 0 0 auto
-        width: 6em
+        display: none
+
+        @media screen and (min-width: $phone-bp)
+            +flex(column)
+            height: 100%
+            flex: 0 0 auto
+            width: 6em
 
         .navPanelItem
             +flex(column)
@@ -147,9 +173,24 @@ nav
             justify-content: flex-start
             align-items: center
 
+    .navBottomPanel
+        +flex
+        flex: 0 0 auto
+        height: 5em
+        justify-content: space-around
+
+        @media screen and (min-width: $phone-bp)
+            display: none
+
+        button
+            margin-right: 0.6em
+            margin-left: 0.6em
 
     .detailCenterPanel
+        +flex(column)
         flex: 5 1 auto
+        height: 100%
+        overflow: hidden
 
     .versionDatesPanel
         +flex
@@ -157,13 +198,33 @@ nav
         flex-wrap: nowrap
         color: white
         background-color: #006FAB
-        height: 1.2em
+        height: 1.4em
         align-items: center
+        flex: 0 0 auto
+        font-size: 3.5vw
+        padding-right: 0.6em
+        padding-left: 0.6em
+
+        @media screen and (min-width: $phone-bp)
+            padding-right: 0
+            padding-left: 0
+
+        @media screen and (min-width: 400px)
+            font-size: inherit
 
         .versionDateItem
             +flex
             flex: 1
             justify-content: center
+
+            .dateLong
+                display: none
+
+            @media screen and (min-width: 1000px)
+               .dateLong
+                   display: inline
+               .dateShort
+                   display: none
 
         .versionDateLeft
             @extend .versionDateItem
@@ -177,15 +238,54 @@ nav
             @extend .versionDateItem
             span
                 margin-left: auto
+        .flipShowVersionButton
+            background: transparent
+            border: none
+            outline: none
+            vertical-align: middle
+            svg
+                transform: rotate(0deg)
+                transition: transform 1s ease-in-out
+            display: none
+            // fixes rotating issues in chrome (https://stackoverflow.com/a/15623914/2688113)
+            -webkit-backface-visibility: hidden;
+
+            @media screen and (min-width: 400px)
+                display: inline
+
+        .pressedFlipShowVersionButton
+            @extend .flipShowVersionButton
+            svg
+                transform: rotate(540deg)
+                transition: transform 1s ease-in-out
+
         .moreIconSvg
             fill: white
-            width: 0.8em
-            height: 0.8em
-            margin-right: 0.3em
-            margin-left: 0.3em
+            width: 1.2em
+            height: 1.2em
+            margin-left: 0.5em
 
-    .diffPanel
-        flex: 1 1 auto
+
+    .versionDateDetailPanel
+        +flex
+        overflow: hidden
+        justify-content: center
+        background: #545454
+        color: white
+        transition: height 0.5s
+        border-radius: 0px 0px 15px 15px
+
+    .showPanel
+        height: 1.4em
+        flex: 0 0 auto
+        font-size: smaller
+        display: none
+        @media screen and (min-width: 400px)
+            display: inherit
+
+    .hidePanel
+        height: 0em
+        flex: 0 0 auto
 
     .arrowButton
         flex: 0 0 auto
@@ -199,7 +299,8 @@ nav
             path
                 transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
                 &:hover
-                    stroke-width: 13
+                    @media screen and (min-width: $phone-bp)
+                        stroke-width: 13
                 &:active
                     stroke: rgba(0, 0, 0, 0.5)
                     stroke-width: 3
@@ -210,6 +311,9 @@ nav
 
     .arrow
         stroke: black
+        height: 5em
+        @media screen and (min-width: $phone-bp)
+            height: 7.5em
 
     .rightArrow
         @extend .arrow
@@ -228,24 +332,26 @@ nav
         outline: none
         transition-duration: 0.3s
 
+        @media screen and (min-width: $phone-bp)
+            &:hover
+                fill: #006FAB
 
     .lockedButton
         @extend .lockButton
         fill: $lockedButtonColour
 
-        &:hover
-            fill: #006FAB
-
     .unlockedButton
         @extend .lockButton
         fill: black
 
-        &:hover
-            fill: #006FAB
+    .lockerIcon
+        height: 2em
+        @media screen and (min-width: $phone-bp)
+            height: 2.3em
 
 .rdap
-    // padding: 0 0.5em
     padding-top: 0.5em
+    padding-bottom: 0.5em
     font-family: $detail-font
     table
         border-collapse: collapse
@@ -308,18 +414,65 @@ nav
     .diff-word-deleted
         display: none
 
+.rdap-mobile
+    padding-top: 0.5em
+    padding-bottom: 0.5em
+    font-family: $detail-font
+    margin-left: auto
+    margin-right: auto
+
+    @media screen and (min-width: $unified-diff-bp)
+        display: none
+
+    .diff-modified
+        background-color: #ffffdd
+        +floaty-mobile("!")
+    .diff-new
+        background-color: #ddffdd
+        +floaty-mobile("+")
+    .diff-unchanged
+        +floaty-mobile(" ")
+    .diff-deleted
+        +floaty-mobile("-")
+        background-color: #ffdce0
+    .diff-word-new
+        background-color: #acf2bd
+    .diff-word-deleted
+        background-color: #ffa2ad
+        text-decoration: line-through
+    .mobileLineTitle
+        color: rgb(140, 140, 140)
+    .mobileRemovedLine
+        background-color: #ffdce0
+        text-decoration: line-through
+    .mobileAddedLine
+        background-color: #ddffdd
+    .mobileRdapDiff
+        margin-bottom: 0.5em
+    hr
+        margin-top: 0.5em
+        margin-bottom: 0.5em
+
 .diffPanel
     +flex
-    overflow: hidden
+    flex: 1 1 auto
+    overflow: auto
     flex-wrap: nowrap
     height: 100%
-    justify-content: center
     padding-top: 1em
+    padding-right: 0.6em
+    padding-left: 0.6em
+
+    @media screen and (min-width: $phone-bp)
+        padding-right: 0
+        padding-left: 0
 
     .diffPanelItem
         flex: 1
-        display: inline-block
+        display: none
         padding: 0 0.7em
+        @media screen and (min-width: $unified-diff-bp)
+            display: inline-block
 
     .diffPanelItem:first-child .diff
         border-left: none
@@ -365,6 +518,3 @@ nav
         fill: $existed
         &:hover
             fill: lighten($existed, 10%)
-
-.logo
-    transform: scale(0.7, 0.7)

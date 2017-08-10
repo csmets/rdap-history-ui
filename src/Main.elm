@@ -1,10 +1,10 @@
 module Main exposing (..)
 
-import Date exposing (fromString, toTime)
+import Date exposing (Date, fromString, toTime)
 import DOM exposing (target, childNode)
 import Either exposing (Either(..))
 import Guards exposing (..)
-import Html exposing (nav, div, node, Html, li, h1, text, img, form, input, ul)
+import Html exposing (nav, div, node, Html, li, h1, text, img, form, input, ul, span, button)
 import Html.Attributes exposing (class, value, id, rel, href, src, autofocus)
 import Html.Events exposing (onWithOptions, onInput, onClick)
 import Html.Lazy exposing (lazy)
@@ -17,6 +17,8 @@ import Maybe.Extra exposing (or, join)
 import Platform.Cmd
 import Regex
 import String
+import Svg
+import Svg.Attributes
 import Task
 import Tuple2
 
@@ -27,7 +29,8 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) False, search resource )
+            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) Nothing False,
+                     search resource )
 
 errMsg : Http.Error -> String
 errMsg err = case err of
@@ -59,13 +62,15 @@ update msg model = case msg of
     UrlChange l ->
         init l
     Select i ->
-        ( upd { model | selected = i }, Cmd.none )
+        ( upd { model | selected = i, navigationLocks = (Unlocked, Unlocked) }, Cmd.none )
     StartSearch s ->
         ( model, Navigation.newUrl ("#" ++ s) )
     NavigateDiff direction ->
         ( navigate model direction, Cmd.none )
     FlipNavLock direction ->
         (flipNavigationLock model direction, Cmd.none)
+    FlipShowVersionDateDetail d ->
+        (flipShowVersionDateDetail model d, Cmd.none)
 
 upd : Model -> Model
 upd model =
@@ -73,7 +78,7 @@ upd model =
                                []            -> (Nothing, Nothing)
                                v :: []       -> (Nothing, Just v)
                                v1 :: v2 :: _ -> (Just v2, Just v1)
-            in { model | redraw = not model.redraw, displayedVersions = displayedVersions }
+            in { model | redraw = not model.redraw, displayedVersions = displayedVersions, versionDateDetail = Nothing }
 
 navigate : Model -> NavigationDirection -> Model
 navigate model dir =
@@ -92,7 +97,7 @@ navigate model dir =
                               then v1
                               else nextV1
              newDV = (if dir == Fwd then identity else Tuple2.swap) (newV1, newV2)
-         in { model | displayedVersions = newDV }
+         in { model | displayedVersions = newDV , versionDateDetail = Nothing }
 
 flipNavigationLock : Model -> NavigationDirection -> Model
 flipNavigationLock model direction =
@@ -106,8 +111,11 @@ flipNavigationLock model direction =
         newLeftVersion = case newstate of
                               Unlocked -> join <| map2 getPreviousVersion rightVersion (versions model)
                               Locked   -> leftVersion
-    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (newLeftVersion, rightVersion)}
+    in {model | navigationLocks = (newBkwdState, newFwdState), displayedVersions = (newLeftVersion, rightVersion),
+                                  versionDateDetail = Nothing}
 
+flipShowVersionDateDetail : Model -> Maybe Date -> Model
+flipShowVersionDateDetail m d = { m | versionDateDetail = d }
 
 -- View
 
@@ -118,7 +126,7 @@ view_ : Model -> Html Msg
 view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
-        Right response -> viewAsList response model.selected model.displayedVersions model.navigationLocks
+        Right response -> viewAsList response model.selected model.displayedVersions model.navigationLocks model.versionDateDetail
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)
@@ -126,20 +134,25 @@ styles = [ node "link" [ rel "stylesheet", href "css/ui.css" ] [] ]
 
 headerBar : Model -> List (Html Msg)
 headerBar model =
-    [ nav []
-        [ ul []
-            [ li [] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg" ] []]
-            , li [] [ h1 [] [ text "Whowas" ] ]
-            , li [] [ searchBox model ]
-            ]
-        ]
+    [ div [class "headerBar"]
+          [ div [] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg"] [],
+                         span [class "title"] [ text "Whowas" ] ]
+          , div [] [ searchBox model ]
+          ]
     ]
 
 searchBox : Model -> Html Msg
 searchBox model =
     let cease = { stopPropagation = True, preventDefault = True }
     in form [ class "range", onWithOptions "submit" cease searchForm ]
-            [ input [ value model.resource, autofocus True ] [] ]
+            [ input [ value model.resource, autofocus True ] [],
+              button [class "searchButton"] [searchIcon "searchIcon"]]
+
+searchIcon : String -> Html a
+searchIcon svgClass =
+    Svg.svg [Svg.Attributes.viewBox "0 0 24 24", Svg.Attributes.class svgClass]
+        [Svg.path [Svg.Attributes.strokeLinecap "round", Svg.Attributes.strokeLinejoin "round",
+                   Svg.Attributes.d "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"] []]
 
 fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)
