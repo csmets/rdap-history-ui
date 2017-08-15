@@ -1,4 +1,4 @@
-module Render exposing (viewAsList)
+module Render exposing (viewAsList, Context)
 
 import Date exposing (Date)
 import Date.Extra.Config.Config_en_au exposing (config)
@@ -17,6 +17,7 @@ import Tuple exposing (..)
 
 import Model exposing (..)
 import Rdap
+import TimelineWidget
 
 -- Rendering happens inside a context
 type alias Context = {
@@ -25,15 +26,16 @@ type alias Context = {
     toVersion : Maybe Version,
     versions : List Version, -- TODO: rename this since it can be mistakely taken as all versions
     navigationLocks : (LockerState, LockerState),
-    versionDateDetail : Maybe Date
+    versionDateDetail : Maybe Date,
+    today: Date
 }
 
 type DateFormat = Short | Long
 
-mkCtx : History -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> Maybe Date -> Context
-mkCtx h (fromVersion, toVersion) navigationLockers =
+mkCtx : Date -> History -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> Maybe Date -> Context
+mkCtx today h (fromVersion, toVersion) navigationLockers versionDateDetails =
     let versions = Maybe.Extra.values [fromVersion, toVersion]
-    in Context h fromVersion toVersion versions navigationLockers
+    in Context h fromVersion toVersion versions navigationLockers versionDateDetails today
 
 viewAsList : Response -> Int -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) ->
              Maybe Date -> List (Html Msg)
@@ -41,7 +43,7 @@ viewAsList response idx displayedVersions navigationLocks versionDateDetail =
     let history = response.history !! idx
     in case history of
            Nothing -> [] -- TODO: will never happen. deal with it differently?
-           Just h -> let ctx = mkCtx h displayedVersions navigationLocks versionDateDetail
+           Just h -> let ctx = mkCtx response.stamp h displayedVersions navigationLocks versionDateDetail
                      in [div [class "historyPane"] ((objectListPanel response.history idx) ++
                                                         (objectListMobile response.history idx) ++
                                                         (detailPanel ctx))]
@@ -78,6 +80,7 @@ detailPanel ctx =
     [div [class "detailPanel"] [
         navPanel ctx Bkwd,
         div [class "detailCenterPanel"] [
+          timelineWidgetPanel ctx,
           versionDatesPanel ctx,
           versionDateDetailPanel ctx,
           diffPanel ctx
@@ -119,6 +122,10 @@ versionDateDetailPanel ctx =
                                        Nothing -> ("hidePanel", "")
                                        Just d  -> ("showPanel", toString d)
     in div [class <| "versionDateDetailPanel " ++ panelClass] [text dateString]
+
+timelineWidgetPanel : Context -> Html Msg
+timelineWidgetPanel ctx =
+    TimelineWidget.render <| mkTimelineModel ctx
 
 navPanel : Context -> NavigationDirection -> Html Msg
 navPanel ctx direction =
@@ -256,9 +263,12 @@ lockerIcon state svgClass id =
                            Svg.Attributes.mask <| "url(#" ++ maskName ++ ")"] [Svg.title [] [text iconTitle]]
        ]
 
-
- -- Utility methods
+-- Utility methods
 
 checkNavDisabled : Context -> NavigationDirection -> Bool
 checkNavDisabled ctx dir =
     not <| Model.canNavigate ctx.history.versions (ctx.fromVersion, ctx.toVersion) dir ctx.navigationLocks
+
+mkTimelineModel : Context -> TimelineWidget.Model
+mkTimelineModel ctx =
+    TimelineWidget.Model TimelineWidget.Lifetime ctx.versionDateDetail ctx.history.versions ctx.today

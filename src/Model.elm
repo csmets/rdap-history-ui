@@ -14,7 +14,7 @@ import List exposing (head)
 import List.Extra exposing ((!!), last)
 
 type alias Response =
-    { stamp : Date.Date  -- TODO: this can probably be removed
+    { stamp : Date.Date
     , history : List History
     }
 
@@ -35,6 +35,7 @@ type Msg
     | StartSearch String
     | Select Int
     | NavigateDiff NavigationDirection
+    | NavigateDiffToDate Date
     | FlipNavLock NavigationDirection
     | FlipShowVersionDateDetail (Maybe Date)
 

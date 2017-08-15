@@ -67,6 +67,8 @@ update msg model = case msg of
         ( model, Navigation.newUrl ("#" ++ s) )
     NavigateDiff direction ->
         ( navigate model direction, Cmd.none )
+    NavigateDiffToDate d ->
+        ( model, Cmd.none )
     FlipNavLock direction ->
         (flipNavigationLock model direction, Cmd.none)
     FlipShowVersionDateDetail d ->
