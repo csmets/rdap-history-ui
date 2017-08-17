@@ -271,4 +271,4 @@ checkNavDisabled ctx dir =
 
 mkTimelineModel : Context -> TimelineWidget.Model
 mkTimelineModel ctx =
-    TimelineWidget.Model TimelineWidget.Lifetime ctx.versionDateDetail ctx.history.versions ctx.today
+    TimelineWidget.Model TimelineWidget.Lifetime (ctx.fromVersion, ctx.toVersion) ctx.history.versions ctx.today

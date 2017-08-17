@@ -2,6 +2,7 @@ module TimelineWidget exposing (render, Model, Zoom(..))
 
 import Date exposing (Date, year, Month(..), toTime)
 import Date.Extra.Create exposing (dateFromFields)
+import Date.Extra.Compare exposing (Compare2(..), is)
 import Date.Extra.Duration as Duration
 import Guards exposing (..)
 import Html exposing (Html, div, text, button)
@@ -15,6 +16,7 @@ import Maybe.Extra exposing (join)
 import Svg exposing (svg, path)
 import Svg.Attributes as SA
 import Svg.Events as SE
+import Tuple exposing (first, second)
 
 import Model exposing (Msg, Version)
 
@@ -23,7 +25,7 @@ import Debug exposing (log)
 type alias Model =
     {
         zoom : Zoom,
-        target : Maybe Date,
+        displayedVersions : (Maybe Version, Maybe Version),
         versions : List Version,
         today: Date
     }
@@ -46,18 +48,17 @@ render m =
 
 box : Model -> Date -> Html Msg
 box m d =
-    div [class "timelineBox"] <|
-        timelineBoxTitle m d ++
-        timelineLifeline m d ++
-        [
-            markerIcon False Nothing ""
-        ]
+    let measurements = calculateMeasurements m d
+    in div [class "timelineBox"] <|
+           timelineBoxTitle m d ++
+           timelineLifeline measurements ++
+           timelineMarkers m measurements
 
 type alias BoxVersionMeasurement =
     {
         fromPct: Float,
         untilPct: Float,
-        from: Date,
+        version: Version,
         selected: Bool
     }
 
@@ -70,37 +71,41 @@ timelineBoxTitle m d =
     in [div [class "timelineBoxTitle"] [text title]]
 
 
-timelineLifeline : Model -> Date -> List (Html a)
-timelineLifeline m d =
+timelineLifeline : List BoxVersionMeasurement -> List (Html a)
+timelineLifeline =
     let createDiv (x, y) = div [class "timelineLifeline",
                                     style [("left", (toString x) ++ "%"), ("width", (toString y) ++ "%")]] []
-    in List.map createDiv <| prune pcts
+    in List.map createDiv << List.map (\x -> (max 0 x.fromPct, min 100 x.untilPct)) 
 
-timelinePercentages : List Version -> Date -> Date -> Date -> List (Float, Float)
-timelinePercentages vs startDate endDate today =
---    let total = (toTime endDate) - (toTime startDate)
-    let total = (toTime (log "endDate" endDate)) - (toTime (log "startDate" startDate))
-        convert v = (convertDate v.from, convertDate <| withDefault today v.until)
-        convertDate d = ((toTime d) - (toTime startDate)) / total * 100
---    in List.map convert vs
-    in log "result" <| List.map convert (log "vs" vs)
-
-
-timelineMarkers : Model -> Date -> List (Html Msg)
-timelineMarkers m d =
-    let pcts = timelinePercentages m.versions d (Duration.add period 1 d) m.today
+calculateMeasurements : Model -> Date -> List BoxVersionMeasurement
+calculateMeasurements m startDate =
+    let endDate = Duration.add period 1 startDate
         period = case m.zoom of
                     Lifetime -> Duration.Year
                     Year     -> Duration.Year
                     Month    -> Duration.Month
-        prune versions = case versions of
-                       [] -> []
-                       ((x, y) :: xs) -> if ((x < 0) && (y < 0)) || ((x > 100) && (y > 100))
-                                         then prune xs
-                                         else (max 0 x, min 100 y) :: prune xs
-        createDiv (x, y) = div [class "timelineLifeline",
-                                    style [("left", (toString x) ++ "%"), ("width", (toString y) ++ "%")]] []
-    in List.map createDiv <| prune pcts
+        total = (toTime endDate) - (toTime startDate)
+        convert v = BoxVersionMeasurement (convertDate v.from)
+                                          (convertDate <| withDefault m.today v.until)
+                                          v
+                                          (isSelected v)
+        convertDate d = ((toTime d) - (toTime startDate)) / total * 100
+        isSelected v = case m.displayedVersions of
+                           (Nothing, Nothing) -> False
+                           (Just v2, Just v1) -> (is After v.from v2.from) &&
+                                                 (is SameOrBefore v.from v1.from)
+                           _                  -> True
+        prune = List.filter (\p -> not (((p.fromPct < 0) && (p.untilPct < 0)) ||
+                                           ((p.fromPct > 100) && (p.untilPct > 100))))
+    in log "afterPrune" <| prune <| List.map convert m.versions
+
+
+timelineMarkers : Model -> List BoxVersionMeasurement -> List (Html Msg)
+timelineMarkers model =
+    let style meas = "left: " ++ (toString meas.fromPct) ++ "%"
+        createMarker meas = markerIcon meas.selected Nothing (style meas)
+        prune = List.filter (\meas -> meas.fromPct >= 0 && Just meas.version /= List.Extra.last model.versions)
+    in List.map createMarker << prune
 
 markerIcon : Bool -> Maybe Msg -> String -> Html Msg
 markerIcon selected mMsg style =
@@ -111,5 +116,5 @@ markerIcon selected mMsg style =
     in svg [SA.viewBox "0 0 20 50", SA.class ("timelineMarker " ++ svgClass), SA.style style]
            [
               Svg.line ([SA.x1 "10", SA.y1 "20", SA.x2 "10", SA.y2 "50"] ++ action) [],
-              Svg.circle ([SA.cx "10", SA.cy "10", SA.r "10"] ++ action) []
+              Svg.circle ([SA.cx "10", SA.cy "10", SA.r "7", SA.style "stroke-width: 6"] ++ action) []
            ]
