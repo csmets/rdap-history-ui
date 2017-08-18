@@ -67,8 +67,8 @@ update msg model = case msg of
         ( model, Navigation.newUrl ("#" ++ s) )
     NavigateDiff direction ->
         ( navigate model direction, Cmd.none )
-    NavigateDiffToDate d ->
-        ( model, Cmd.none )
+    NavigateDiffToVersion v ->
+        ( navigateToVersion model v, Cmd.none )
     FlipNavLock direction ->
         (flipNavigationLock model direction, Cmd.none)
     FlipShowVersionDateDetail d ->
@@ -100,6 +100,21 @@ navigate model dir =
                               else nextV1
              newDV = (if dir == Fwd then identity else Tuple2.swap) (newV1, newV2)
          in { model | displayedVersions = newDV , versionDateDetail = Nothing }
+
+navigateToVersion : Model -> Version -> Model
+navigateToVersion  model version =
+    let versions = withDefault [] <| Model.versions model
+        (v1, v2) = model.displayedVersions
+        (l1, l2) = model.navigationLocks
+        newDV = (l1 == Unlocked && l2 == Unlocked) => (previousV, Just version)
+             |= (l1 == Locked && l2 == Locked)     => (v1, v2)
+             |= (l1 == Locked && (withDefault 0 distanceToV1) > 0) => (v1, Just version)
+             |= (l2 == Locked && (withDefault -1 distanceToV2) <= 0) => (previousV, v2)
+             |= (v1, v2)
+        distanceToV1 = join <| Maybe.map3 Model.getDistance v1 (Just version) (Just versions)
+        distanceToV2 = join <| Maybe.map3 Model.getDistance v2 (Just version) (Just versions)
+        previousV = getPreviousVersion version versions
+    in { model | displayedVersions = newDV , versionDateDetail = Nothing }
 
 flipNavigationLock : Model -> NavigationDirection -> Model
 flipNavigationLock model direction =

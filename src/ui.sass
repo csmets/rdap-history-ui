@@ -366,23 +366,42 @@ abbr
         .timelineLifeline
              height: 2px
              position: absolute
-             top: 75%
+             top: 90%
              background: white
-             width: 100%
+             &.active
+                 background: #003D5E
+                 height: 4px
+
 
         .timelineMarker
-            position: absolute;
-            height: 50px;
-            width: 20px;
-            top: 75%;
-            transform: translate(-50%, -50%)
+            position: absolute
+            height: 50px
+            width: 20px
+            bottom: 10%
+            transform: translate(-50%, 0%)
             stroke: white
             fill: white
 
         .selected
             z-index: 10
+            stroke: #003D5E
             circle
-                fill: #003D5E
+                fill: black
+
+        .timelineScale
+            position: absolute
+            bottom: 20%
+            height: 10px
+            width: 1px
+            background: darkgray
+
+        .timelineScaleHalf
+            @extend .timelineScale
+            height: 20px
+
+        .timelineScaleFull
+            @extend .timelineScale
+            height: 30px
 
 .rdap
     padding-top: 0.5em

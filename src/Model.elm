@@ -35,7 +35,7 @@ type Msg
     | StartSearch String
     | Select Int
     | NavigateDiff NavigationDirection
-    | NavigateDiffToDate Date
+    | NavigateDiffToVersion Version
     | FlipNavLock NavigationDirection
     | FlipShowVersionDateDetail (Maybe Date)
 
