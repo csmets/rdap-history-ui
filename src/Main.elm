@@ -29,7 +29,7 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) Nothing False,
+            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) Nothing False Lifetime Nothing,
                      search resource )
 
 errMsg : Http.Error -> String
@@ -73,6 +73,8 @@ update msg model = case msg of
         (flipNavigationLock model direction, Cmd.none)
     FlipShowVersionDateDetail d ->
         (flipShowVersionDateDetail model d, Cmd.none)
+    ZoomTimelineWidget z d ->
+        (zoomTimelineWidget model z d, Cmd.none)
 
 upd : Model -> Model
 upd model =
@@ -134,6 +136,9 @@ flipNavigationLock model direction =
 flipShowVersionDateDetail : Model -> Maybe Date -> Model
 flipShowVersionDateDetail m d = { m | versionDateDetail = d }
 
+zoomTimelineWidget : Model -> TimelineZoom -> Maybe Date -> Model
+zoomTimelineWidget m z d = {m | timelineWidgetZoom = z, timelineWidgetZoomDate = d}
+
 -- View
 
 view : Model -> Html Msg
@@ -143,7 +148,7 @@ view_ : Model -> Html Msg
 view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
-        Right response -> viewAsList response model.selected model.displayedVersions model.navigationLocks model.versionDateDetail
+        Right response -> viewAsList response model
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)

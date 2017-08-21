@@ -27,25 +27,27 @@ type alias Context = {
     versions : List Version, -- TODO: rename this since it can be mistakely taken as all versions
     navigationLocks : (LockerState, LockerState),
     versionDateDetail : Maybe Date,
-    today: Date
+    today: Date,
+    timelineWidgetZoom : TimelineZoom,
+    timelineWidgetZoomDate : Maybe Date
 }
 
 type DateFormat = Short | Long
 
-mkCtx : Date -> History -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> Maybe Date -> Context
-mkCtx today h (fromVersion, toVersion) navigationLockers versionDateDetails =
-    let versions = Maybe.Extra.values [fromVersion, toVersion]
-    in Context h fromVersion toVersion versions navigationLockers versionDateDetails today
+mkCtx : Date -> History -> Model -> Context
+mkCtx today h m =
+    let (fromVersion, toVersion) = m.displayedVersions
+        versions = Maybe.Extra.values [fromVersion, toVersion]
+    in Context h fromVersion toVersion versions m.navigationLocks m.versionDateDetail today m.timelineWidgetZoom m.timelineWidgetZoomDate
 
-viewAsList : Response -> Int -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) ->
-             Maybe Date -> List (Html Msg)
-viewAsList response idx displayedVersions navigationLocks versionDateDetail =
-    let history = response.history !! idx
+viewAsList : Response -> Model -> List (Html Msg)
+viewAsList response m =
+    let history = response.history !! m.selected
     in case history of
            Nothing -> [] -- TODO: will never happen. deal with it differently?
-           Just h -> let ctx = mkCtx response.stamp h displayedVersions navigationLocks versionDateDetail
-                     in [div [class "historyPane"] ((objectListPanel response.history idx) ++
-                                                        (objectListMobile response.history idx) ++
+           Just h -> let ctx = mkCtx response.stamp h m
+                     in [div [class "historyPane"] ((objectListPanel response.history m.selected) ++
+                                                        (objectListMobile response.history m.selected) ++
                                                         (detailPanel ctx))]
 
 -- Selection Panel
@@ -271,4 +273,4 @@ checkNavDisabled ctx dir =
 
 mkTimelineModel : Context -> TimelineWidget.Model
 mkTimelineModel ctx =
-    TimelineWidget.Model TimelineWidget.Lifetime (ctx.fromVersion, ctx.toVersion) ctx.history.versions ctx.today
+    TimelineWidget.Model ctx.timelineWidgetZoom ctx.timelineWidgetZoomDate (ctx.fromVersion, ctx.toVersion) ctx.history.versions ctx.today

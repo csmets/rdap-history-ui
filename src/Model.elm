@@ -1,6 +1,6 @@
 module Model exposing (Version, History, Identifier, ObjectClass (..), Response, Model, Msg (..), Selected
                       , history, versions, LockerState (..), NavigationDirection (..), getNextVersion
-                      , getPreviousVersion, getDistance, canNavigate)
+                      , getPreviousVersion, getDistance, canNavigate, TimelineZoom(..))
 
 import Date exposing (Date, toTime)
 import Date.Extra.Compare exposing (Compare2(..), is)
@@ -26,6 +26,8 @@ type alias Model =
     , navigationLocks : (LockerState, LockerState)
     , versionDateDetail : Maybe Date
     , redraw : Bool
+    , timelineWidgetZoom : TimelineZoom
+    , timelineWidgetZoomDate : Maybe Date
     }
 
 type Msg
@@ -38,6 +40,7 @@ type Msg
     | NavigateDiffToVersion Version
     | FlipNavLock NavigationDirection
     | FlipShowVersionDateDetail (Maybe Date)
+    | ZoomTimelineWidget TimelineZoom (Maybe Date)
 
 type Selected
     = Selected
@@ -71,6 +74,8 @@ type alias Version =
 type NavigationDirection = Fwd | Bkwd
 
 type LockerState = Locked | Unlocked
+
+type TimelineZoom = Lifetime | Year | Month
 
 -- Utility methods
 history : Model -> Maybe History
