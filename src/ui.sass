@@ -352,12 +352,11 @@ abbr
 .timelineWidget
     +flex
     height: 100px
-    background: #545454
+    background-color: #006FAB
 
     .timelineBox
         flex: 1 1 auto
         position: relative
-        background-color: #006FAB
 
         .timelineBoxTitle
             text-align: center
@@ -446,6 +445,23 @@ abbr
             outline: none
             background: transparent
             fill: white
+
+    .timelineWidgetNavPanel
+        +flex(column)
+        justify-content: center
+        .arrowButton
+            .timelineWidgetArrow
+                stroke: white
+                height: 3em
+            .timelineWidgetLeftArrow
+                @extend .timelineWidgetArrow
+                transform: rotate(180deg)
+            .timelineWidgetRightArrow
+                @extend .timelineWidgetArrow
+            &.left
+                margin-right: 1em
+            &.right
+                margin-left: 1em
 
 .rdap
     padding-top: 0.5em

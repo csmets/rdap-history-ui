@@ -17,11 +17,10 @@ import Maybe.Extra exposing (or, join)
 import Platform.Cmd
 import Regex
 import String
-import Svg
-import Svg.Attributes
 import Task
 import Tuple2
 
+import Icons exposing (..)
 import Model exposing (..)
 import Decode exposing (history)
 import Render exposing (viewAsList)
@@ -168,13 +167,7 @@ searchBox model =
     let cease = { stopPropagation = True, preventDefault = True }
     in form [ class "range", onWithOptions "submit" cease searchForm ]
             [ input [ value model.resource, autofocus True ] [],
-              button [class "searchButton"] [searchIcon "searchIcon"]]
-
-searchIcon : String -> Html a
-searchIcon svgClass =
-    Svg.svg [Svg.Attributes.viewBox "0 0 24 24", Svg.Attributes.class svgClass]
-        [Svg.path [Svg.Attributes.strokeLinecap "round", Svg.Attributes.strokeLinejoin "round",
-                   Svg.Attributes.d "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"] []]
+              button [class "searchButton"] [zoomIcon "searchIcon"]]
 
 fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)

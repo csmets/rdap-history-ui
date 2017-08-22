@@ -11,10 +11,9 @@ import List exposing (length, head)
 import List.Extra exposing ((!!), dropWhile, last)
 import Maybe exposing (map, map2, map3, withDefault)
 import Maybe.Extra exposing (isJust, (?), join)
-import Svg exposing (svg, path)
-import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
 import Tuple exposing (..)
 
+import Icons exposing (..)
 import Model exposing (..)
 import Rdap
 import TimelineWidget
@@ -201,69 +200,6 @@ createDateLabel md versionDateDetail =
                                 [expandIcon "moreIconSvg"]
                       ]
 
- -- Icons
-
-arrow : String -> Html a
-arrow svgClass =
-    svg [viewBox "0 0 50 100", Svg.Attributes.class svgClass]
-        [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
-                   Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
-
-moreIcon : String -> Html a
-moreIcon svgClass =
-    svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
-                Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                              Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
-                Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] [],
-                Svg.circle [Svg.Attributes.cx "18.33", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] [],
-                Svg.circle [Svg.Attributes.cx "81.66", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] []
-                ]
-          ],
-        Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []
-    ]
-
-expandIcon : String -> Html a
-expandIcon svgClass =
-    svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
-                Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                              Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
-                path [strokeWidth "17", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
-                          Svg.Attributes.d "M 20 35 L 50 65 L 80 35", Svg.Attributes.stroke "black"] []
-              ]
-          ],
-        Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []
-    ]
-
--- Note: We need to change the mask name otherwise Chrome won't update the icon. Only updating the mask's path
---       is not enough.
-lockerIcon : LockerState -> String -> String -> Html a
-lockerIcon state svgClass id =
-    let maskPathDraw = case state of
-                           Locked   -> "M 35 50 v -20 c 0 -20 30 -20 30 0 v 20"
-                           Unlocked -> "M 35 50 v -20 c 0 -20 30 -20 30 0"
-        maskName = toString state ++ id
-        iconTitle = if state == Locked then "Unlock version" else "Lock version"
-    in svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-           Svg.defs [] [Svg.mask [Svg.Attributes.id maskName] [
-                   Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                                 Svg.Attributes.height "100", fill "white"] [],
-                   Svg.rect [Svg.Attributes.x "25", Svg.Attributes.y "45", Svg.Attributes.width "50",
-                                 Svg.Attributes.height "30", Svg.Attributes.rx "10", Svg.Attributes.ry "10",
-                                 fill "black"] [],
-                   Svg.path [Svg.Attributes.d maskPathDraw, strokeWidth "6", strokeLinecap "round",
-                                 strokeLinejoin "round", fill "transparent", Svg.Attributes.stroke "black"] []
-                   ]
-             ],
-            Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                           Svg.Attributes.mask <| "url(#" ++ maskName ++ ")"] [Svg.title [] [text iconTitle]]
-       ]
 
 -- Utility methods
 
