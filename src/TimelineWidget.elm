@@ -76,7 +76,8 @@ timelineLifeline =
     let createDiv (x, y, a)= div [HA.class <| divClass a,
                                     HA.style [("left", (toString x) ++ "%"), ("width", (toString <| y - x) ++ "%")]] []
         divClass a = "timelineLifeline" ++ if a then " active" else ""
-    in List.map (\vm -> createDiv (max 0 vm.fromPct, min 100 vm.untilPct, vm.active))
+    in (++) [div [HA.class "timelineLifelineGuide"][]] <<
+        List.map (\vm -> createDiv (max 0 vm.fromPct, min 100 vm.untilPct, vm.active))
 
 timelineScales : TimelineZoom -> Date -> List (Html a)
 timelineScales z d =
@@ -96,12 +97,12 @@ zoomBox : Model -> Date -> List (Html Msg)
 zoomBox m d =
     let pct x = toFloat x * (100/12)
     in case m.zoom of
-           Lifetime -> [div [HA.class "zoomBoxYear", HE.onClick (ZoomTimelineWidget Year (Just d))] [], zoomIcon "zoomIcon"]
+           Lifetime -> [div [HA.class "zoomBoxYear", HE.onClick (ZoomTimelineWidget Year (Just d))] []] --, zoomIcon "zoomIcon"]
            Year     -> List.map (\x -> div [HA.class "zoomBoxMonth", HA.style [("left", (toString <| pct (x - 1)) ++ "%"),
                                                                          ("width", (toString <| pct x - pct (x - 1)) ++ "%")],
                                             HE.onClick (ZoomTimelineWidget Month
                                                             (Just <| Duration.add Duration.Month (x - 1) d))]
-                                     [zoomIcon "zoomIcon"])
+                                     []) --zoomIcon "zoomIcon"])
                                 (List.range 1 12)
            Month    -> []
 
@@ -173,6 +174,6 @@ zoomBack : Model -> List (Html Msg)
 zoomBack m =
     case m.zoom of
         Lifetime -> []
-        Year     -> [button [HA.class "zoomBackButton", HE.onClick <| ZoomTimelineWidget Lifetime Nothing] [zoomBackIcon]]
-        Month    -> [button [HA.class "zoomBackButton", HE.onClick <| ZoomTimelineWidget Year <|
-                                 Maybe.map (DEF.fieldToDateClamp (DEF.Month Jan)) m.zoomDate] [zoomBackIcon]]
+        Year     -> [button [HA.class "zoomOutButton", HE.onClick <| ZoomTimelineWidget Lifetime Nothing, HA.title "Zoom out"] [zoomOutIcon]]
+        Month    -> [button [HA.class "zoomOutButton", HE.onClick <| ZoomTimelineWidget Year <|
+                                 Maybe.map (DEF.fieldToDateClamp (DEF.Month Jan)) m.zoomDate] [zoomOutIcon]]

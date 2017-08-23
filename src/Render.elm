@@ -78,16 +78,18 @@ dropdownResultsMobile historyList idx =
 
 detailPanel : Context -> List (Html Msg)
 detailPanel ctx =
-    [div [class "detailPanel"] [
-        navPanel ctx Bkwd,
-        div [class "detailCenterPanel"] [
-          timelineWidgetPanel ctx,
-          versionDatesPanel ctx,
-          versionDateDetailPanel ctx,
-          diffPanel ctx
-        ],
-        navPanel ctx Fwd,
-        navBottomPanel ctx
+    [ div [class "detailPanel"] [
+        timelineWidgetPanel ctx,
+        div [class "detailPanelMain"] [
+            navPanel ctx Bkwd,
+            div [class "detailCenterPanel"] [
+              versionDatesPanel ctx,
+              versionDateDetailPanel ctx,
+              diffPanel ctx
+            ],
+            navPanel ctx Fwd,
+            navBottomPanel ctx
+        ]
     ]]
 
 diffPanel : Context -> Html Msg

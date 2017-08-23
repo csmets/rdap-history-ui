@@ -152,11 +152,15 @@ abbr
         +flex(column)
         width: 100%
         height: 100%
-        overflow: hidden
-        flex-wrap: nowrap
+        .detailPanelMain
+            +flex(column)
+            width: 100%
+            height: 100%
+            overflow: hidden
+            flex-wrap: nowrap
 
-        @media screen and (min-width: $phone-bp)
-            +flex
+            @media screen and (min-width: $phone-bp)
+                +flex
 
     .navPanel
         display: none
@@ -351,8 +355,9 @@ abbr
 
 .timelineWidget
     +flex
-    height: 100px
+    height: 90px
     background-color: #006FAB
+    padding: 0.3em 1em 0.3em 1em
 
     .timelineBox
         flex: 1 1 auto
@@ -363,15 +368,27 @@ abbr
             color: white
 
         .timelineLifeline
-             height: 2px
+             height: 3px
              position: absolute
              top: 90%
              background: white
+             transform: translate3d(0, -1px, 0)    // needs to be 3d to avoid blurry
+             transition: background 0.3s
              &.active
-                 background: #003D5E
-                 height: 4px
+                 // background: #003D5E
+                 background: #41BCFF
+                 height: 5px
+                 transform: translate3d(0, -2px, 0)
+
+        .timelineLifelineGuide
+            @extend .timelineLifeline
+            background: darkgray
+            height: 1px
+            width: 100%
+            transform: translate3d(0, 0, 0)
 
         .timelineMarker
+            //transition: stroke 0.3s, fill 0.3s
             position: absolute
             height: 50px
             width: 20px
@@ -380,10 +397,16 @@ abbr
             stroke: white
             fill: white
             z-index: 5
+            circle
+                transition: stroke 0.3s, fill 0.3s
+                &:hover
+                    stroke: #41BCFF
+                    fill: #41BCFF
 
         .selected
             z-index: 10
-            stroke: #003D5E
+            stroke: #41BCFF
+            // stroke: #003D5E
             circle
                 fill: black
 
@@ -405,12 +428,14 @@ abbr
         .zoomBoxYear
             position: absolute
             width: 100%
-            height: 100%
+            height: 90%
             top: 0%
             left: 0%
             z-index: 2
+            cursor: zoom-in
             &:hover
-                & + .zoomIcon
+                background: rgba(255, 255, 255, 0.25)
+                & + .zoomIcon   // TODO: REMOVE?
                   fill: white
 
         .zoomIcon
@@ -424,27 +449,40 @@ abbr
 
         .zoomBoxMonth
             position: absolute
-            height: 100%
+            height: 90%
             top: 0%
             z-index: 2
+            cursor: zoom-in
             .zoomIcon
                 left: 50%
                 transform: translate(-50%, 0%)
-
             &:hover
+                background: rgba(255, 255, 255, 0.25)
                 .zoomIcon
                   fill: white
 
-        .zoomBackButton
+        .zoomOutButton
             position: absolute
-            top: 0.3em
-            left: 0.3em
-            width: 2em
+            top: 0
+            left: 0
+            width: 3em
+            height: 3em
             z-index: 15
             border: none
             outline: none
             background: transparent
             fill: white
+            &:hover
+                .zoomOutIcon
+                    //width: 2.3em
+                    //height: 2.3em
+                    transform: scale(1.2)
+
+            .zoomOutIcon
+                transition: transform 0.3s, fill 0.3s
+                width: 2em
+                height: 2em
+
 
     .timelineWidgetNavPanel
         +flex(column)
