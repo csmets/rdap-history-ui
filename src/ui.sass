@@ -354,10 +354,13 @@ abbr
             height: 2.3em
 
 .timelineWidget
-    +flex
-    height: 90px
-    background-color: #006FAB
-    padding: 0.3em 1em 0.3em 1em
+    display: none
+
+    @media screen and (min-width: $phone-bp)
+        +flex
+        height: 90px
+        background-color: #006FAB
+        padding: 0.3em 1em 0.3em 1em
 
     .timelineBox
         flex: 1 1 auto
