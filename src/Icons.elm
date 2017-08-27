@@ -117,6 +117,8 @@ markerButton selected mMsg style tooltip =
                      Just msg -> [SvgE.onClick msg]
     in svg [SvgA.viewBox "0 0 20 50", SvgA.class ("timelineMarker " ++ svgClass), SvgA.style style]
            [
-              Svg.line ([SvgA.x1 "10", SvgA.y1 "20", SvgA.x2 "10", SvgA.y2 "50"] ++ action) [Svg.title [] [Svg.text tooltip]],
-              Svg.circle ([SvgA.cx "10", SvgA.cy "10", SvgA.r "7", SvgA.style "stroke-width: 6"] ++ action) [Svg.title [] [Svg.text tooltip]]
+              Svg.line ([SvgA.x1 "10", SvgA.y1 "20", SvgA.x2 "10", SvgA.y2 "50",
+                             SvgA.class "timelineMarkerItem"] ++ action) [Svg.title [] [Svg.text tooltip]],
+              Svg.circle ([SvgA.cx "10", SvgA.cy "10", SvgA.r "7", SvgA.style "stroke-width: 6",
+                             SvgA.class "timelineMarkerItem"] ++ action) [Svg.title [] [Svg.text tooltip]]
            ]

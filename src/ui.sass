@@ -208,6 +208,7 @@ abbr
         font-size: 3.5vw
         padding-right: 0.6em
         padding-left: 0.6em
+        cursor: default
 
         @media screen and (min-width: $phone-bp)
             padding-right: 0
@@ -247,6 +248,7 @@ abbr
             border: none
             outline: none
             vertical-align: middle
+            cursor: pointer
             svg
                 transform: rotate(0deg)
                 transition: transform 1s ease-in-out
@@ -297,7 +299,7 @@ abbr
         border: none
         background: transparent
         outline: none
-
+        cursor: pointer
         &:enabled
             transition-duration: 0.3s
             path
@@ -335,6 +337,7 @@ abbr
         border: none
         outline: none
         transition-duration: 0.3s
+        cursor: pointer
 
         @media screen and (min-width: $phone-bp)
             &:hover
@@ -405,6 +408,8 @@ abbr
                 &:hover
                     stroke: #41BCFF
                     fill: #41BCFF
+            .timelineMarkerItem
+                cursor: pointer
 
         .selected
             z-index: 10
@@ -475,6 +480,7 @@ abbr
             outline: none
             background: transparent
             fill: white
+            cursor: pointer
             &:hover
                 .zoomOutIcon
                     //width: 2.3em
