@@ -97,12 +97,12 @@ zoomBox : Model -> Date -> List (Html Msg)
 zoomBox m d =
     let pct x = toFloat x * (100/12)
     in case m.zoom of
-           Lifetime -> [div [HA.class "zoomBoxYear", HE.onClick (ZoomTimelineWidget Year (Just d))] []] --, zoomIcon "zoomIcon"]
+           Lifetime -> [div [HA.class "zoomBoxYear", HE.onClick (ZoomTimelineWidget Year (Just d))] []]
            Year     -> List.map (\x -> div [HA.class "zoomBoxMonth", HA.style [("left", (toString <| pct (x - 1)) ++ "%"),
                                                                          ("width", (toString <| pct x - pct (x - 1)) ++ "%")],
                                             HE.onClick (ZoomTimelineWidget Month
                                                             (Just <| Duration.add Duration.Month (x - 1) d))]
-                                     []) --zoomIcon "zoomIcon"])
+                                     [])
                                 (List.range 1 12)
            Month    -> []
 
