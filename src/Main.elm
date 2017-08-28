@@ -17,11 +17,10 @@ import Maybe.Extra exposing (or, join)
 import Platform.Cmd
 import Regex
 import String
-import Svg
-import Svg.Attributes
 import Task
 import Tuple2
 
+import Icons exposing (..)
 import Model exposing (..)
 import Decode exposing (history)
 import Render exposing (viewAsList)
@@ -29,7 +28,7 @@ import Render exposing (viewAsList)
 init : Navigation.Location -> ( Model, Cmd Msg )
 init loc = let hash = String.dropLeft 1 loc.hash
                resource = if String.isEmpty hash then "203.133.248.0/24" else hash
-            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) Nothing False,
+            in ( Model resource (Left "Searching…") 0 (Nothing, Nothing) (Unlocked, Unlocked) Nothing False Lifetime Nothing,
                      search resource )
 
 errMsg : Http.Error -> String
@@ -67,10 +66,14 @@ update msg model = case msg of
         ( model, Navigation.newUrl ("#" ++ s) )
     NavigateDiff direction ->
         ( navigate model direction, Cmd.none )
+    NavigateDiffToVersion v ->
+        ( navigateToVersion model v, Cmd.none )
     FlipNavLock direction ->
         (flipNavigationLock model direction, Cmd.none)
     FlipShowVersionDateDetail d ->
         (flipShowVersionDateDetail model d, Cmd.none)
+    ZoomTimelineWidget z d ->
+        (zoomTimelineWidget model z d, Cmd.none)
 
 upd : Model -> Model
 upd model =
@@ -99,6 +102,21 @@ navigate model dir =
              newDV = (if dir == Fwd then identity else Tuple2.swap) (newV1, newV2)
          in { model | displayedVersions = newDV , versionDateDetail = Nothing }
 
+navigateToVersion : Model -> Version -> Model
+navigateToVersion  model version =
+    let versions = withDefault [] <| Model.versions model
+        (v1, v2) = model.displayedVersions
+        (l1, l2) = model.navigationLocks
+        newDV = (l1 == Unlocked && l2 == Unlocked) => (previousV, Just version)
+             |= (l1 == Locked && l2 == Locked)     => (v1, v2)
+             |= (l1 == Locked && (withDefault 0 distanceToV1) > 0) => (v1, Just version)
+             |= (l2 == Locked && (withDefault -1 distanceToV2) <= 0) => (previousV, v2)
+             |= (v1, v2)
+        distanceToV1 = join <| Maybe.map3 Model.getDistance v1 (Just version) (Just versions)
+        distanceToV2 = join <| Maybe.map3 Model.getDistance v2 (Just version) (Just versions)
+        previousV = getPreviousVersion version versions
+    in { model | displayedVersions = newDV , versionDateDetail = Nothing }
+
 flipNavigationLock : Model -> NavigationDirection -> Model
 flipNavigationLock model direction =
     let flip state = if state == Locked then Unlocked else Locked
@@ -117,6 +135,9 @@ flipNavigationLock model direction =
 flipShowVersionDateDetail : Model -> Maybe Date -> Model
 flipShowVersionDateDetail m d = { m | versionDateDetail = d }
 
+zoomTimelineWidget : Model -> TimelineZoom -> Maybe Date -> Model
+zoomTimelineWidget m z d = {m | timelineWidgetZoom = z, timelineWidgetZoomDate = d}
+
 -- View
 
 view : Model -> Html Msg
@@ -126,7 +147,7 @@ view_ : Model -> Html Msg
 view_ model =
     let body = case model.response of
         Left error     -> [ div [ class "error" ] [ text error ] ]
-        Right response -> viewAsList response model.selected model.displayedVersions model.navigationLocks model.versionDateDetail
+        Right response -> viewAsList response model
     in div [ class "main" ] <| List.concat [ styles, (headerBar model), body ]
 
 styles : List (Html a)
@@ -146,13 +167,7 @@ searchBox model =
     let cease = { stopPropagation = True, preventDefault = True }
     in form [ class "range", onWithOptions "submit" cease searchForm ]
             [ input [ value model.resource, autofocus True ] [],
-              button [class "searchButton"] [searchIcon "searchIcon"]]
-
-searchIcon : String -> Html a
-searchIcon svgClass =
-    Svg.svg [Svg.Attributes.viewBox "0 0 24 24", Svg.Attributes.class svgClass]
-        [Svg.path [Svg.Attributes.strokeLinecap "round", Svg.Attributes.strokeLinejoin "round",
-                   Svg.Attributes.d "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"] []]
+              button [class "searchButton"] [zoomIcon "searchIcon"]]
 
 fl : List String -> String
 fl xs = String.concat (List.intersperse "\n" xs)

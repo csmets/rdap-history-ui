@@ -1,4 +1,4 @@
-module Render exposing (viewAsList)
+module Render exposing (viewAsList, Context)
 
 import Date exposing (Date)
 import Date.Extra.Config.Config_en_au exposing (config)
@@ -11,12 +11,12 @@ import List exposing (length, head)
 import List.Extra exposing ((!!), dropWhile, last)
 import Maybe exposing (map, map2, map3, withDefault)
 import Maybe.Extra exposing (isJust, (?), join)
-import Svg exposing (svg, path)
-import Svg.Attributes exposing (width, height, viewBox, strokeLinecap, strokeLinejoin, strokeWidth, fill)
 import Tuple exposing (..)
 
+import Icons exposing (..)
 import Model exposing (..)
 import Rdap
+import TimelineWidget
 
 -- Rendering happens inside a context
 type alias Context = {
@@ -25,25 +25,28 @@ type alias Context = {
     toVersion : Maybe Version,
     versions : List Version, -- TODO: rename this since it can be mistakely taken as all versions
     navigationLocks : (LockerState, LockerState),
-    versionDateDetail : Maybe Date
+    versionDateDetail : Maybe Date,
+    today: Date,
+    timelineWidgetZoom : TimelineZoom,
+    timelineWidgetZoomDate : Maybe Date
 }
 
 type DateFormat = Short | Long
 
-mkCtx : History -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) -> Maybe Date -> Context
-mkCtx h (fromVersion, toVersion) navigationLockers =
-    let versions = Maybe.Extra.values [fromVersion, toVersion]
-    in Context h fromVersion toVersion versions navigationLockers
+mkCtx : Date -> History -> Model -> Context
+mkCtx today h m =
+    let (fromVersion, toVersion) = m.displayedVersions
+        versions = Maybe.Extra.values [fromVersion, toVersion]
+    in Context h fromVersion toVersion versions m.navigationLocks m.versionDateDetail today m.timelineWidgetZoom m.timelineWidgetZoomDate
 
-viewAsList : Response -> Int -> (Maybe Version, Maybe Version) -> (LockerState, LockerState) ->
-             Maybe Date -> List (Html Msg)
-viewAsList response idx displayedVersions navigationLocks versionDateDetail =
-    let history = response.history !! idx
+viewAsList : Response -> Model -> List (Html Msg)
+viewAsList response m =
+    let history = response.history !! m.selected
     in case history of
            Nothing -> [] -- TODO: will never happen. deal with it differently?
-           Just h -> let ctx = mkCtx h displayedVersions navigationLocks versionDateDetail
-                     in [div [class "historyPane"] ((objectListPanel response.history idx) ++
-                                                        (objectListMobile response.history idx) ++
+           Just h -> let ctx = mkCtx response.stamp h m
+                     in [div [class "historyPane"] ((objectListPanel response.history m.selected) ++
+                                                        (objectListMobile response.history m.selected) ++
                                                         (detailPanel ctx))]
 
 -- Selection Panel
@@ -75,15 +78,18 @@ dropdownResultsMobile historyList idx =
 
 detailPanel : Context -> List (Html Msg)
 detailPanel ctx =
-    [div [class "detailPanel"] [
-        navPanel ctx Bkwd,
-        div [class "detailCenterPanel"] [
-          versionDatesPanel ctx,
-          versionDateDetailPanel ctx,
-          diffPanel ctx
-        ],
-        navPanel ctx Fwd,
-        navBottomPanel ctx
+    [ div [class "detailPanel"] [
+        timelineWidgetPanel ctx,
+        div [class "detailPanelMain"] [
+            navPanel ctx Bkwd,
+            div [class "detailCenterPanel"] [
+              versionDatesPanel ctx,
+              versionDateDetailPanel ctx,
+              diffPanel ctx
+            ],
+            navPanel ctx Fwd,
+            navBottomPanel ctx
+        ]
     ]]
 
 diffPanel : Context -> Html Msg
@@ -119,6 +125,10 @@ versionDateDetailPanel ctx =
                                        Nothing -> ("hidePanel", "")
                                        Just d  -> ("showPanel", toString d)
     in div [class <| "versionDateDetailPanel " ++ panelClass] [text dateString]
+
+timelineWidgetPanel : Context -> Html Msg
+timelineWidgetPanel ctx =
+    TimelineWidget.render <| mkTimelineModel ctx
 
 navPanel : Context -> NavigationDirection -> Html Msg
 navPanel ctx direction =
@@ -192,73 +202,13 @@ createDateLabel md versionDateDetail =
                                 [expandIcon "moreIconSvg"]
                       ]
 
- -- Icons
 
-arrow : String -> Html a
-arrow svgClass =
-    svg [viewBox "0 0 50 100", Svg.Attributes.class svgClass]
-        [path [strokeWidth "8", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
-                   Svg.Attributes.d "M 10 10 L 40 50 L 10 90"] []]
-
-moreIcon : String -> Html a
-moreIcon svgClass =
-    svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
-                Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                              Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
-                Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] [],
-                Svg.circle [Svg.Attributes.cx "18.33", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] [],
-                Svg.circle [Svg.Attributes.cx "81.66", Svg.Attributes.cy "50", Svg.Attributes.r "13.33",
-                                Svg.Attributes.fill "black"] []
-                ]
-          ],
-        Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []
-    ]
-
-expandIcon : String -> Html a
-expandIcon svgClass =
-    svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-        Svg.defs [] [Svg.mask [Svg.Attributes.id svgClass] [
-                Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                              Svg.Attributes.height "100", Svg.Attributes.fill "white"] [],
-                path [strokeWidth "17", fill "transparent" , strokeLinecap "round", strokeLinejoin "round",
-                          Svg.Attributes.d "M 20 35 L 50 65 L 80 35", Svg.Attributes.stroke "black"] []
-              ]
-          ],
-        Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                        Svg.Attributes.mask <| "url(#" ++ svgClass ++ ")"] []
-    ]
-
--- Note: We need to change the mask name otherwise Chrome won't update the icon. Only updating the mask's path
---       is not enough.
-lockerIcon : LockerState -> String -> String -> Html a
-lockerIcon state svgClass id =
-    let maskPathDraw = case state of
-                           Locked   -> "M 35 50 v -20 c 0 -20 30 -20 30 0 v 20"
-                           Unlocked -> "M 35 50 v -20 c 0 -20 30 -20 30 0"
-        maskName = toString state ++ id
-        iconTitle = if state == Locked then "Unlock version" else "Lock version"
-    in svg [viewBox "0 0 100 100", Svg.Attributes.class svgClass] [
-           Svg.defs [] [Svg.mask [Svg.Attributes.id maskName] [
-                   Svg.rect [Svg.Attributes.x "0", Svg.Attributes.y "0", Svg.Attributes.width "100",
-                                 Svg.Attributes.height "100", fill "white"] [],
-                   Svg.rect [Svg.Attributes.x "25", Svg.Attributes.y "45", Svg.Attributes.width "50",
-                                 Svg.Attributes.height "30", Svg.Attributes.rx "10", Svg.Attributes.ry "10",
-                                 fill "black"] [],
-                   Svg.path [Svg.Attributes.d maskPathDraw, strokeWidth "6", strokeLinecap "round",
-                                 strokeLinejoin "round", fill "transparent", Svg.Attributes.stroke "black"] []
-                   ]
-             ],
-            Svg.circle [Svg.Attributes.cx "50", Svg.Attributes.cy "50", Svg.Attributes.r "50",
-                           Svg.Attributes.mask <| "url(#" ++ maskName ++ ")"] [Svg.title [] [text iconTitle]]
-       ]
-
-
- -- Utility methods
+-- Utility methods
 
 checkNavDisabled : Context -> NavigationDirection -> Bool
 checkNavDisabled ctx dir =
     not <| Model.canNavigate ctx.history.versions (ctx.fromVersion, ctx.toVersion) dir ctx.navigationLocks
+
+mkTimelineModel : Context -> TimelineWidget.Model
+mkTimelineModel ctx =
+    TimelineWidget.Model ctx.timelineWidgetZoom ctx.timelineWidgetZoomDate (ctx.fromVersion, ctx.toVersion) ctx.history.versions ctx.today

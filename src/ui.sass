@@ -152,11 +152,15 @@ abbr
         +flex(column)
         width: 100%
         height: 100%
-        overflow: hidden
-        flex-wrap: nowrap
+        .detailPanelMain
+            +flex(column)
+            width: 100%
+            height: 100%
+            overflow: hidden
+            flex-wrap: nowrap
 
-        @media screen and (min-width: $phone-bp)
-            +flex
+            @media screen and (min-width: $phone-bp)
+                +flex
 
     .navPanel
         display: none
@@ -204,6 +208,7 @@ abbr
         font-size: 3.5vw
         padding-right: 0.6em
         padding-left: 0.6em
+        cursor: default
 
         @media screen and (min-width: $phone-bp)
             padding-right: 0
@@ -243,6 +248,7 @@ abbr
             border: none
             outline: none
             vertical-align: middle
+            cursor: pointer
             svg
                 transform: rotate(0deg)
                 transition: transform 1s ease-in-out
@@ -293,7 +299,7 @@ abbr
         border: none
         background: transparent
         outline: none
-
+        cursor: pointer
         &:enabled
             transition-duration: 0.3s
             path
@@ -331,6 +337,7 @@ abbr
         border: none
         outline: none
         transition-duration: 0.3s
+        cursor: pointer
 
         @media screen and (min-width: $phone-bp)
             &:hover
@@ -348,6 +355,151 @@ abbr
         height: 2em
         @media screen and (min-width: $phone-bp)
             height: 2.3em
+
+.timelineWidget
+    display: none
+
+    @media screen and (min-width: $phone-bp)
+        +flex
+        height: 90px
+        background-color: #006FAB
+        padding: 0.3em 1em 0.3em 1em
+
+    .timelineBox
+        flex: 1 1 auto
+        position: relative
+
+        .timelineBoxTitle
+            text-align: center
+            color: white
+
+        .timelineLifeline
+             height: 3px
+             position: absolute
+             top: 90%
+             background: white
+             transform: translate3d(0, -1px, 0)    // needs to be 3d to avoid blurry
+             transition: background 0.3s
+             &.active
+                 background: #41BCFF
+                 height: 5px
+                 transform: translate3d(0, -2px, 0)
+
+        .timelineLifelineGuide
+            @extend .timelineLifeline
+            background: darkgray
+            height: 1px
+            width: 100%
+            transform: translate3d(0, 0, 0)
+
+        .timelineMarker
+            position: absolute
+            height: 50px
+            width: 20px
+            bottom: 10%
+            transform: translate(-50%, 0%)
+            stroke: white
+            fill: white
+            z-index: 5
+            circle
+                transition: stroke 0.3s, fill 0.3s
+                &:hover
+                    stroke: #41BCFF
+                    fill: #41BCFF
+            .timelineMarkerItem
+                cursor: pointer
+
+        .selected
+            z-index: 10
+            stroke: #41BCFF
+            circle
+                fill: black
+
+        .timelineScale
+            position: absolute
+            bottom: 20%
+            height: 10px
+            width: 1px
+            background: darkgray
+
+        .timelineScaleHalf
+            @extend .timelineScale
+            height: 20px
+
+        .timelineScaleFull
+            @extend .timelineScale
+            height: 30px
+
+        .zoomBoxYear
+            position: absolute
+            width: 100%
+            height: 90%
+            top: 0%
+            left: 0%
+            z-index: 2
+            cursor: zoom-in
+            &:hover
+                background: rgba(255, 255, 255, 0.25)
+
+        .zoomIcon
+            position: absolute
+            top: 0%
+            right: 0%
+            stroke: transparent
+            fill: transparent
+            height: 2em
+            transition: fill 0.5s
+
+        .zoomBoxMonth
+            position: absolute
+            height: 90%
+            top: 0%
+            z-index: 2
+            cursor: zoom-in
+            .zoomIcon
+                left: 50%
+                transform: translate(-50%, 0%)
+            &:hover
+                background: rgba(255, 255, 255, 0.25)
+
+        .zoomOutButton
+            position: absolute
+            top: 0
+            left: 0
+            width: 3em
+            height: 3em
+            z-index: 15
+            border: none
+            outline: none
+            background: transparent
+            fill: white
+            cursor: pointer
+            &:hover
+                .zoomOutIcon
+                    transform: scale(1.2)
+
+            .zoomOutIcon
+                transition: transform 0.3s, fill 0.3s
+                width: 2em
+                height: 2em
+
+
+    .timelineWidgetNavPanel
+        +flex(column)
+        justify-content: center
+        .arrowButton
+            .timelineWidgetArrow
+                stroke: white
+                height: 3em
+            .timelineWidgetLeftArrow
+                @extend .timelineWidgetArrow
+                transform: rotate(180deg)
+            .timelineWidgetRightArrow
+                @extend .timelineWidgetArrow
+            &.left
+                margin-right: 1em
+            &.right
+                margin-left: 1em
 
 .rdap
     padding-top: 0.5em
