@@ -4,6 +4,7 @@
   "description": "WHOWAS user interface",
   "main": "index.js",
   "scripts": {
+	"install": "node_modules/elm/binwrappers/elm-package install",
     "start": "elm reactor",
     "build": "gulp"
   },
