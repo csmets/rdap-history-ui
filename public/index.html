@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whowas</title>
+	<link href="http://cgi1.apnic.net/assets/styleguide/apnic-web-style-guide.min.css" rel="stylesheet" media="all">
   </head>
-  <body>
+  <body style="margin: 0">
 
 
 <!-- APNIC Header for Whowas -->
@@ -21,43 +22,8 @@
             </div>
             <div class="navbar-collapse" id="navbarSupportedContent">
                 <ul class="nav navbar-nav navbar-right">
-                    <li id="search" class="utility utility-search">
-                        <form class="navbar-form navbar-right utility-search-form" role="search" method="get" action="https://apnic-net.github.io/rdap-history-ui/">
-                            <div class="form-group form-group-sm">
-                                <label for="s" class="sr-only">Whowas search</label>
-                                <div class="input-group">
-                                    <input type="text" id="form-search" class="form-control" name="s" placeholder="WHOWAS SEARCH">
-                                    <span class="input-group-btn">
-                                        <button type="submit" class="btn btn-s">
-                                            <i class="fa fa-search" aria-hidden="true"></i>
-                                        </button>
-                                    </span>
-                                    <span class="help-block">
-                                        <a type="button" class="btn btn-s navbar-btn" href="https://wq.apnic.net/whois-search/static/search.html">Advanced Whois</a>
-                                    </span>
-                                </div>
-                            </div>
-                        </form>
-                    </li>
                     <li class="utility">
-                        <a href="https://wq.apnic.net/whois-search/static/search.html">Advanced Whois</a>
-                    </li>
-                    <li class="utility">
-                        <a href="https://www.apnic.net/get-ip/apnic-membership/billing-procedure/make-a-payment/">Make a payment</a>
-                    </li>
-
-                    <!-- After login .hidden class should be added-->
-                    <li class="utility">
-                        <a href="" class="btn-primary btn-login navbar-btn">Login</a>
-                    </li>
-
-                    <!-- After login .hidden class should be removed-->
-                    <li class="utility dropdown hidden">
-                        <a class="dropdown-toggle" type="button" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi, User Name!<span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                            <li><a href="#">My Profile</a></li>
-                            <li><a href="#">Logout</a></li>
-                        </ul>
+                        <a href="https://wq.apnic.net/whois-search/static/search.html">Whois Search</a>
                     </li>
 
                     <li class="utility dropdown">
@@ -80,7 +46,7 @@
 
 
     <!-- Main app -->
-    <div id="elm_main"></div>
+    <div class="whowas" id="elm_main"></div>
     <script src="js/elm.js"></script>
     <script>
     var node = document.getElementById('elm_main');
@@ -89,7 +55,7 @@
 
 
     <!-- APNIC Footer -->
-    <footer class="footer" role="contentinfo">
+    <footer class="footer" role="contentinfo" style="margin-top: 0; bottom: auto">
     <div class="container">
         <div class="grid grid-inline grid-middle">
         <div class="col size-1-of-4">
@@ -101,7 +67,7 @@
             <div class="footer-social">
             Connect with us
                 <ul>
-                    <li><a href="https://www.facebook.com/APNIC" class="fa-facebook-square"><span class="sr-only">Facebook</span></a></li>
+                    <li><a href="https://www.facebook.com/APNIC" class="fa fa-facebook-square"><span class="sr-only">Facebook</span></a></li>
                     <li><a href="https://twitter.com/apnic" class="fa fa-twitter"><span class="sr-only">Twitter</span></a></li>
                     <li><a href="https://www.youtube.com/user/apnicmultimedia" class="fa fa-youtube"><span class="sr-only">YouTube</span></a></li>
                     <li><a href="https://www.flickr.com/photos/apnic/" class="fa fa-flickr"><span class="sr-only">Flickr</span></a></li>

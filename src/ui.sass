@@ -8,6 +8,14 @@ $lockedButtonColour: #732a2a
 $phone-bp: 800px
 $unified-diff-bp: 1500px
 
+html
+    font-family: 'Arial', sans-serif
+    min-width: initial
+    min-height: initial
+    overflow-y: initial
+    font-size: initial
+    line-height: initial
+
 =prefixed($name, $value)
     -webkit-#{$name}: $value
     -moz-#{$name}: $value
@@ -43,651 +51,664 @@ $unified-diff-bp: 1500px
         float: left
         text-align: left
 
-pre
-    font-family: $fixed-font
+.whowas
 
-abbr
-    text-decoration: none
-    border-bottom: 0.05em dotted #999
+    a
+        text-decoration: underline;
+        color: blue
 
-*
-    margin: 0
-    padding: 0
+    a:visited
+        color: purple
 
-.main
-    +flex(column)
-//    height: 100vh
-//    width: 100vw
+    pre
+        font-family: $fixed-font
+        background-color: inherit
+        font-size: inherit
+        line-height: inherit
+        color: inherit
 
-.headerBar
-    +flex(column)
-    align-items: center
-    color: white
-    background-color: #003D5E
-    margin: 0
-    padding: 0.5em
-    .title
-        font-size: x-large
-        font-weight: bold
-    img
-        height: 2em
-        padding-right: 2em
-    div
-        +flex
+    abbr
+        text-decoration: none
+        border-bottom: 0.05em dotted #999
+
+    *
+        margin: 0
+        padding: 0
+
+    .main
+        +flex(column)
+    //    height: 100vh
+    //    width: 100vw
+
+    .headerBar
+        +flex(column)
         align-items: center
-        justify-content: center
+        color: white
+        background-color: #003D5E
+        margin: 0
         padding: 0.5em
-    .range
-        +flex
-        align-item: center
-        .searchButton
-            background-color: white
-            width: 2em
-            border: none
-            outline: none
-        .searchIcon
-            stroke: transparent
-            fill: darkgray
-        input
-            font-size: large
-            border: none
-            outline: none
-
-    @media screen and (min-width: 650px)
-        +flex
+        .title
+            font-size: x-large
+            font-weight: bold
         img
             height: 2em
+            padding-right: 2em
         div
             +flex
             align-items: center
-            margin-right: 2.5em
-            width: inherit
+            justify-content: center
+            padding: 0.5em
+        .range
+            +flex
+            align-item: center
+            .searchButton
+                background-color: white
+                width: 2em
+                border: none
+                outline: none
+            .searchIcon
+                stroke: transparent
+                fill: darkgray
+            input
+                font-size: large
+                border: none
+                outline: none
 
-.object
-    margin: 5em
+        @media screen and (min-width: 650px)
+            +flex
+            img
+                height: 2em
+            div
+                +flex
+                align-items: center
+                margin-right: 2.5em
+                width: inherit
 
-.historyPane
-    +flex(column)
-    min-width: 0
-    min-height: 0
-    height: 100%
-    @media screen and (min-width: $phone-bp)
-        +flex
-    .objectList
-        display: none
+    .object
+        margin: 5em
 
+    .historyPane
+        +flex(column)
+        min-width: 0
+        min-height: 0
+        height: 100%
         @media screen and (min-width: $phone-bp)
-            display: block
-            background-color: #f4f4f4
-            margin: 0
-            padding: 1em 0 0 0
-            border-right: 1px solid #e5e3e3
-            font-size: small
-            list-style: none
-            overflow-y: auto
-            cursor: default
-            +flex-shrink(0)
-
-            li
-                padding: 0.25em 1em
-                margin: 0
-                &:hover
-                    background-color: #cfcfcf
-                &.selected
-                    background-color: #a9c1d6
-
-    .objectListMobile
-        display: flex
-        justify-content: space-around
-        flex: 0 0 auto
-        padding: 0.5em
-        color: white
-        background: darkgray
-        @media screen and (min-width: $phone-bp)
+            +flex
+        .objectList
             display: none
 
-    .detailPanel
-        +flex(column)
-        width: 100%
-        height: 100%
-        .detailPanelMain
+            @media screen and (min-width: $phone-bp)
+                display: block
+                background-color: #f4f4f4
+                margin: 0
+                padding: 1em 0 0 0
+                border-right: 1px solid #e5e3e3
+                font-size: small
+                list-style: none
+                overflow-y: auto
+                cursor: default
+                +flex-shrink(0)
+
+                li
+                    padding: 0.25em 1em
+                    margin: 0
+                    &:hover
+                        background-color: #cfcfcf
+                    &.selected
+                        background-color: #a9c1d6
+
+        .objectListMobile
+            display: flex
+            justify-content: space-around
+            flex: 0 0 auto
+            padding: 0.5em
+            color: white
+            background: darkgray
+            @media screen and (min-width: $phone-bp)
+                display: none
+
+        .detailPanel
             +flex(column)
             width: 100%
             height: 100%
-            overflow: hidden
-            flex-wrap: nowrap
+            .detailPanelMain
+                +flex(column)
+                width: 100%
+                height: 100%
+                overflow: hidden
+                flex-wrap: nowrap
+
+                @media screen and (min-width: $phone-bp)
+                    +flex
+
+        .navPanel
+            display: none
 
             @media screen and (min-width: $phone-bp)
-                +flex
+                +flex(column)
+                height: 100%
+                flex: 0 0 auto
+                width: 6em
 
-    .navPanel
+            .navPanelItem   // TODO: REMOVE?
+                +flex(column)
+                flex: 1
+                justify-content: flex-start
+                align-items: center
+
+            .navPanelButtons
+                position: fixed
+                top: 50%
+                +flex(column)
+                justify-content: flex-start
+                align-items: center
+                width: 6em
+
+        .navBottomPanel
+            +flex
+            flex: 0 0 auto
+            height: 5em
+            justify-content: space-around
+
+            @media screen and (min-width: $phone-bp)
+                display: none
+
+            button
+                margin-right: 0.6em
+                margin-left: 0.6em
+
+        .detailCenterPanel
+            +flex(column)
+            flex: 5 1 auto
+            height: 100%
+            overflow: hidden
+            align-items: center
+
+        .versionDatesPanel
+            +flex
+            overflow: hidden
+            flex-wrap: nowrap
+            color: white
+            background-color: #006FAB
+            height: 1.4em
+            width: 100%
+            align-items: center
+            flex: 0 0 auto
+            font-size: 3.5vw
+            padding-right: 0.6em
+            padding-left: 0.6em
+            cursor: default
+
+            @media screen and (min-width: $phone-bp)
+                padding-right: 0
+                padding-left: 0
+
+            @media screen and (min-width: 400px)
+                font-size: inherit
+
+            .versionDateItem
+                +flex
+                flex: 1
+                justify-content: center
+
+                .dateLong
+                    display: none
+
+                @media screen and (min-width: 1000px)
+                   .dateLong
+                       display: inline
+                   .dateShort
+                       display: none
+
+            .versionDateLeft
+                @extend .versionDateItem
+                span
+                    margin-right: auto
+
+            .versionDateCenter
+                @extend .versionDateItem
+
+            .versionDateRight
+                @extend .versionDateItem
+                span
+                    margin-left: auto
+            .flipShowVersionButton
+                background: transparent
+                border: none
+                outline: none
+                vertical-align: middle
+                cursor: pointer
+                svg
+                    transform: rotate(0deg)
+                    transition: transform 1s ease-in-out
+                display: none
+                // fixes rotating issues in chrome (https://stackoverflow.com/a/15623914/2688113)
+                -webkit-backface-visibility: hidden;
+
+                @media screen and (min-width: 400px)
+                    display: inline
+
+            .pressedFlipShowVersionButton
+                @extend .flipShowVersionButton
+                svg
+                    transform: rotate(540deg)
+                    transition: transform 1s ease-in-out
+
+            .moreIconSvg
+                fill: white
+                width: 1.2em
+                height: 1.2em
+                margin-left: 0.5em
+
+
+        .versionDateDetailPanel
+            +flex
+            overflow: hidden
+            justify-content: center
+            background: #545454
+            color: white
+            transition: width 1s, height 5s
+
+            &.left
+                align-self: flex-start
+                border-radius: 0px 0px 15px 0px
+                padding: 0 1em 0 0
+
+            &.center
+                border-radius: 0px 0px 15px 15px
+                padding: 0 1em 0 1em
+
+            &.right
+                align-self: flex-end
+                border-radius: 0px 0px 0px 15px
+                padding: 0 0 0 1em
+
+            &.showPanel
+                height: 1.4em
+                flex: 0 0 auto
+                font-size: smaller
+                display: none
+                @media screen and (min-width: 400px)
+                    display: inherit
+
+            &.hidePanel
+                height: 0em
+                flex: 0 0 auto
+
+        .arrowButton
+            flex: 0 0 auto
+            align-self: center
+            border: none
+            background: transparent
+            outline: none
+            cursor: pointer
+            &:enabled
+                transition-duration: 0.3s
+                path
+                    transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
+                    &:hover
+                        @media screen and (min-width: $phone-bp)
+                            stroke-width: 13
+                    &:active
+                        stroke: rgba(0, 0, 0, 0.5)
+                        stroke-width: 3
+            &:disabled
+                transition-duration: 0.3s
+                opacity: 0.4
+                cursor: not-allowed
+
+        .arrow
+            stroke: black
+            height: 5em
+            @media screen and (min-width: $phone-bp)
+                height: 7.5em
+
+        .rightArrow
+            @extend .arrow
+
+        .leftArrow
+            @extend .arrow
+            transform: rotate(180deg)
+
+        .lockButton
+            flex: 0 0 auto
+            margin-top: 1em
+            height: 30px
+            width: 30px
+            background-color: transparent
+            border: none
+            outline: none
+            transition-duration: 0.3s
+            cursor: pointer
+
+            @media screen and (min-width: $phone-bp)
+                &:hover
+                    fill: #006FAB
+
+        .lockedButton
+            @extend .lockButton
+            fill: $lockedButtonColour
+
+        .unlockedButton
+            @extend .lockButton
+            fill: black
+
+        .lockerIcon
+            height: 2em
+            @media screen and (min-width: $phone-bp)
+                height: 2.3em
+
+    .timelineWidget
         display: none
 
         @media screen and (min-width: $phone-bp)
+            +flex
+            height: 90px
+            background-color: #006FAB
+            padding: 0.3em 1em 0.3em 1em
+
+        .timelineBox
+            flex: 1 1 auto
+            position: relative
+
+            .timelineBoxTitle
+                text-align: center
+                color: white
+
+            .timelineLifeline
+                 height: 3px
+                 position: absolute
+                 top: 90%
+                 background: white
+                 transform: translate3d(0, -1px, 0)    // needs to be 3d to avoid blurry
+                 transition: background 0.3s
+                 &.active
+                     background: #41BCFF
+                     height: 5px
+                     transform: translate3d(0, -2px, 0)
+
+            .timelineLifelineGuide
+                @extend .timelineLifeline
+                background: darkgray
+                height: 1px
+                width: 100%
+                transform: translate3d(0, 0, 0)
+
+            .timelineMarker
+                position: absolute
+                height: 50px
+                width: 20px
+                bottom: 10%
+                transform: translate(-50%, 0%)
+                stroke: white
+                fill: white
+                z-index: 5
+                circle
+                    transition: stroke 0.3s, fill 0.3s
+                    &:hover
+                        stroke: #41BCFF
+                        fill: #41BCFF
+                .timelineMarkerItem
+                    cursor: pointer
+
+            .selected
+                z-index: 10
+                stroke: #41BCFF
+                circle
+                    fill: black
+
+            .timelineScale
+                position: absolute
+                bottom: 20%
+                height: 10px
+                width: 1px
+                background: darkgray
+
+            .timelineScaleHalf
+                @extend .timelineScale
+                height: 20px
+
+            .timelineScaleFull
+                @extend .timelineScale
+                height: 30px
+
+            .zoomBoxYear
+                position: absolute
+                width: 100%
+                height: 90%
+                top: 0%
+                left: 0%
+                z-index: 2
+                cursor: zoom-in
+                &:hover
+                    background: rgba(255, 255, 255, 0.25)
+
+            .zoomIcon
+                position: absolute
+                top: 0%
+                right: 0%
+                stroke: transparent
+                fill: transparent
+                height: 2em
+                transition: fill 0.5s
+
+            .zoomBoxMonth
+                position: absolute
+                height: 90%
+                top: 0%
+                z-index: 2
+                cursor: zoom-in
+                .zoomIcon
+                    left: 50%
+                    transform: translate(-50%, 0%)
+                &:hover
+                    background: rgba(255, 255, 255, 0.25)
+
+            .zoomOutButton
+                position: absolute
+                top: 0
+                left: 0
+                width: 3em
+                height: 3em
+                z-index: 15
+                border: none
+                outline: none
+                background: transparent
+                fill: white
+                cursor: pointer
+                &:hover
+                    .zoomOutIcon
+                        transform: scale(1.2)
+
+                .zoomOutIcon
+                    transition: transform 0.3s, fill 0.3s
+                    width: 2em
+                    height: 2em
+
+
+        .timelineWidgetNavPanel
             +flex(column)
-            height: 100%
-            flex: 0 0 auto
-            width: 6em
+            justify-content: center
+            .arrowButton
+                .timelineWidgetArrow
+                    stroke: white
+                    height: 3em
+                .timelineWidgetLeftArrow
+                    @extend .timelineWidgetArrow
+                    transform: rotate(180deg)
+                .timelineWidgetRightArrow
+                    @extend .timelineWidgetArrow
+                &.left
+                    margin-right: 1em
+                &.right
+                    margin-left: 1em
 
-        .navPanelItem   // TODO: REMOVE?
-            +flex(column)
-            flex: 1
-            justify-content: flex-start
-            align-items: center
+    .rdap
+        padding-top: 0.5em
+        padding-bottom: 0.5em
+        font-family: $detail-font
+        table
+            border-collapse: collapse
+            margin: auto
+        td
+            padding: 0 0.15em
+        td:first-child
+            vertical-align: top
+            font-family: $title-font
+            color: rgb(140, 140, 140)
+            text-align: right
+            padding-right: 1em
 
-        .navPanelButtons
-            position: fixed
-            top: 50%
-            +flex(column)
-            justify-content: flex-start
-            align-items: center
-            width: 6em
+        .spacer td
+            padding: 0.2em
 
-    .navBottomPanel
-        +flex
-        flex: 0 0 auto
-        height: 5em
-        justify-content: space-around
+    .rdap-was
+        @extend .rdap
 
-        @media screen and (min-width: $phone-bp)
+        .diff-modified
+            background-color: #ffffdd
+            +floaty("!")
+        .diff-new
+            color: transparent
+            background-color: #f4f4f4
+            td:first-child
+                color: transparent
+            a
+                display: none
+        .diff-unchanged
+            +floaty(" ")
+        .diff-deleted
+            +floaty("-")
+            background-color: #ffdce0
+        .diff-word-new
+            display: none
+        .diff-word-deleted
+            background-color: #ffff00
+
+    .rdap-is
+        @extend .rdap
+
+        .diff-modified
+            background-color: #ffffdd
+            +floaty("!")
+        .diff-new
+            background-color: #ddffdd
+            +floaty("+")
+        .diff-unchanged
+            +floaty(" ")
+        .diff-deleted
+            color: transparent
+            background-color: #f4f4f4
+            td:first-child
+                color: transparent
+            a
+                display: none
+        .diff-word-new
+            background-color: #ffff00
+        .diff-word-deleted
             display: none
 
-        button
-            margin-right: 0.6em
-            margin-left: 0.6em
+    .rdap-mobile
+        padding-top: 0.5em
+        padding-bottom: 0.5em
+        font-family: $detail-font
+        margin-left: auto
+        margin-right: auto
 
-    .detailCenterPanel
-        +flex(column)
-        flex: 5 1 auto
-        height: 100%
-        overflow: hidden
-        align-items: center
+        @media screen and (min-width: $unified-diff-bp)
+            display: none
 
-    .versionDatesPanel
+        .diff-modified
+            background-color: #ffffdd
+            +floaty-mobile("!")
+        .diff-new
+            background-color: #ddffdd
+            +floaty-mobile("+")
+        .diff-unchanged
+            +floaty-mobile(" ")
+        .diff-deleted
+            +floaty-mobile("-")
+            background-color: #ffdce0
+        .diff-word-new
+            background-color: #acf2bd
+        .diff-word-deleted
+            background-color: #ffa2ad
+            text-decoration: line-through
+        .mobileLineTitle
+            color: rgb(140, 140, 140)
+        .mobileRemovedLine
+            background-color: #ffdce0
+            text-decoration: line-through
+        .mobileAddedLine
+            background-color: #ddffdd
+        .mobileRdapDiff
+            margin-bottom: 0.5em
+        hr
+            margin-top: 0.5em
+            margin-bottom: 0.5em
+
+    .diffPanel
         +flex
-        overflow: hidden
+        flex: 1 1 auto
+        overflow: auto
         flex-wrap: nowrap
-        color: white
-        background-color: #006FAB
-        height: 1.4em
-        width: 100%
-        align-items: center
-        flex: 0 0 auto
-        font-size: 3.5vw
+        height: 100%
+        padding-top: 1em
         padding-right: 0.6em
         padding-left: 0.6em
-        cursor: default
 
         @media screen and (min-width: $phone-bp)
             padding-right: 0
             padding-left: 0
 
-        @media screen and (min-width: 400px)
-            font-size: inherit
-
-        .versionDateItem
-            +flex
+        .diffPanelItem
             flex: 1
-            justify-content: center
-
-            .dateLong
-                display: none
-
-            @media screen and (min-width: 1000px)
-               .dateLong
-                   display: inline
-               .dateShort
-                   display: none
-
-        .versionDateLeft
-            @extend .versionDateItem
-            span
-                margin-right: auto
-
-        .versionDateCenter
-            @extend .versionDateItem
-
-        .versionDateRight
-            @extend .versionDateItem
-            span
-                margin-left: auto
-        .flipShowVersionButton
-            background: transparent
-            border: none
-            outline: none
-            vertical-align: middle
-            cursor: pointer
-            svg
-                transform: rotate(0deg)
-                transition: transform 1s ease-in-out
             display: none
-            // fixes rotating issues in chrome (https://stackoverflow.com/a/15623914/2688113)
-            -webkit-backface-visibility: hidden;
+            padding: 0 0.7em
+            @media screen and (min-width: $unified-diff-bp)
+                display: inline-block
 
-            @media screen and (min-width: 400px)
-                display: inline
+        .diffPanelItem:first-child .diff
+            border-left: none
 
-        .pressedFlipShowVersionButton
-            @extend .flipShowVersionButton
-            svg
-                transform: rotate(540deg)
-                transition: transform 1s ease-in-out
-
-        .moreIconSvg
-            fill: white
-            width: 1.2em
-            height: 1.2em
-            margin-left: 0.5em
-
-
-    .versionDateDetailPanel
-        +flex
-        overflow: hidden
-        justify-content: center
-        background: #545454
-        color: white
-        transition: width 1s, height 5s
-
-        &.left
-            align-self: flex-start
-            border-radius: 0px 0px 15px 0px
-            padding: 0 1em 0 0
-
-        &.center
-            border-radius: 0px 0px 15px 15px
-            padding: 0 1em 0 1em
-
-        &.right
-            align-self: flex-end
-            border-radius: 0px 0px 0px 15px
-            padding: 0 0 0 1em
-
-        &.showPanel
-            height: 1.4em
-            flex: 0 0 auto
-            font-size: smaller
-            display: none
-            @media screen and (min-width: 400px)
-                display: inherit
-
-        &.hidePanel
-            height: 0em
-            flex: 0 0 auto
-
-    .arrowButton
-        flex: 0 0 auto
-        align-self: center
-        border: none
-        background: transparent
-        outline: none
-        cursor: pointer
-        &:enabled
-            transition-duration: 0.3s
-            path
-                transition: stroke-width 0.5s ease-in-out, stroke 0.3s ease-out
-                &:hover
-                    @media screen and (min-width: $phone-bp)
-                        stroke-width: 13
-                &:active
-                    stroke: rgba(0, 0, 0, 0.5)
-                    stroke-width: 3
-        &:disabled
-            transition-duration: 0.3s
-            opacity: 0.4
-            cursor: not-allowed
-
-    .arrow
-        stroke: black
-        height: 5em
-        @media screen and (min-width: $phone-bp)
-            height: 7.5em
-
-    .rightArrow
-        @extend .arrow
-
-    .leftArrow
-        @extend .arrow
-        transform: rotate(180deg)
-
-    .lockButton
-        flex: 0 0 auto
-        margin-top: 1em
-        height: 30px
-        width: 30px
-        background-color: transparent
-        border: none
-        outline: none
-        transition-duration: 0.3s
-        cursor: pointer
-
-        @media screen and (min-width: $phone-bp)
-            &:hover
-                fill: #006FAB
-
-    .lockedButton
-        @extend .lockButton
-        fill: $lockedButtonColour
-
-    .unlockedButton
-        @extend .lockButton
-        fill: black
-
-    .lockerIcon
-        height: 2em
-        @media screen and (min-width: $phone-bp)
-            height: 2.3em
-
-.timelineWidget
-    display: none
-
-    @media screen and (min-width: $phone-bp)
-        +flex
-        height: 90px
-        background-color: #006FAB
-        padding: 0.3em 1em 0.3em 1em
-
-    .timelineBox
-        flex: 1 1 auto
-        position: relative
-
-        .timelineBoxTitle
-            text-align: center
-            color: white
-
-        .timelineLifeline
-             height: 3px
-             position: absolute
-             top: 90%
-             background: white
-             transform: translate3d(0, -1px, 0)    // needs to be 3d to avoid blurry
-             transition: background 0.3s
-             &.active
-                 background: #41BCFF
-                 height: 5px
-                 transform: translate3d(0, -2px, 0)
-
-        .timelineLifelineGuide
-            @extend .timelineLifeline
-            background: darkgray
-            height: 1px
-            width: 100%
-            transform: translate3d(0, 0, 0)
-
-        .timelineMarker
-            position: absolute
-            height: 50px
-            width: 20px
-            bottom: 10%
-            transform: translate(-50%, 0%)
-            stroke: white
-            fill: white
-            z-index: 5
-            circle
-                transition: stroke 0.3s, fill 0.3s
-                &:hover
-                    stroke: #41BCFF
-                    fill: #41BCFF
-            .timelineMarkerItem
-                cursor: pointer
-
-        .selected
-            z-index: 10
-            stroke: #41BCFF
-            circle
-                fill: black
-
-        .timelineScale
-            position: absolute
-            bottom: 20%
-            height: 10px
-            width: 1px
-            background: darkgray
-
-        .timelineScaleHalf
-            @extend .timelineScale
-            height: 20px
-
-        .timelineScaleFull
-            @extend .timelineScale
-            height: 30px
-
-        .zoomBoxYear
-            position: absolute
-            width: 100%
-            height: 90%
-            top: 0%
-            left: 0%
-            z-index: 2
-            cursor: zoom-in
-            &:hover
-                background: rgba(255, 255, 255, 0.25)
-
-        .zoomIcon
-            position: absolute
-            top: 0%
-            right: 0%
-            stroke: transparent
-            fill: transparent
-            height: 2em
-            transition: fill 0.5s
-
-        .zoomBoxMonth
-            position: absolute
-            height: 90%
-            top: 0%
-            z-index: 2
-            cursor: zoom-in
-            .zoomIcon
-                left: 50%
-                transform: translate(-50%, 0%)
-            &:hover
-                background: rgba(255, 255, 255, 0.25)
-
-        .zoomOutButton
-            position: absolute
-            top: 0
-            left: 0
-            width: 3em
-            height: 3em
-            z-index: 15
-            border: none
-            outline: none
-            background: transparent
-            fill: white
-            cursor: pointer
-            &:hover
-                .zoomOutIcon
-                    transform: scale(1.2)
-
-            .zoomOutIcon
-                transition: transform 0.3s, fill 0.3s
-                width: 2em
-                height: 2em
-
-
-    .timelineWidgetNavPanel
-        +flex(column)
-        justify-content: center
-        .arrowButton
-            .timelineWidgetArrow
-                stroke: white
-                height: 3em
-            .timelineWidgetLeftArrow
-                @extend .timelineWidgetArrow
-                transform: rotate(180deg)
-            .timelineWidgetRightArrow
-                @extend .timelineWidgetArrow
-            &.left
-                margin-right: 1em
-            &.right
-                margin-left: 1em
-
-.rdap
-    padding-top: 0.5em
-    padding-bottom: 0.5em
-    font-family: $detail-font
-    table
-        border-collapse: collapse
-        margin: auto
-    td
-        padding: 0 0.15em
-    td:first-child
-        vertical-align: top
-        font-family: $title-font
-        color: rgb(140, 140, 140)
-        text-align: right
-        padding-right: 1em
-
-    .spacer td
-        padding: 0.2em
-
-.rdap-was
-    @extend .rdap
-
-    .diff-modified
-        background-color: #ffffdd
-        +floaty("!")
-    .diff-new
-        color: transparent
-        background-color: #f4f4f4
-        td:first-child
-            color: transparent
-        a
-            display: none
-    .diff-unchanged
-        +floaty(" ")
-    .diff-deleted
-        +floaty("-")
-        background-color: #ffdce0
-    .diff-word-new
-        display: none
-    .diff-word-deleted
-        background-color: #ffff00
-
-.rdap-is
-    @extend .rdap
-
-    .diff-modified
-        background-color: #ffffdd
-        +floaty("!")
-    .diff-new
-        background-color: #ddffdd
-        +floaty("+")
-    .diff-unchanged
-        +floaty(" ")
-    .diff-deleted
-        color: transparent
-        background-color: #f4f4f4
-        td:first-child
-            color: transparent
-        a
-            display: none
-    .diff-word-new
-        background-color: #ffff00
-    .diff-word-deleted
-        display: none
-
-.rdap-mobile
-    padding-top: 0.5em
-    padding-bottom: 0.5em
-    font-family: $detail-font
-    margin-left: auto
-    margin-right: auto
-
-    @media screen and (min-width: $unified-diff-bp)
-        display: none
-
-    .diff-modified
-        background-color: #ffffdd
-        +floaty-mobile("!")
-    .diff-new
-        background-color: #ddffdd
-        +floaty-mobile("+")
-    .diff-unchanged
-        +floaty-mobile(" ")
-    .diff-deleted
-        +floaty-mobile("-")
-        background-color: #ffdce0
-    .diff-word-new
-        background-color: #acf2bd
-    .diff-word-deleted
-        background-color: #ffa2ad
-        text-decoration: line-through
-    .mobileLineTitle
-        color: rgb(140, 140, 140)
-    .mobileRemovedLine
-        background-color: #ffdce0
-        text-decoration: line-through
-    .mobileAddedLine
-        background-color: #ddffdd
-    .mobileRdapDiff
-        margin-bottom: 0.5em
-    hr
-        margin-top: 0.5em
-        margin-bottom: 0.5em
-
-.diffPanel
-    +flex
-    flex: 1 1 auto
-    overflow: auto
-    flex-wrap: nowrap
-    height: 100%
-    padding-top: 1em
-    padding-right: 0.6em
-    padding-left: 0.6em
-
-    @media screen and (min-width: $phone-bp)
-        padding-right: 0
-        padding-left: 0
-
-    .diffPanelItem
-        flex: 1
-        display: none
-        padding: 0 0.7em
-        @media screen and (min-width: $unified-diff-bp)
+        .diff
             display: inline-block
+            border-left: 1px dashed black
+            padding-left: 1.2em
+            margin: 1em
+            white-space: pre
+            font-family: $fixed-font
+            font-size: 80%
+            vertical-align: top
 
-    .diffPanelItem:first-child .diff
-        border-left: none
+            .changed
+                background-color: #ffffdd
+            .added
+                background-color: #ddffdd
+            .removed::before
+                margin-left: -1.1em
+                position: relative
+                top: -0.6em
+                content: '▶'
+                color: #cc4444
+            .removed
+                height: 2px
+                display: block
+                background-color: #cc4444
 
-    .diff
-        display: inline-block
-        border-left: 1px dashed black
-        padding-left: 1.2em
-        margin: 1em
-        white-space: pre
-        font-family: $fixed-font
-        font-size: 80%
-        vertical-align: top
+    .clearfix
+        clear: both
 
-        .changed
-            background-color: #ffffdd
-        .added
-            background-color: #ddffdd
-        .removed::before
-            margin-left: -1.1em
-            position: relative
-            top: -0.6em
-            content: '▶'
-            color: #cc4444
-        .removed
-            height: 2px
-            display: block
-            background-color: #cc4444
+    .timeline
+        width: 100%
+        height: 1em
+        stroke: none
 
-.clearfix
-    clear: both
+        .empty
+            fill: #eee
 
-.timeline
-    width: 100%
-    height: 1em
-    stroke: none
-
-    .empty
-        fill: #eee
-
-    .existed
-        stroke: #999
-        fill: $existed
-        &:hover
-            fill: lighten($existed, 10%)
+        .existed
+            stroke: #999
+            fill: $existed
+            &:hover
+                fill: lighten($existed, 10%)
