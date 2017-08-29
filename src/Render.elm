@@ -176,15 +176,16 @@ viewDiff ctx was is =
                         div [class "rdap-mobile"] [mobileDiffOutput]
                       ]
 
-prettifyDate : Date -> DateFormat -> Html a
-prettifyDate d df =
+prettifyDate : Date -> DateFormat -> Bool -> Html a
+prettifyDate d df active =
     let pattern = case df of
                       Short -> "%d/%m/%y"
                       Long  -> "%d/%m/%Y %H:%M"
         spanClass = case df of
                         Short -> "dateShort"
                         Long  -> "dateLong"
-    in span [class spanClass] [text <| formatUtc config pattern d]
+        activeClass = if active then " active" else ""
+    in span [class <| spanClass ++ activeClass] [text <| formatUtc config pattern d]
 
 createDateLabel : Maybe Date -> Maybe Date -> List (Html Msg)
 createDateLabel md versionDateDetail =
@@ -193,10 +194,10 @@ createDateLabel md versionDateDetail =
         Just d  -> let flipTo = case versionDateDetail of
                                     Nothing -> md
                                     Just vd -> if (is Same d vd) then Nothing else md
-                       (buttonClass, tooltipText) = if flipTo == Nothing
-                                                    then ("pressedFlipShowVersionButton", "Hide date detail")
-                                                    else ("flipShowVersionButton", "Show date detail")
-                   in [ prettifyDate d Short, prettifyDate d Long,
+                       (buttonClass, tooltipText, active) = if flipTo == Nothing
+                                                    then ("pressedFlipShowVersionButton", "Hide date detail", True)
+                                                    else ("flipShowVersionButton", "Show date detail", False)
+                   in [ prettifyDate d Short active, prettifyDate d Long active,
                          button [class buttonClass, onClick (FlipShowVersionDateDetail flipTo), title tooltipText]
                                 [expandIcon "moreIconSvg"]
                       ]
@@ -210,4 +211,5 @@ checkNavDisabled ctx dir =
 
 mkTimelineModel : Context -> TimelineWidget.Model
 mkTimelineModel ctx =
-    TimelineWidget.Model ctx.timelineWidgetZoom ctx.timelineWidgetZoomDate (ctx.fromVersion, ctx.toVersion) ctx.history.versions ctx.today
+    TimelineWidget.Model ctx.timelineWidgetZoom ctx.timelineWidgetZoomDate (ctx.fromVersion, ctx.toVersion)
+        ctx.history.versions ctx.today
