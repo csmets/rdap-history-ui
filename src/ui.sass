@@ -56,24 +56,8 @@ abbr
 
 .main
     +flex(column)
-    height: 100vh
-    width: 100vw
-
-    .range
-        +flex
-        align-item: center
-        .searchButton
-            background-color: white
-            width: 2em
-            border: none
-            outline: none
-        .searchIcon
-            stroke: transparent
-            fill: darkgray
-        input
-            font-size: large
-            border: none
-            outline: none
+//    height: 100vh
+//    width: 100vw
 
 .headerBar
     +flex(column)
@@ -93,6 +77,21 @@ abbr
         align-items: center
         justify-content: center
         padding: 0.5em
+    .range
+        +flex
+        align-item: center
+        .searchButton
+            background-color: white
+            width: 2em
+            border: none
+            outline: none
+        .searchIcon
+            stroke: transparent
+            fill: darkgray
+        input
+            font-size: large
+            border: none
+            outline: none
 
     @media screen and (min-width: 650px)
         +flex
@@ -109,7 +108,6 @@ abbr
 
 .historyPane
     +flex(column)
-    width: 100vw
     min-width: 0
     min-height: 0
     height: 100%
@@ -171,11 +169,19 @@ abbr
             flex: 0 0 auto
             width: 6em
 
-        .navPanelItem
+        .navPanelItem   // TODO: REMOVE?
             +flex(column)
             flex: 1
             justify-content: flex-start
             align-items: center
+
+        .navPanelButtons
+            position: fixed
+            top: 50%
+            +flex(column)
+            justify-content: flex-start
+            align-items: center
+            width: 6em
 
     .navBottomPanel
         +flex
@@ -195,6 +201,7 @@ abbr
         flex: 5 1 auto
         height: 100%
         overflow: hidden
+        align-items: center
 
     .versionDatesPanel
         +flex
@@ -203,6 +210,7 @@ abbr
         color: white
         background-color: #006FAB
         height: 1.4em
+        width: 100%
         align-items: center
         flex: 0 0 auto
         font-size: 3.5vw
@@ -278,20 +286,33 @@ abbr
         justify-content: center
         background: #545454
         color: white
-        transition: height 0.5s
-        border-radius: 0px 0px 15px 15px
+        transition: width 1s, height 5s
 
-    .showPanel
-        height: 1.4em
-        flex: 0 0 auto
-        font-size: smaller
-        display: none
-        @media screen and (min-width: 400px)
-            display: inherit
+        &.left
+            align-self: flex-start
+            border-radius: 0px 0px 15px 0px
+            padding: 0 1em 0 0
 
-    .hidePanel
-        height: 0em
-        flex: 0 0 auto
+        &.center
+            border-radius: 0px 0px 15px 15px
+            padding: 0 1em 0 1em
+
+        &.right
+            align-self: flex-end
+            border-radius: 0px 0px 0px 15px
+            padding: 0 0 0 1em
+
+        &.showPanel
+            height: 1.4em
+            flex: 0 0 auto
+            font-size: smaller
+            display: none
+            @media screen and (min-width: 400px)
+                display: inherit
+
+        &.hidePanel
+            height: 0em
+            flex: 0 0 auto
 
     .arrowButton
         flex: 0 0 auto

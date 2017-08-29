@@ -4,7 +4,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whowas</title>
-    <script type="text/javascript" src="js/elm.js"></script>
   </head>
-  <body><script type="text/javascript">Elm.Main.fullscreen()</script></body>
+  <body>
+
+
+<!-- APNIC Header for Whowas -->
+<a href="#main" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<header>
+    <nav id="global-nav" class="navbar utilities" role="navigation" aria-label="Global Navigation" lang="en-AU" dir="ltr">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="https://www.apnic.net">
+                    <div class="header-logo-image-s"></div>
+                </a>
+            </div>
+            <div class="navbar-collapse" id="navbarSupportedContent">
+                <ul class="nav navbar-nav navbar-right">
+                    <li id="search" class="utility utility-search">
+                        <form class="navbar-form navbar-right utility-search-form" role="search" method="get" action="https://apnic-net.github.io/rdap-history-ui/">
+                            <div class="form-group form-group-sm">
+                                <label for="s" class="sr-only">Whowas search</label>
+                                <div class="input-group">
+                                    <input type="text" id="form-search" class="form-control" name="s" placeholder="WHOWAS SEARCH">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-s">
+                                            <i class="fa fa-search" aria-hidden="true"></i>
+                                        </button>
+                                    </span>
+                                    <span class="help-block">
+                                        <a type="button" class="btn btn-s navbar-btn" href="https://wq.apnic.net/whois-search/static/search.html">Advanced Whois</a>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+                    <li class="utility">
+                        <a href="https://wq.apnic.net/whois-search/static/search.html">Advanced Whois</a>
+                    </li>
+                    <li class="utility">
+                        <a href="https://www.apnic.net/get-ip/apnic-membership/billing-procedure/make-a-payment/">Make a payment</a>
+                    </li>
+
+                    <!-- After login .hidden class should be added-->
+                    <li class="utility">
+                        <a href="" class="btn-primary btn-login navbar-btn">Login</a>
+                    </li>
+
+                    <!-- After login .hidden class should be removed-->
+                    <li class="utility dropdown hidden">
+                        <a class="dropdown-toggle" type="button" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Hi, User Name!<span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li><a href="#">My Profile</a></li>
+                            <li><a href="#">Logout</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="utility dropdown">
+                        <a class="dropdown-toggle-menu" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-bars fa-2x" aria-hidden="true"></i></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <li><a href="https://www.apnic.net">APNIC</a></li>
+                            <li><a href="https://www.myapnic.net">MyAPNIC</a></li>
+                            <li><a href="https://training.apnic.net/">Training</a></li>
+                            <li><a href="https://academy.apnic.net/">Academy</a></li>
+                            <li><a href="https://blog.apnic.net/">Blog</a></li>
+                            <li><a href="http://confer.apnic.net/">Confer</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+
+
+    <!-- Main app -->
+    <div id="elm_main"></div>
+    <script src="js/elm.js"></script>
+    <script>
+    var node = document.getElementById('elm_main');
+    var app = Elm.Main.embed(node);
+    </script>
+
+
+    <!-- APNIC Footer -->
+    <footer class="footer" role="contentinfo">
+    <div class="container">
+        <div class="grid grid-inline grid-middle">
+        <div class="col size-1-of-4">
+            <a href="https://www.apnic.net">
+            <div class="footer-logo"></div>
+            </a>
+        </div>
+        <div class="col size-3-of-4">
+            <div class="footer-social">
+            Connect with us
+                <ul>
+                    <li><a href="https://www.facebook.com/APNIC" class="fa-facebook-square"><span class="sr-only">Facebook</span></a></li>
+                    <li><a href="https://twitter.com/apnic" class="fa fa-twitter"><span class="sr-only">Twitter</span></a></li>
+                    <li><a href="https://www.youtube.com/user/apnicmultimedia" class="fa fa-youtube"><span class="sr-only">YouTube</span></a></li>
+                    <li><a href="https://www.flickr.com/photos/apnic/" class="fa fa-flickr"><span class="sr-only">Flickr</span></a></li>
+                    <li><a href="http://weibo.com/APNICrir" class="fa fa-weibo"><span class="sr-only">Weibo</span></a></li>
+                    <li><a href="http://www.slideshare.net/apnic" class="fa fa-slideshare"><span class="sr-only">Slideshare</span></a></li>
+                    <li><a href="https://www.linkedin.com/company/apnic" class="fa fa-linkedin"><span class="sr-only">LinkedIn</span></a></li>
+                    <li><a href="https://blog.apnic.net/feed/" class="fa fa-rss"><span class="sr-only">RSS</span></a></li>
+                </ul>
+            </div>
+        </div>
+        </div>
+        <div class="footer-aside">
+        <small class="footer-aside-copyright">© 2017&nbsp;APNIC<span class="footer-aside-copyright-abn">ABN&nbsp;42&nbsp;081&nbsp;528&nbsp;010</span></small>
+        <ul class="footer-aside-links">
+            <li><a href="https://www.apnic.net/about-apnic/corporate-documents/documents/corporate/privacy/">Privacy</a></li>
+            <li><a href="https://www.apnic.net/about-apnic/organization/contact-apnic/">Contact</a></li>
+            <li><a href="https://www.apnic.net/get-ip/helpdesk/">Helpdesk</a></li>
+            <li><a href="https://www.nro.net/category/news">NRO News</a></li>
+            <li><a href="https://www.apnic.net/about-apnic/service-updates/">Service Status</a></li>
+        </ul>
+        </div>
+    </div>
+    </footer>
+
+<!-- Other dependencies -->
+<!-- Jquery (Necessary For Bootstrap's JavaScript plugins) -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> 
+<!-- Bootstrap script -->
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<!-- APNIC script -->
+    <script type="text/javascript" src="http://cgi1.apnic.net/assets/styleguide/js/apnic-web-style-guide.js"></script>
+
+  </body>
+
+
 </html>

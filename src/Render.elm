@@ -82,11 +82,7 @@ detailPanel ctx =
         timelineWidgetPanel ctx,
         div [class "detailPanelMain"] [
             navPanel ctx Bkwd,
-            div [class "detailCenterPanel"] [
-              versionDatesPanel ctx,
-              versionDateDetailPanel ctx,
-              diffPanel ctx
-            ],
+            div [class "detailCenterPanel"] ([versionDatesPanel ctx] ++ versionDateDetailPanels ctx ++ [diffPanel ctx]),
             navPanel ctx Fwd,
             navBottomPanel ctx
         ]
@@ -119,12 +115,16 @@ versionDatesPanel ctx =
                                    div [class "versionDateRight"] [span [] ([text "<"] ++ createDateLabel v2.until ctx.versionDateDetail)]
                                 ]
 
-versionDateDetailPanel : Context -> Html a
-versionDateDetailPanel ctx =
-    let (panelClass, dateString) = case ctx.versionDateDetail of
-                                       Nothing -> ("hidePanel", "")
-                                       Just d  -> ("showPanel", toString d)
-    in div [class <| "versionDateDetailPanel " ++ panelClass] [text dateString]
+versionDateDetailPanels : Context -> List (Html a)
+versionDateDetailPanels ctx =
+    let createDiv pos (panelClass, dateString) = div [class <| "versionDateDetailPanel " ++ pos ++ " " ++ panelClass]
+                                                     [text dateString]
+        process date = if date /= Nothing && ctx.versionDateDetail == date
+                       then ("showPanel", Maybe.withDefault "" <| Maybe.map toString date)
+                       else ("hidePanel", "")
+    in [createDiv "left" <| process <| Maybe.map .from ctx.fromVersion,
+        createDiv "center" <| process <| Maybe.map .from ctx.toVersion,
+        createDiv "right" <| process <| Maybe.Extra.join <| Maybe.map .until ctx.toVersion]
 
 timelineWidgetPanel : Context -> Html Msg
 timelineWidgetPanel ctx =
@@ -134,9 +134,8 @@ navPanel : Context -> NavigationDirection -> Html Msg
 navPanel ctx direction =
     div [class "navPanel"] [
         div [class "versionDatesPanel"] [],
-        div [class "navPanelItem"] [],
-        arrowButton ctx direction,
-        div [class "navPanelItem"] [lockButton ctx direction <| "navPanel" ++ toString direction]
+        div [class "navPanelButtons"] [arrowButton ctx direction,
+                                        lockButton ctx direction <| "navPanel" ++ toString direction]
      ]
 
 navBottomPanel : Context -> Html Msg
