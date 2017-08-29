@@ -6,7 +6,7 @@
     <title>Whowas</title>
 	<link href="http://cgi1.apnic.net/assets/styleguide/apnic-web-style-guide.min.css" rel="stylesheet" media="all">
   </head>
-  <body style="margin: 0">
+  <body>
 
 
 <!-- APNIC Header for Whowas -->
@@ -14,7 +14,7 @@
 
 <header>
     <nav id="global-nav" class="navbar utilities" role="navigation" aria-label="Global Navigation" lang="en-AU" dir="ltr">
-        <div class="container">
+        <div>
             <div class="navbar-header">
                 <a class="navbar-brand" href="https://www.apnic.net">
                     <div class="header-logo-image-s"></div>
@@ -41,6 +41,40 @@
             </div>
         </div>
     </nav>
+	<nav class="header-brand" role="navigation" aria-label="Primary Navigation" lang="en-AU" dir="ltr">
+        <div class="container">
+            <div id="glyph"></div>
+            <div class="header-mobile">
+                <a id="navigation-toggle" href="#navigation" class="header-mobile-cell header-mobile-navigation-toggle">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                </a>
+                <span class="header-mobile-cell header-mobile-logo">
+                    <a href="#"><img src="https://www.apnic.net/wp-content/themes/apnic/assets/images/apnic-reverse.svg" alt="Home"></a>
+                </span>
+            </div>
+        </div>
+    </nav>
+	<div class="container">
+        <nav id="main-nav" class="navigation" role="navigation" aria-label="Main Navigation" lang="en-AU" dir="ltr">
+            <ul class="navigation-menu navigation-actions">
+                <li class="navigation-item-button panel">
+                    <div class="panel-heading" id="headingApnicDirections" role="button" data-toggle="collapse" data-parent="#accordion" href="#apnic-directions" aria-expanded="true" aria-controls="collapseOne">
+                        Choose APNIC direction <span class="caret"></span>
+                    </div>
+                    <div id="apnic-directions" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingApnicDirections">
+                        <div class="list-group">
+                            <a href="https://www.apnic.net" class="list-group-item">APNIC</a>
+                            <a href="https://www.myapnic.net" class="list-group-item">MyAPNIC</a>
+                            <a href="https://training.apnic.net/" class="list-group-item">Training</a>
+                            <a href="https://academy.apnic.net/" class="list-group-item">Academy</a>
+                            <a href="https://blog.apnic.net/" class="list-group-item">Blog</a>
+                            <a href="http://confer.apnic.net/" class="list-group-item">Confer</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </header>
 
 
@@ -55,8 +89,8 @@
 
 
     <!-- APNIC Footer -->
-    <footer class="footer" role="contentinfo" style="margin-top: 0; bottom: auto">
-    <div class="container">
+    <footer class="footer" role="contentinfo">
+    <div>
         <div class="grid grid-inline grid-middle">
         <div class="col size-1-of-4">
             <a href="https://www.apnic.net">
