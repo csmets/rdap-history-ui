@@ -8,6 +8,7 @@ $lockedButtonColour: #732a2a
 $phone-bp: 800px
 $unified-diff-bp: 1500px
 $footer-height: 220px;
+$mobile-footer-height: 280px;
 
 =prefixed($name, $value)
     -webkit-#{$name}: $value
@@ -54,6 +55,9 @@ html
 
 body
     margin: 0 0 $footer-height
+
+    @media screen and (max-width: $phone-bp)
+        margin: 0 0 $mobile-footer-height
 
 .navigation::after
     height: 0;
