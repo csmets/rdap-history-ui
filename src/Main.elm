@@ -156,7 +156,7 @@ styles = [ node "link" [ rel "stylesheet", href "css/ui.css" ] [] ]
 headerBar : Model -> List (Html Msg)
 headerBar model =
     [ div [class "headerBar"]
-          [ div [] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg"] [],
+          [ div [ class "branding" ] [ img [ class "logo", src "images/APNIC-Formal-Logo_cmyk-svg-optimized-white.svg"] [],
                          span [class "title"] [ text "Whowas" ] ]
           , div [] [ searchBox model ]
           ]
